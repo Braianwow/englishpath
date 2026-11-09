@@ -24,13 +24,14 @@ describe('free conversation mode', () => {
     expect(checkSentence('I went to the beach with my friends.')).toBeNull();
   });
 
-  it('asks for English, rejects rude words and stays on the question', () => {
-    const { out } = play(['hola hola puto', 'hola como estas amigo', 'another day we change the temperature']);
-    expect(out[0].reply).toMatch(/language/i);
-    expect(out[0].reply).toMatch(/best trip/);
-    expect(out[1].reply).toMatch(/in English/i);
-    expect(out[1].reply).toMatch(/best trip/);
-    expect(out[2].fix).toBe('we changed'); // a finished trip → past simple
+  it('never blocks: keeps the conversation going and corrects mistakes', () => {
+    const { out } = play(['hola como estas', 'another day we change the temperature', 'yes', 'what about you?']);
+    expect(out[0].reply).toMatch(/English/);
+    expect(out[0].reply).not.toMatch(/Hi, how are you/); // no translations
+    expect(out[1].fix).toBe('we changed'); // a finished trip → past simple
+    expect(out[1].reply).not.toMatch(/not sure that answers/);
+    expect(out[2].reply).toMatch(/\?/); // a short answer gets a follow-up question
+    expect(out[3].reply).toMatch(/\?/); // Jake answers and asks the next thing
   });
 
   it('reacts to what the learner said and moves through the topic', () => {

@@ -154,6 +154,10 @@ const RULES: { re: RegExp; fix: (m: RegExpMatchArray) => string; why: string }[]
   { re: /\bi didn't (went|saw|ate|had|got|did)\b/i, fix: (m) => `I didn't ${({ went: 'go', saw: 'see', ate: 'eat', had: 'have', got: 'get', did: 'do' } as Record<string, string>)[m[1].toLowerCase()]}`, why: "After didn't we use the base verb." },
   { re: /\b(yesterday|last (?:week|year|month|night)),? i (go|eat|see|have|do|play|visit)\b/i, fix: (m) => `${m[1]} I ${({ go: 'went', eat: 'ate', see: 'saw', have: 'had', do: 'did', play: 'played', visit: 'visited' } as Record<string, string>)[m[2].toLowerCase()]}`, why: 'Finished past time → past simple.' },
   { re: /\bi (go|went) to (the )?home\b/i, fix: (m) => `I ${m[1]} home`, why: 'We say go home (no to, no the).' },
+  { re: /\b(my|his|her|our|their|your|the) (sister|brother|mum|mom|dad|father|mother|friend|boss|teacher|son|daughter|wife|husband|girlfriend|boyfriend|family|team) don'?t\b/i, fix: (m) => `${m[1]} ${m[2]} doesn't`, why: 'One person (he/she) → doesn\'t.' },
+  { re: /\bfor (watch|see|buy|learn|study|play|talk|listen|read|check|make|get)\b/i, fix: (m) => `to ${m[1]}`, why: 'To say why you do something: to + verb (not for + verb).' },
+  { re: /\ball the (night|day|morning|afternoon|week|weekend)\b/i, fix: (m) => `all ${m[1]}`, why: 'We say all night / all day (no the).' },
+  { re: /\b(the|a) video ?games are\b/i, fix: () => 'video games are', why: 'Talking in general → no article.' },
   { re: /\bin the airport\b/i, fix: () => 'at the airport', why: 'at + a place seen as a point (at the airport, at the station).' },
   { re: /\bexplain me\b/i, fix: () => 'explain to me', why: 'explain something to somebody.' },
   { re: /\b(a|one) informations?\b/i, fix: () => 'some information', why: 'information is uncountable.' },
@@ -183,17 +187,6 @@ const pick = <T,>(a: T[], seed: number) => a[Math.abs(seed) % a.length];
 const SPANISH = /\b(hola|qué|que|como|cómo|porque|pero|para|con|los|las|una|uno|el|la|es|está|estoy|soy|tengo|fui|fuimos|muy|bueno|bien|sí|nada|yo|vos|tu|mi|mis|nosotros|viaje|playa|amigos|familia|cuando|donde|dónde)\b/gi;
 const RUDE = /\b(puto|puta|pelotud\w*|boludo|forro|mierda|concha|culiao|fuck(ing|er)?|shit|bitch|dick|asshole|idiot|stupid)\b/i;
 const STOP = new Set('the a an and or but so to of in on at for with from my your his her our their me you i we they he she it is are was were be been am do does did have has had will would can could what where when who why how which that this there here very really just about some any more most like'.split(' '));
-
-/** Words that show the answer is about the topic. */
-const TOPIC_WORDS: Record<TopicId, RegExp> = {
-  viajes: /\b(trip|travel\w*|holiday|vacation|beach|mountain\w*|city|cities|country|countries|hotel|airport|flight|plane|bus|train|car|went|go|going|visit\w*|stay\w*|abroad|tour\w*|bag|luggage|ticket|sea|lake|snow|family|friends|summer|winter|skiing|swimming|camping)\b/i,
-  informatica: /\b(app|apps|phone|computer|laptop|code|coding|program\w*|ai|internet|online|game|games|gaming|gadget|tech\w*|software|screen|social media|instagram|tiktok|youtube|chatgpt|study|work|use|using)\b/i,
-  farandula: /\b(celebrit\w*|famous|singer|actor|actress|series|show|film|movie|music|song|band|concert|influencer|instagram|tiktok|netflix|watch\w*|listen\w*|artist|album|follow)\b/i,
-  argentina: /\b(argentin\w*|asado|mate|empanada\w*|football|soccer|team|boca|river|buenos aires|tango|food|eat|meat|family|sunday|culture|people|visit|place|patagonia|mendoza|córdoba|cordoba|bariloche|salta)\b/i,
-  internacional: /\b(country|countries|culture\w*|abroad|language\w*|world|global|people|live|living|europe|usa|america|china|japan|spain|italy|france|brazil|problem|change|travel)\b/i,
-  decada: /\b(2020|2030|pandemic|covid|lockdown|home|remote|online|social media|habit\w*|change\w*|decade|years?|work\w*|stud\w*|life|now|before|since)\b/i,
-  ahora: /\b(week|weekend|today|now|lately|recently|work\w*|stud\w*|hobby|show|series|song|music|friends?|family|goal|plan\w*|news|month|life|busy|tired|happy|going)\b/i,
-};
 
 type Expect = 'past' | 'future' | 'conditional' | 'present';
 function expectedTense(q: string): Expect {
@@ -236,19 +229,12 @@ function tenseCheck(answer: string, expect: Expect): Correction | null {
   return null;
 }
 
-const STARTERS: Record<Expect, string> = {
-  past: '“I went to … with … and we …”',
-  conditional: '“I would … because …”',
-  future: '“I’m going to … because …”',
-  present: '“I usually … because …”',
-};
-
 /** Something the learner mentioned, to react to it (a name or place, or the noun after to/in/at). */
 function mention(answer: string): string | null {
-  const names = answer.slice(1).match(/\b[A-Z][a-záéíóúñ]+(?: [A-Z][a-záéíóúñ]+)?\b/g)?.filter((w) => !/^(I|I'm|I've|I'd|I'll)$/.test(w));
-  if (names?.length) return names[0];
-  const m = answer.match(/\b(?:to|in|at|on|with)\s+(?:the |my |a |an )?([a-z]{4,}(?: [a-z]{4,})?)\b/i);
-  return m && !STOP.has(m[1].toLowerCase()) ? m[1] : null;
+  // proper names only (places, apps, people): not the first word of a sentence, not common words
+  const names = answer.match(/(?<!^|[.!?]\s)\b[A-Z][a-zA-Z]+(?: [A-Z][a-z]+)?\b/g)
+    ?.filter((w) => !/^(I|I'm|I've|I'd|I'll|And|But|So|Yes|No|Ok|Okay|Well|Oh|Hi|Hello)$/.test(w) && !STOP.has(w.toLowerCase()));
+  return names?.length ? names[0] : null;
 }
 
 function reaction(answer: string, seed: number): string {
@@ -269,16 +255,34 @@ function followUp(answer: string, expect: Expect, seed: number): string {
   return pick(['Why is that?', 'Can you give me an example?', 'How often?'], seed);
 }
 
+/** Jake's own answer to each script question, used when the learner asks "and you?". */
+const JAKE: Record<TopicId, string[]> = {
+  viajes: ["Mine? A road trip along the coast of Portugal. Tiny towns, amazing seafood, zero plans.", 'I went with two friends, and we basically ate our way through the whole country.', 'Oh yeah — an airline lost my bag once and I wore the same T-shirt for three days.', "I'd go to Japan. The food, the trains, the neon… it looks unreal.", 'City breaks, for sure. I get bored on a beach after one day.', 'My headphones. I can’t survive a flight without music.', 'People think everyone here dances tango all day. Not true… mostly.', "I'm planning a weekend in the mountains next month. Fingers crossed."],
+  informatica: ['Honestly? Spotify, WhatsApp and way too much TikTok.', 'Like five hours a day. Don’t judge me.', 'I tried coding once. I made a website that only said “hello”. Big success.', "I think it's useful, but a bit scary. It writes better emails than me.", 'My noise-cancelling headphones. Life-changing.', 'I play football games, mostly. And I lose, mostly.', 'I study with videos now. Books feel so slow.', 'An app that tells you when your friends are lying. Dangerous, right?'],
+  farandula: ["Right now? Probably Bad Bunny. The guy is everywhere.", "I'm watching a crime series. I can't stop.", 'A lot of Argentine trap lately.', 'A couple of travel influencers. Pure jealousy.', "Dinner with Messi. I'd just stare at him.", "I think they should keep some things private, honestly.", 'Coldplay. I cried a little. Don’t tell anyone.', 'I saw a horror film last week. Terrible idea before bed.'],
+  argentina: ['An asado, obviously. And then empanadas. And then more asado.', "It's a hot herbal drink you share with friends from the same cup. It's more about the moment than the taste.", "I'm not telling you — football here is dangerous. 😏", 'Bariloche. Lakes, mountains and chocolate everywhere.', 'Big lunch with the family that lasts until five.', 'That we kiss everyone on the cheek, even people we just met.', 'Yes! Lots of meat, lots of people, and someone always talking about football.', 'The food. And the people. Mostly the food.'],
+  internacional: ["I'd live in Canada. Nature, nice people… cold, though.", 'Yes, a guy from Korea. He taught me how to use chopsticks properly.', 'Japanese culture. Everything is so organised.', "I'd miss my family and the food. Definitely the food.", 'Climate change, to be honest.', "Italian. It sounds so beautiful.", 'Here people are more relaxed about time. Like, way more.', "I'd make travel free for everyone. Sounds good, right?"],
+  decada: ['I work from home a lot more. My sofa is my office now.', 'From home, but I miss seeing people sometimes.', 'Walking every morning. Okay, most mornings.', "It's more about videos now. Everyone's a creator.", 'Probably the pandemic and AI. Wild decade.', 'Concerts without phones in the air.', 'Travelling again after the pandemic. That felt amazing.', "Hopefully somewhere sunny, still talking to students like you."],
+  ahora: ["Busy, but good. Lots of work, lots of coffee.", "I've been studying Portuguese, actually.", "I'm really into a podcast about weird history.", 'A video of a cat falling into a pool. Classic.', "I'm going to see some friends and watch the match.", 'Not much — I try not to read too much news.', 'Waking up early every day. Terrible.', 'To run 5 kilometres without stopping.'],
+};
+
+const GREETING = /^(hi|hello|hey|good (morning|afternoon|evening))\b|how are you|how('s| is) it going|what'?s up/i;
+const ASK_BACK = /\b(and you|what about you|how about you|you\?|do you|have you|are you|what'?s yours)\b/i;
+const DONT_KNOW = /\b(i don'?t know|no idea|not sure|i can'?t remember|nothing)\b/i;
+
 // ───────────── the turn ─────────────
 
-/** The next tutor line (and the correction for the learner's last line). */
+/**
+ * The next tutor line (and the correction for the learner's last line).
+ * Jake never blocks the learner: he answers what they said, corrects one mistake if there is one,
+ * and keeps the conversation going on the topic.
+ */
 export function localTurn(topic: TopicId, turns: Turn[]): { reply: string; correction: Correction | null } {
   const qs = QUESTIONS[topic];
   const tutorLines = turns.filter((t) => t.role === 'tutor').map((t) => t.text);
   const last = [...turns].reverse().find((t) => t.role === 'me');
   if (!last) return { reply: `Hey… you came back. ${qs[0]}`, correction: null };
 
-  // the question being answered = the last script question Jake asked
   const askedIdx = qs.map((q, i) => (tutorLines.some((l) => l.includes(q)) ? i : -1)).filter((i) => i >= 0);
   const current = askedIdx.length ? Math.max(...askedIdx) : 0;
   const question = qs[current];
@@ -289,36 +293,44 @@ export function localTurn(topic: TopicId, turns: Turn[]): { reply: string; corre
   const seed = tutorLines.length * 7 + words.length;
   const prevTutor = tutorLines[tutorLines.length - 1] ?? '';
   const prevWasFollowUp = !qs.some((q) => prevTutor.includes(q));
+  const moveOn = nextQ ? nextQ : "That was a great chat. Press “Finish and see my grade” whenever you're ready — or keep talking, I'm here.";
+  // after a follow-up or a side comment, go on with the topic; otherwise sometimes dig deeper first
+  const continueLine = (answer: string) => (!prevWasFollowUp && words.length <= 3 ? followUp(answer, expect, seed)
+    : prevWasFollowUp || words.length >= 14 || seed % 2 === 1 ? moveOn : followUp(answer, expect, seed));
 
-  // 1. rude words → keep it friendly, ask again
-  if (RUDE.test(text)) {
-    return { reply: `Whoa, watch the language! 😏 Let's keep it clean. ${question}`, correction: { said: text, better: 'Try a full answer in English', why: 'Avoid rude words, and answer the question with a complete sentence.' } };
-  }
-  // 2. Spanish → ask for English, give a starter
+  // Spanish: a short reminder to use English, then carry on
   const es = (text.match(SPANISH) ?? []).length;
   if (es >= 2 || (es >= 1 && words.length <= 3)) {
-    return { reply: `Ha, nice try — but in English, please! You could start with ${STARTERS[expect]}. ${question}`, correction: { said: text, better: `Answer in English: ${STARTERS[expect].replace(/[“”]/g, '')}`, why: 'This is English practice: try to say it in English, even if it is simple.' } };
+    return { reply: `${pick(['English, please! 😉', 'Hey, in English! 😏', 'Nice try — English only! 😉'], seed)} ${question}`, correction: null };
   }
-  // 3. corrections: general rules first, then the tense the question needs
+
+  // rude words: laugh it off and keep going
+  if (RUDE.test(text)) {
+    return { reply: `Haha, easy there 😏 ${prevWasFollowUp ? question : continueLine(text)}`, correction: { said: text, better: 'Try it without the bad words 😉', why: 'Rude words are fine with friends, but not in class or at work.' } };
+  }
+
   const correction = checkSentence(text) ?? tenseCheck(text, expect);
   const tip = correction ? `${pick(['Quick tip:', 'Small thing:', 'Just so you know:'], seed)} we say “${correction.better}”. ` : '';
 
-  // 4. too short or not about the question → stay on the same question
-  const onTopic = TOPIC_WORDS[topic].test(text) || !!mention(text) || words.some((w) => question.toLowerCase().includes(w.toLowerCase()) && w.length > 3 && !STOP.has(w.toLowerCase()));
-  if (words.length < 4) {
-    return { reply: `${tip}${pick(['Come on, give me a full sentence!', 'Hmm, tell me a bit more.', 'Short and sweet, huh?'], seed)} Try: ${STARTERS[expect]}. ${question}`, correction };
+  // greetings and small talk
+  if (GREETING.test(text) && words.length <= 8) {
+    return { reply: `${tip}${pick(["I'm great, thanks for asking!", "Pretty good, thanks! You?", "All good here!"], seed)} ${question}`, correction };
   }
-  if (!onTopic) {
-    return { reply: `${tip}Hmm, I'm not sure that answers my question. I asked: ${question} You could start with ${STARTERS[expect]}.`, correction };
+  // the learner asks Jake something back → Jake answers, then continues
+  if (ASK_BACK.test(text) && /\b(good|fine|great|ok|okay|well|not bad)\b/i.test(text) && words.length <= 8) {
+    return { reply: `${tip}${pick(["I'm great, thanks!", 'All good here, thanks!', "Pretty good, thanks for asking!"], seed)} ${question}`, correction };
+  }
+  if (ASK_BACK.test(text)) {
+    const mine = JAKE[topic][current] ?? JAKE[topic][0];
+    return { reply: `${tip}${reaction(text, seed)} ${mine} ${moveOn}`, correction };
+  }
+  // "I don't know" → help with an easier angle
+  if (DONT_KNOW.test(text) && words.length < 8) {
+    return { reply: `${tip}No worries! ${pick(['Let me ask it another way:', 'Okay, easier one:', 'Then tell me this:'], seed)} ${nextQ ?? question}`, correction };
   }
 
-  // 5. good answer: react, sometimes dig deeper, then move on
-  const react = reaction(text, seed);
-  if (!prevWasFollowUp && words.length < 14 && seed % 2 === 0) {
-    return { reply: `${tip}${react} ${followUp(text, expect, seed)}`, correction };
-  }
-  if (!nextQ) return { reply: `${tip}${react} That was a great chat. Press “Finish and see my grade” whenever you're ready, or keep talking.`, correction };
-  return { reply: `${tip}${react} ${nextQ}`, correction };
+  // any other answer: react to it, then follow up or move on with the topic
+  return { reply: `${tip}${reaction(text, seed)} ${continueLine(text)}`, correction };
 }
 
 /** Grade the conversation from simple measures. */
