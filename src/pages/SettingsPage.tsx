@@ -6,6 +6,8 @@ import { setThemeAnimated } from '../lib/theme';
 import { Button, Card, PageHeader, cx } from '../components/ui';
 import { VOICE_STYLES, englishVoices, resolveVoice, speak, speechSupported } from '../lib/speech';
 import ElevenPanel from '../components/ElevenPanel';
+import { browserSttAvailable, getSttEngine, setSttEngine, type SttEngine } from '../lib/recognition';
+import { preloadLocalStt } from '../lib/localStt';
 import { AI_VOICES, DEFAULT_AI_VOICE, aiSupported, loadAiVoice, useAiStatus } from '../lib/neuralTts';
 
 const SAMPLES = [
@@ -152,6 +154,7 @@ export default function SettingsPage() {
       </Card>
 
       <VoiceSettings />
+      <SpeechRecognitionSettings />
 
       <Card>
         <div className="mb-3 font-semibold text-slate-900 dark:text-white">Daily goals</div>
@@ -202,5 +205,29 @@ export default function SettingsPage() {
         </div>
       </Card>
     </div>
+  );
+}
+
+function SpeechRecognitionSettings() {
+  const [engine, setEngine] = useState<SttEngine>(getSttEngine());
+  const choose = (e: SttEngine) => { setSttEngine(e); setEngine(e); if (e === 'local') preloadLocalStt(); };
+  const opts: [SttEngine, string, string, boolean][] = [
+    ['browser', 'Browser (Google)', 'Fast and shows your words while you speak. It sends your audio to the browser’s speech service, which is not available in every browser.', browserSttAvailable()],
+    ['local', 'On this device (Whisper)', 'Works in any browser and your voice never leaves your computer. Downloads a speech model once (80–200 MB) and shows the text when you pause.', true],
+  ];
+  return (
+    <Card>
+      <div className="mb-1 font-semibold text-slate-900 dark:text-white">Speech recognition</div>
+      <p className="mb-3 text-sm text-slate-500">How the microphone turns your voice into text in Speaking and in the conversation with Jake. If the browser option fails, the app switches to this device by itself.</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {opts.map(([id, label, desc, ok]) => (
+          <button key={id} type="button" disabled={!ok} onClick={() => choose(id)}
+            className={cx('pressable rounded-xl border p-3 text-left transition disabled:opacity-40', engine === id ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 hover:border-brand-500/50 dark:border-slate-700')}>
+            <div className="font-semibold text-slate-900 dark:text-white">{label}</div>
+            <div className="text-xs text-slate-500">{desc}</div>
+          </button>
+        ))}
+      </div>
+    </Card>
   );
 }

@@ -6,5 +6,5 @@ export default defineConfig({
   base: './',
   server: { port: 5173, strictPort: true },
   worker: { format: 'es' },
-  optimizeDeps: { exclude: ['kokoro-js'] },
+  optimizeDeps: { exclude: ['kokoro-js', '@huggingface/transformers'] },
 });

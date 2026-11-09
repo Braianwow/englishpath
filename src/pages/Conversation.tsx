@@ -64,6 +64,7 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
   const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
   const [interim, setInterim] = useState('');
+  const [sttStatus, setSttStatus] = useState('');
   const [typed, setTyped] = useState('');
   const [handsFree, setHandsFree] = useState(recognitionSupported());
   const [showEs, setShowEs] = useState<Record<number, boolean>>({});
@@ -126,11 +127,12 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
   function startListening() {
     if (!recognitionSupported()) return;
     stopSpeaking(); setSpeaking(false);
-    setListening(true); setInterim(''); setError('');
+    setListening(true); setInterim(''); setError(''); setSttStatus('');
     let last = '';
     stopRef.current = listen({
-      onText: (txt, final) => { last = txt; setInterim(txt); if (final) { stopRef.current(); } },
-      onEnd: () => { setListening(false); if (last.trim()) send(last); },
+      onText: (txt, final) => { last = txt; setInterim(txt); setSttStatus(''); if (final) { stopRef.current(); } },
+      onStatus: setSttStatus,
+      onEnd: () => { setListening(false); setSttStatus(''); if (last.trim()) send(last); },
       onError: (m) => { if (m) setError(m); },
     });
   }
@@ -195,6 +197,7 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
           </div>
         ))}
         {interim && <div className="self-end max-w-[85%] rounded-2xl rounded-tr-sm border-2 border-dashed border-brand-500/60 px-4 py-3 text-slate-500">{interim}…</div>}
+        {sttStatus && <div className="self-end text-sm text-slate-500">🎙️ {sttStatus}</div>}
         {thinking && <div className="flex items-center gap-2 text-sm text-slate-500"><Loader2 size={16} className="animate-spin" /> Jake is thinking…</div>}
         {error && <div className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</div>}
         <div ref={endRef} />

@@ -72,6 +72,7 @@ function MicButton({ onResult, disabled }: { onResult: (text: string) => void; d
     setOn(true);
     stopRef.current = listen({
       onText: (t) => { setLive(t); lastRef.current = t; },
+      onStatus: (m) => setLive(m),
       onError: (m) => m && setErr(m),
       onEnd: () => { setOn(false); if (lastRef.current) onResult(lastRef.current); },
     });
