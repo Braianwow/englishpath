@@ -25,12 +25,10 @@ import Speaking from './pages/Speaking';
 import Conversation from './pages/Conversation';
 import Writing from './pages/Writing';
 import { applyTheme, getSettings } from './store/progress';
-import { preloadVoice } from './lib/speech';
 
 export default function App() {
   useEffect(() => {
     applyTheme(getSettings().theme);
-    preloadVoice();
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const fn = () => applyTheme(getSettings().theme);
     mq.addEventListener?.('change', fn);

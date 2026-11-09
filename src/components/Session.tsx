@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X, Trophy, RotateCcw, Zap } from 'lucide-react';
 import type { KeyedExercise } from '../content';
@@ -6,6 +6,9 @@ import { UNIT_BY_ID } from '../content';
 import ExerciseView, { Feedback, type Answered } from './ExerciseView';
 import { Button, Card, Progress, Ring, cx } from './ui';
 import { recordAnswer } from '../store/progress';
+import { clearSaved, loadSaved, saveState } from '../lib/persist';
+
+interface Saved { base: KeyedExercise[]; queue: number[]; idx: number; summary: SessionSummary; retry: string[] }
 
 export interface SessionSummary { total: number; correct: number; xp: number; wrong: { item: KeyedExercise; ans: Answered }[]; firstTry: Record<string, boolean> }
 
@@ -13,15 +16,27 @@ export interface SessionSummary { total: number; correct: number; xp: number; wr
  * Practice session: immediate feedback after each answer; items answered
  * wrongly come back once at the end of the session so the learner fixes them.
  */
-export default function Session({ items, title, onFinish, onExit, finishLabel = 'Terminar', extra }: {
+export default function Session({ items: given, title, onFinish, onExit: exit, finishLabel = 'Terminar', extra }: {
   items: KeyedExercise[]; title: string; onFinish?: (s: SessionSummary) => void; onExit?: () => void; finishLabel?: string; extra?: React.ReactNode;
 }) {
-  const [queue, setQueue] = useState<KeyedExercise[]>(items);
-  const [idx, setIdx] = useState(0);
-  const [summary, setSummary] = useState<SessionSummary>({ total: items.length, correct: 0, xp: 0, wrong: [], firstTry: {} });
+  // Autosave: a reload (F5) continues the same exercises at the same point.
+  const saveKey = `session:${title}`;
+  const saved = useMemo(() => {
+    const s = loadSaved<Saved>(saveKey);
+    return s && s.base?.length && s.queue.every((i) => s.base[i]) && s.idx < s.queue.length ? s : undefined;
+  }, [saveKey]);
+  const items = saved?.base ?? given;
+  const [queue, setQueue] = useState<KeyedExercise[]>(() => (saved ? saved.queue.map((i) => saved.base[i]) : items));
+  const [idx, setIdx] = useState(saved?.idx ?? 0);
+  const [summary, setSummary] = useState<SessionSummary>(saved?.summary ?? { total: items.length, correct: 0, xp: 0, wrong: [], firstTry: {} });
   const [done, setDone] = useState(false);
   const seed = useMemo(() => Math.floor(Math.random() * 1e6), []);
-  const retryKeys = useMemo(() => new Set<string>(), []);
+  const retryKeys = useMemo(() => new Set<string>(saved?.retry ?? []), [saved]);
+  useEffect(() => {
+    if (done || !items.length) { clearSaved(saveKey); return; }
+    saveState(saveKey, { base: items, queue: queue.map((q) => items.indexOf(q)), idx, summary, retry: [...retryKeys] } satisfies Saved);
+  }, [saveKey, items, queue, idx, summary, done, retryKeys]);
+  const onExit = exit && (() => { clearSaved(saveKey); exit(); });
 
   if (!items.length) return <Card>No hay ejercicios disponibles para esta sesión.</Card>;
 

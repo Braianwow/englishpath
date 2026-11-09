@@ -3,12 +3,6 @@ import { notify } from '../store/toast';
 import { speakEleven, stopEleven } from './elevenlabs';
 import { DEFAULT_AI_VOICE, aiSupported, aiVoiceCached, getAiStatus, loadAiVoice, speakAi, stopAi, whenAiReady } from './neuralTts';
 
-/** If the AI voice was downloaded before, start loading it as soon as the app opens. */
-export function preloadVoice() {
-  const s = getSettings();
-  if ((s.voiceEngine ?? 'ai') === 'ai' && aiSupported() && aiVoiceCached()) loadAiVoice();
-}
-
 /**
  * Uses the browser's built-in speech synthesis (no network, no AI).
  * The available voices are the ones installed on the device; the "canchero"
@@ -56,11 +50,12 @@ export function speak(text: string, lang = 'en-GB', rate = 0.92, onEnd?: () => v
     try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
     speakEleven(clean, s.elevenKey, s.elevenVoiceId, s.elevenModel ?? 'eleven_multilingual_v2', rate * (s.voiceRate ?? 1), onEnd).catch((e: Error) => {
       notify({ kind: 'info', title: 'No se pudo usar ElevenLabs', body: e.message });
-      speakLocal(clean, lang, rate, onEnd, 'ai');
+      speakLocal(clean, lang, rate, onEnd, 'system');
     });
     return;
   }
-  speakLocal(clean, lang, rate, onEnd, s.voiceEngine === 'system' ? 'system' : 'ai');
+  // The free AI voice is opt-in: loading it uses the GPU heavily for a while and makes the page stutter.
+  speakLocal(clean, lang, rate, onEnd, s.voiceEngine === 'ai' ? 'ai' : 'system');
 }
 
 function speakLocal(clean: string, lang: string, rate: number, onEnd: (() => void) | undefined, engine: string) {

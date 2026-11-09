@@ -18,7 +18,7 @@ const SAMPLES = [
 function VoiceSettings() {
   const s = useSettings();
   const ai = useAiStatus();
-  const engine = s.voiceEngine ?? (aiSupported() ? 'ai' : 'system');
+  const engine = s.voiceEngine ?? 'system';
   const [sample, setSample] = useState(0);
   const test = () => { speak(SAMPLES[sample], 'en-US', 1); setSample((sample + 1) % SAMPLES.length); };
   const pick = (id: string) => { updateSettings({ aiVoice: id }); if (ai.state === 'ready') speak(SAMPLES[sample], 'en-US', 1); };
@@ -29,7 +29,7 @@ function VoiceSettings() {
       <div className="mb-1 font-semibold text-slate-900 dark:text-white">Voz</div>
       <p className="mb-3 text-sm text-slate-500">La voz que lee palabras, oraciones, dictados y el modelo de Speaking.</p>
       <div className="grid gap-2 sm:grid-cols-3">
-        {([['eleven', 'ElevenLabs 🔥', 'La más humana y expresiva. Necesita tu cuenta y clave de ElevenLabs (usa tus créditos).'], ['ai', 'Voz con IA gratis', 'Modelo Kokoro: corre en tu navegador, sin cuenta ni clave. Menos expresiva.'], ['system', 'Voz del sistema', 'Las voces que trae tu dispositivo. Robóticas, pero sin descarga.']] as const).map(([k, l, d]) => (
+        {([['eleven', 'ElevenLabs 🔥', 'La más humana y expresiva. Necesita tu cuenta y clave de ElevenLabs (usa tus créditos).'], ['ai', 'Voz con IA gratis', 'Modelo Kokoro en tu navegador, sin cuenta ni clave. Al cargarse usa mucho la placa de video y la página puede trabarse unos segundos.'], ['system', 'Voz del sistema', 'Las voces que trae tu dispositivo. Robóticas, pero sin descarga.']] as const).map(([k, l, d]) => (
           <button key={k} disabled={k === 'ai' && !aiSupported()} onClick={() => { updateSettings({ voiceEngine: k }); if (k === 'ai') loadAiVoice(); }}
             className={cx('rounded-xl border-2 p-3 text-left transition disabled:opacity-50', engine === k ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600')}>
             <div className="font-semibold text-slate-900 dark:text-white">{l}</div>

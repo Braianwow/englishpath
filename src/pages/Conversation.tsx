@@ -9,10 +9,11 @@ import { listen, recognitionSupported } from '../lib/recognition';
 import { speak, stopSpeaking } from '../lib/speech';
 import { Button, Card, LinkButton, cx } from '../components/ui';
 import SkillHeader from '../components/SkillHeader';
+import { clearSaved, usePersisted } from '../lib/persist';
 
 export default function Conversation() {
   const s = useSettings();
-  const [topic, setTopic] = useState<TopicId | null>(null);
+  const [topic, setTopic] = usePersisted<TopicId | null>('conv:topic', null);
   const hasAi = s.aiProvider === 'anthropic' && !!s.aiKey;
 
   if (topic && hasAi) return <Session topic={topic} onExit={() => setTopic(null)} />;
@@ -51,10 +52,13 @@ export default function Conversation() {
   );
 }
 
-function Session({ topic, onExit }: { topic: TopicId; onExit: () => void }) {
+function Session({ topic, onExit: exit }: { topic: TopicId; onExit: () => void }) {
   const s = useSettings();
   const t = TOPICS.find((x) => x.id === topic)!;
-  const [turns, setTurns] = useState<Turn[]>([]);
+  // autosaved: a reload (F5) keeps the conversation
+  const saveKey = `conv:${topic}`;
+  const [turns, setTurns] = usePersisted<Turn[]>(saveKey, []);
+  const onExit = () => { clearSaved(saveKey); exit(); };
   const [thinking, setThinking] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
@@ -104,7 +108,7 @@ function Session({ topic, onExit }: { topic: TopicId; onExit: () => void }) {
     if (opened.current) return;
     opened.current = true;
     setLast({ kind: 'speaking', id: topic, title: `Conversación: ${t.label}`, path: '/conversation' });
-    ask([]);
+    if (!turnsRef.current.length) ask([]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const send = (text: string) => {
@@ -137,6 +141,7 @@ function Session({ topic, onExit }: { topic: TopicId; onExit: () => void }) {
     try {
       const r = await finalReport(s, topic, turns);
       setReport(r);
+      clearSaved(saveKey);
       const mine = turns.filter((x) => x.role === 'me').length;
       recordSkill('speaking', `Conversación: ${t.label}`, r.score, 10, 15 + mine * 3);
     } catch (e) {

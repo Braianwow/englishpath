@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X, AlertTriangle, CheckCircle2, ArrowRight, Target } from 'lucide-react';
 import type { ExamKind, ExamResult } from '../types';
@@ -7,16 +7,28 @@ import { UNIT_BY_ID } from '../content';
 import ExerciseView, { Feedback, type Answered } from './ExerciseView';
 import { Badge, Button, Card, LinkButton, Progress, Ring } from './ui';
 import { recordAnswer, PASS_MARK } from '../store/progress';
+import { clearSaved, loadSaved, saveState } from '../lib/persist';
 
 export interface ExamOutcome { result: ExamResult; answers: { item: KeyedExercise; ans: Answered }[] }
 
 /** Exam mode: no feedback while answering; full corrected report at the end. */
-export default function ExamRunner({ items, title, kind, examId, onFinish, onExit, recordAnswers = true }: {
+export default function ExamRunner({ items: given, title, kind, examId, onFinish: finish, onExit: exit, recordAnswers = true }: {
   items: KeyedExercise[]; title: string; kind: ExamKind; examId: string;
   onFinish: (o: ExamOutcome) => void; onExit?: () => void; recordAnswers?: boolean;
 }) {
-  const [idx, setIdx] = useState(0);
-  const [answers, setAnswers] = useState<{ item: KeyedExercise; ans: Answered }[]>([]);
+  // Autosave: a reload (F5) keeps the same questions and the answers given so far.
+  const saveKey = `exam:${kind}:${examId}`;
+  const saved = useMemo(() => {
+    const s = loadSaved<{ items: KeyedExercise[]; idx: number; answers: { item: KeyedExercise; ans: Answered }[] }>(saveKey);
+    return s && s.items?.length && s.idx < s.items.length ? s : undefined;
+  }, [saveKey]);
+  const items = saved?.items ?? given;
+  const [idx, setIdx] = useState(saved?.idx ?? 0);
+  const [answers, setAnswers] = useState<{ item: KeyedExercise; ans: Answered }[]>(saved?.answers ?? []);
+  const [finished, setFinished] = useState(false);
+  useEffect(() => { if (items.length && !finished) saveState(saveKey, { items, idx, answers }); }, [saveKey, items, idx, answers, finished]);
+  const onFinish = (o: ExamOutcome) => { setFinished(true); clearSaved(saveKey); finish(o); };
+  const onExit = exit && (() => { clearSaved(saveKey); exit(); });
   const seed = useMemo(() => Math.floor(Math.random() * 1e6), []);
   if (!items.length) return <Card>No hay suficientes ejercicios para esta evaluación todavía.</Card>;
   const cur = items[idx];

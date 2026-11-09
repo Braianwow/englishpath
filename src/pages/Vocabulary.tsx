@@ -12,6 +12,8 @@ import { Badge, Button, Card, Empty, LinkButton, PageHeader, Progress, SourceTag
 import { SpeakBtn } from '../components/ExerciseView';
 import { SkillTabs } from '../components/SkillHeader';
 import MyWords from '../components/MyWords';
+import { highlightParts } from '../lib/myWords';
+import { usePersisted } from '../lib/persist';
 
 type Tab = 'review' | 'mine' | 'browse' | 'stats';
 
@@ -50,12 +52,13 @@ function buildQueue(cards: ReturnType<typeof useProgress>['cards'], cat: string,
 function Review() {
   const p = useProgress();
   const settings = useSettings();
-  const [cat, setCat] = useState('all');
-  const [reverse, setReverse] = useState(false);
-  const [queue, setQueue] = useState<string[] | null>(null);
-  const [i, setI] = useState(0);
+  // autosaved: a reload (F5) continues the same card session
+  const [cat, setCat] = usePersisted('vocab:cat', 'all');
+  const [reverse, setReverse] = usePersisted('vocab:reverse', false);
+  const [queue, setQueue] = usePersisted<string[] | null>('vocab:queue', null);
+  const [i, setI] = usePersisted('vocab:i', 0);
   const [flipped, setFlipped] = useState(false);
-  const [stats, setStats] = useState({ again: 0, ok: 0 });
+  const [stats, setStats] = usePersisted('vocab:stats', { again: 0, ok: 0 });
 
   const doneToday = p.days[todayKey()]?.cards ?? 0;
   const preview = useMemo(() => buildQueue(p.cards, cat, Math.max(5, settings.dailyCardsGoal - doneToday)), [p.cards, cat, settings.dailyCardsGoal, doneToday]);
@@ -111,6 +114,7 @@ function Review() {
   }
 
   const w = WORD_BY_ID[queue[i]];
+  if (!w) return <Card className="p-6 text-center"><Button onClick={() => setQueue(null)}>Volver</Button></Card>;
   const card = p.cards[w.id] ?? newCard();
   const grade = (g: Grade) => {
     reviewCard(w.id, g);
@@ -147,25 +151,51 @@ function Review() {
   );
 }
 
+/** Part of speech in plain Spanish (the data uses dictionary abbreviations like "n" or "phr v"). */
+const POS: Record<string, string> = {
+  n: 'sustantivo', v: 'verbo', adj: 'adjetivo', adv: 'adverbio', prep: 'preposición', phr: 'expresión',
+  'phr v': 'phrasal verb', 'adj + prep': 'adjetivo + preposición', 'v + prep': 'verbo + preposición', 'n + prep': 'sustantivo + preposición',
+};
+export const posLabel = (p: string) => POS[p] ?? p;
+
+/** The example sentence with the word (or a form of it) in bold. */
+function Example({ w }: { w: VocabWord }) {
+  const parts = highlightParts(w.ex, w.en.split(' ')[0].replace(/\(.*\)/, ''));
+  return <>{parts.map((p, k) => (p.hit ? <strong key={k} className="font-semibold not-italic text-brand-700 dark:text-brand-400">{p.text}</strong> : <span key={k}>{p.text}</span>))}</>;
+}
+
 function Flashcard({ w, flipped, onFlip, reverse, difficult }: { w: VocabWord; flipped: boolean; onFlip: () => void; reverse: boolean; difficult: boolean }) {
+  const kind = <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">{posLabel(w.pos)}</span>;
   const front = reverse ? (
-    <><div className="text-sm text-slate-500">¿Cómo se dice en inglés?</div><div className="mt-2 font-display text-3xl font-bold text-slate-900 dark:text-white">{w.es}</div><div className="mt-2 text-sm text-slate-400">{w.pos}</div></>
+    <>
+      <div className="text-sm text-slate-500">¿Cómo se dice en inglés?</div>
+      <div className="font-display text-3xl font-bold text-slate-900 dark:text-white">{w.es}</div>
+      {kind}
+    </>
   ) : (
-    <><div className="font-display text-4xl font-bold text-slate-900 dark:text-white">{w.en}</div><div className="mt-2 font-mono text-slate-500">/{w.ipa}/</div><div className="mt-1 text-sm text-slate-400">{w.pos}</div><SpeakBtn text={w.en} className="mt-2" /></>
+    <>
+      <div className="flex items-center gap-2">
+        <span className="font-display text-4xl font-bold text-slate-900 dark:text-white">{w.en}</span>
+        <SpeakBtn text={w.en} />
+      </div>
+      <div className="text-sm text-slate-500">Se pronuncia <span className="font-mono text-slate-600 dark:text-slate-300">/{w.ipa}/</span></div>
+      {kind}
+      <div className="mt-1 text-sm text-slate-500">¿Qué significa?</div>
+    </>
   );
   return (
-    <div className="flip h-72 cursor-pointer select-none" onClick={onFlip}>
+    <div className="flip h-80 cursor-pointer select-none" onClick={onFlip}>
       <div className={cx('flip-inner relative h-full w-full', flipped && 'flipped')}>
-        <Card className="flip-face absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+        <Card className="flip-face absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
           {difficult && <Badge tone="rose" className="absolute right-4 top-4">difícil</Badge>}
           {front}
-          <div className="absolute bottom-4 text-xs text-slate-400">Tocá para girar</div>
+          <div className="absolute bottom-4 text-xs text-slate-400">Tocá la tarjeta para ver la respuesta</div>
         </Card>
         <Card className="flip-face flip-back absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
-          <div className="font-display text-3xl font-bold text-slate-900 dark:text-white">{w.en}</div>
-          <div className="font-mono text-sm text-slate-500">/{w.ipa}/ · {w.pos}</div>
-          <div className="text-xl font-semibold text-brand-700 dark:text-brand-300">{w.es}</div>
-          <div className="mt-2 flex items-center gap-1 rounded-xl bg-slate-50 px-4 py-2 italic text-slate-700 dark:bg-slate-800 dark:text-slate-200">“{w.ex}” <SpeakBtn text={w.ex} /></div>
+          <div className="text-sm text-slate-500">{w.en} · {posLabel(w.pos)}</div>
+          <div className="font-display text-3xl font-bold text-brand-700 dark:text-brand-400">{w.es}</div>
+          <div className="mt-3 text-xs uppercase tracking-wide text-slate-400">Ejemplo</div>
+          <div className="flex items-center gap-1 rounded-xl bg-slate-50 px-4 py-2 text-lg italic text-slate-700 dark:bg-slate-800 dark:text-slate-200">“<Example w={w} />” <SpeakBtn text={w.ex} /></div>
         </Card>
       </div>
     </div>
@@ -212,7 +242,7 @@ function Browse() {
               <Card key={w.id} className="flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2"><span className="font-semibold text-slate-900 dark:text-white">{w.en}</span><span className="font-mono text-xs text-slate-400">/{w.ipa}/</span><SpeakBtn text={w.en} /></div>
-                  <div className="text-sm text-brand-700 dark:text-brand-300">{w.es} <span className="text-slate-400">· {w.pos}</span></div>
+                  <div className="text-sm text-brand-700 dark:text-brand-300">{w.es} <span className="text-slate-400">· {posLabel(w.pos)}</span></div>
                   <div className="mt-1 text-sm italic text-slate-500">{w.ex}</div>
                 </div>
                 <div className="flex shrink-0 flex-col gap-1">

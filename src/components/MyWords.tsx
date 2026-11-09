@@ -8,6 +8,7 @@ import { normalize } from '../lib/grade';
 import { notify } from '../store/toast';
 import { Button, Card, Empty, Progress, cx } from './ui';
 import { SpeakBtn } from './ExerciseView';
+import { clearSaved, usePersisted } from '../lib/persist';
 
 const field = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-900';
 
@@ -15,9 +16,11 @@ export default function MyWords() {
   const p = useProgress();
   const words = useMemo(() => Object.values(p.myWords ?? {}).sort((a, b) => b.at - a.at), [p.myWords]);
   const queue = useMemo(() => myQueue(words, p.cards), [words, p.cards]);
-  const [session, setSession] = useState<string[] | null>(null);
+  const [session, setSession] = usePersisted<string[] | null>('mywords:session', null);
 
-  if (session) return <MyReview ids={session} onExit={() => setSession(null)} onAgain={() => setSession(myQueue(Object.values(p.myWords ?? {}), p.cards))} />;
+  const resetReview = () => ['mywords:queue', 'mywords:i', 'mywords:step', 'mywords:stats'].forEach(clearSaved);
+  const start = (ids: string[] | null) => { resetReview(); setSession(ids); };
+  if (session) return <MyReview key={session.join(',')} ids={session} onExit={() => start(null)} onAgain={() => start(myQueue(Object.values(p.myWords ?? {}), p.cards))} />;
 
   const dueCount = words.filter((w) => isDue(p.cards[myCardId(w.id)])).length;
   return (
@@ -31,7 +34,7 @@ export default function MyWords() {
             <div className="rounded-xl bg-amber-50 p-3 dark:bg-amber-500/10"><div className="text-xl font-bold text-amber-700 dark:text-amber-300">{dueCount}</div><div className="text-xs text-slate-500">para repasar</div></div>
             <div className="rounded-xl bg-brand-50 p-3 dark:bg-brand-500/10"><div className="text-xl font-bold text-brand-700 dark:text-brand-300">{queue.length - dueCount}</div><div className="text-xs text-slate-500">nuevas</div></div>
           </div>
-          <Button size="lg" className="w-full" disabled={!queue.length} onClick={() => setSession(queue)}><Brain size={18} /> {queue.length ? `Empezar (${queue.length})` : 'Nada pendiente'}</Button>
+          <Button size="lg" className="w-full" disabled={!queue.length} onClick={() => start(queue)}><Brain size={18} /> {queue.length ? `Empezar (${queue.length})` : 'Nada pendiente'}</Button>
           {!queue.length && words.length > 0 && <p className="mt-3 text-sm text-slate-500">Ya repasaste todo. Cada palabra vuelve cuando le toca.</p>}
         </Card>
         <AddForm />
@@ -154,10 +157,10 @@ function EditRow({ w, onDone }: { w: MyWord; onDone: () => void }) {
 /** Anki-style card in three steps: word → sentence → meaning. */
 function MyReview({ ids, onExit, onAgain }: { ids: string[]; onExit: () => void; onAgain: () => void }) {
   const p = useProgress();
-  const [queue, setQueue] = useState(ids);
-  const [i, setI] = useState(0);
-  const [step, setStep] = useState<0 | 1 | 2>(0);
-  const [stats, setStats] = useState({ ok: 0, again: 0 });
+  const [queue, setQueue] = usePersisted('mywords:queue', ids);
+  const [i, setI] = usePersisted('mywords:i', 0);
+  const [step, setStep] = usePersisted<0 | 1 | 2>('mywords:step', 0);
+  const [stats, setStats] = usePersisted('mywords:stats', { ok: 0, again: 0 });
 
   if (i >= queue.length) {
     return (
