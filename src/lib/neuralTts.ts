@@ -88,29 +88,62 @@ let ctx: AudioContext | null = null;
 let current: AudioBufferSourceNode | null = null;
 let token = 0;
 
+let scheduled: AudioBufferSourceNode[] = [];
+
 export function stopAi() {
   token++;
-  try { current?.stop(); } catch { /* already stopped */ }
+  for (const s of [...scheduled, ...(current ? [current] : [])]) { try { s.stop(); } catch { /* already stopped */ } }
+  scheduled = [];
   current = null;
 }
 
-/** Speaks with the AI voice. Resolves false if it could not (so the caller can fall back). */
+/** Splits a reply into sentences so the first one can start playing while the rest is generated. */
+function sentences(text: string): string[] {
+  const parts = text.match(/[^.!?…]+[.!?…]+["'”’)]*\s*|[^.!?…]+$/g)?.map((s) => s.trim()).filter(Boolean) ?? [text];
+  // join very short pieces ("Nice." / "Why?") to the next one so the voice doesn't sound choppy
+  const out: string[] = [];
+  for (const p of parts) {
+    if (out.length && out[out.length - 1].split(' ').length < 4) out[out.length - 1] += ` ${p}`;
+    else out.push(p);
+  }
+  return out;
+}
+
+/**
+ * Speaks with the AI voice. Long replies are generated sentence by sentence: the first sentence
+ * starts playing as soon as it is ready while the next ones are generated in the background.
+ * Resolves false if it could not (so the caller can fall back).
+ */
 export async function speakAi(text: string, voice: string, speed: number, onEnd?: () => void): Promise<boolean> {
   stopAi();
   const my = token;
   try {
     ctx ??= new AudioContext();
     if (ctx.state === 'suspended') await ctx.resume();
-    const { audio, sr } = await generate(text, voice, speed);
-    if (my !== token) return true; // something else started meanwhile
-    const buf = ctx.createBuffer(1, audio.length, sr);
-    buf.copyToChannel(new Float32Array(audio), 0);
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.connect(ctx.destination);
-    src.onended = () => { if (current === src) current = null; onEnd?.(); };
-    current = src;
-    src.start();
+    const parts = sentences(text);
+    const jobs = parts.map((p) => generate(p, voice, speed)); // queued in order in the worker
+    jobs.forEach((j) => j.catch(() => {}));
+    let at = 0;
+    for (let i = 0; i < jobs.length; i++) {
+      const { audio, sr } = await jobs[i];
+      if (my !== token) return true; // something else started meanwhile
+      const buf = ctx.createBuffer(1, audio.length, sr);
+      buf.copyToChannel(new Float32Array(audio), 0);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      at = Math.max(at, ctx.currentTime + 0.02);
+      const last = i === jobs.length - 1;
+      src.onended = () => {
+        scheduled = scheduled.filter((x) => x !== src);
+        if (current === src) current = null;
+        if (last && my === token) onEnd?.();
+      };
+      current = src;
+      scheduled.push(src);
+      src.start(at);
+      at += buf.duration + 0.12; // small natural pause between sentences
+    }
     return true;
   } catch {
     return false;

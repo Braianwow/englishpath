@@ -8,7 +8,9 @@ import { pipeline, type AutomaticSpeechRecognitionPipeline } from '@huggingface/
 
 type In = { type: 'load' } | { type: 'transcribe'; id: number; audio: Float32Array };
 
-const MODEL = 'onnx-community/whisper-base.en';
+// GPU: the more accurate base model; CPU: the tiny model, several times faster
+const MODEL_GPU = 'onnx-community/whisper-base.en';
+const MODEL_CPU = 'onnx-community/whisper-tiny.en';
 let asr: Promise<AutomaticSpeechRecognitionPipeline> | null = null;
 
 async function hasGpu(): Promise<boolean> {
@@ -22,7 +24,7 @@ function load() {
   if (!asr) {
     const files: Record<string, { loaded: number; total: number }> = {};
     asr = hasGpu().then(async (gpu) => {
-      const p = await pipeline('automatic-speech-recognition', MODEL, {
+      const p = await pipeline('automatic-speech-recognition', gpu ? MODEL_GPU : MODEL_CPU, {
         device: gpu ? 'webgpu' : 'wasm',
         dtype: gpu ? { encoder_model: 'fp32', decoder_model_merged: 'q4' } : 'q8',
         progress_callback: (e: { status: string; file?: string; loaded?: number; total?: number }) => {
@@ -34,6 +36,8 @@ function load() {
           }
         },
       });
+      // warm-up: the first run compiles the model, so do it now instead of on the first answer
+      try { await (p as unknown as (a: Float32Array) => Promise<unknown>)(new Float32Array(16000)); } catch { /* ignore */ }
       postMessage({ type: 'ready' });
       return p as AutomaticSpeechRecognitionPipeline;
     });

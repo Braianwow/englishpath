@@ -43,7 +43,7 @@ export interface ListenOpts {
 /** Whisper adds notes like (upbeat music) or [BLANK_AUDIO]: drop them. */
 const cleanText = (t: string) => t.replace(/[[(][^\])]*[\])]/g, ' ').replace(/\s+/g, ' ').trim();
 
-const SILENCE_END_MS = 1400;  // stop after this much silence once the learner has spoken
+const SILENCE_END_MS = 900;  // stop after this much silence once the learner has spoken
 const NO_SPEECH_MS = 9000;    // give up if nothing is said
 const MAX_MS = 30000;
 

@@ -6,7 +6,9 @@ import { notify } from '../store/toast';
 import { TOPICS, finalReport, nextTurn, type Report, type TopicId, type Turn } from '../lib/conversation';
 import { localReport, localTurn } from '../lib/freeTutor';
 import { describeError } from '../lib/assistant';
-import { listen, recognitionSupported } from '../lib/recognition';
+import { getSttEngine, listen, recognitionSupported } from '../lib/recognition';
+import { preloadLocalStt } from '../lib/localStt';
+import { aiSupported, loadAiVoice } from '../lib/neuralTts';
 import { speak, stopSpeaking } from '../lib/speech';
 import { Button, Card, LinkButton, cx } from '../components/ui';
 import SkillHeader from '../components/SkillHeader';
@@ -80,6 +82,11 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [turns, interim, thinking]);
   useEffect(() => () => { stopRef.current(); stopSpeaking(); }, []);
+  // get the voice models ready while Jake says hello, so the first answer isn't slow
+  useEffect(() => {
+    if (getSttEngine() === 'local') preloadLocalStt();
+    if (s.voiceEngine === 'ai' && aiSupported()) loadAiVoice();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const say = (text: string) => {
     setSpeaking(true);
@@ -93,7 +100,6 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
     setThinking(true); setError('');
     try {
       const r = ai ? await nextTurn(s, topic, history) : { ...localTurn(topic, history), translation: '' };
-      if (!ai) await new Promise((res) => setTimeout(res, 600)); // a short pause so it feels like a reply
       // attach the correction to the student's last line
       const withCorr = history.map((x, i) => (i === history.length - 1 && x.role === 'me' ? { ...x, correction: r.correction } : x));
       setTurns([...withCorr, { role: 'tutor', text: r.reply, es: r.translation }]);
