@@ -154,6 +154,7 @@ const RULES: { re: RegExp; fix: (m: RegExpMatchArray) => string; why: string }[]
   { re: /\bi didn't (went|saw|ate|had|got|did)\b/i, fix: (m) => `I didn't ${({ went: 'go', saw: 'see', ate: 'eat', had: 'have', got: 'get', did: 'do' } as Record<string, string>)[m[1].toLowerCase()]}`, why: "After didn't we use the base verb." },
   { re: /\b(yesterday|last (?:week|year|month|night)),? i (go|eat|see|have|do|play|visit)\b/i, fix: (m) => `${m[1]} I ${({ go: 'went', eat: 'ate', see: 'saw', have: 'had', do: 'did', play: 'played', visit: 'visited' } as Record<string, string>)[m[2].toLowerCase()]}`, why: 'Finished past time → past simple.' },
   { re: /\bi (go|went) to (the )?home\b/i, fix: (m) => `I ${m[1]} home`, why: 'We say go home (no to, no the).' },
+  { re: /\bin the airport\b/i, fix: () => 'at the airport', why: 'at + a place seen as a point (at the airport, at the station).' },
   { re: /\bexplain me\b/i, fix: () => 'explain to me', why: 'explain something to somebody.' },
   { re: /\b(a|one) informations?\b/i, fix: () => 'some information', why: 'information is uncountable.' },
   { re: /\badvices\b/i, fix: () => 'advice', why: 'advice is uncountable (no -s).' },
@@ -177,37 +178,147 @@ export function checkSentence(text: string): Correction | null {
 
 const pick = <T,>(a: T[], seed: number) => a[Math.abs(seed) % a.length];
 
-function reaction(answer: string, seed: number): string {
-  const words = answer.trim().split(/\s+/).filter(Boolean).length;
-  if (words <= 3) return pick(["Come on, give me more than that!", "That's it? Tell me a bit more next time.", 'Short and sweet, huh? Try to give me a full sentence.'], seed);
-  if (/\b(love|amazing|great|awesome|best|beautiful|fun)\b/i.test(answer)) return pick(['No way, that sounds amazing!', 'I love that.', 'Okay, now I’m jealous.'], seed);
-  if (/\b(hate|bad|terrible|worst|boring|sad|difficult|hard)\b/i.test(answer)) return pick(['Ouch, that sounds tough.', 'Oh no, I feel you.', "That's rough, for real."], seed);
-  if (/\b(because|so|although|but)\b/i.test(answer)) return pick(['Good point — I like how you explained that.', 'Makes sense.', 'Interesting, I didn’t think of it that way.'], seed);
-  return pick(['Nice.', 'Interesting!', 'Got it.', 'Cool, I like that.', 'Fair enough.'], seed);
+// ───────────── understanding the learner's answer ─────────────
+
+const SPANISH = /\b(hola|qué|que|como|cómo|porque|pero|para|con|los|las|una|uno|el|la|es|está|estoy|soy|tengo|fui|fuimos|muy|bueno|bien|sí|nada|yo|vos|tu|mi|mis|nosotros|viaje|playa|amigos|familia|cuando|donde|dónde)\b/gi;
+const RUDE = /\b(puto|puta|pelotud\w*|boludo|forro|mierda|concha|culiao|fuck(ing|er)?|shit|bitch|dick|asshole|idiot|stupid)\b/i;
+const STOP = new Set('the a an and or but so to of in on at for with from my your his her our their me you i we they he she it is are was were be been am do does did have has had will would can could what where when who why how which that this there here very really just about some any more most like'.split(' '));
+
+/** Words that show the answer is about the topic. */
+const TOPIC_WORDS: Record<TopicId, RegExp> = {
+  viajes: /\b(trip|travel\w*|holiday|vacation|beach|mountain\w*|city|cities|country|countries|hotel|airport|flight|plane|bus|train|car|went|go|going|visit\w*|stay\w*|abroad|tour\w*|bag|luggage|ticket|sea|lake|snow|family|friends|summer|winter|skiing|swimming|camping)\b/i,
+  informatica: /\b(app|apps|phone|computer|laptop|code|coding|program\w*|ai|internet|online|game|games|gaming|gadget|tech\w*|software|screen|social media|instagram|tiktok|youtube|chatgpt|study|work|use|using)\b/i,
+  farandula: /\b(celebrit\w*|famous|singer|actor|actress|series|show|film|movie|music|song|band|concert|influencer|instagram|tiktok|netflix|watch\w*|listen\w*|artist|album|follow)\b/i,
+  argentina: /\b(argentin\w*|asado|mate|empanada\w*|football|soccer|team|boca|river|buenos aires|tango|food|eat|meat|family|sunday|culture|people|visit|place|patagonia|mendoza|córdoba|cordoba|bariloche|salta)\b/i,
+  internacional: /\b(country|countries|culture\w*|abroad|language\w*|world|global|people|live|living|europe|usa|america|china|japan|spain|italy|france|brazil|problem|change|travel)\b/i,
+  decada: /\b(2020|2030|pandemic|covid|lockdown|home|remote|online|social media|habit\w*|change\w*|decade|years?|work\w*|stud\w*|life|now|before|since)\b/i,
+  ahora: /\b(week|weekend|today|now|lately|recently|work\w*|stud\w*|hobby|show|series|song|music|friends?|family|goal|plan\w*|news|month|life|busy|tired|happy|going)\b/i,
+};
+
+type Expect = 'past' | 'future' | 'conditional' | 'present';
+function expectedTense(q: string): Expect {
+  if (/\bwould\b|\bif you could\b/i.test(q)) return 'conditional';
+  if (/\bgoing to\b|\bwill\b|\bplanning\b|\bnext (year|week|few)\b|\bin 2030\b/i.test(q)) return 'future';
+  if (/\bever\b|\bdid\b|\bwas\b|\bwere\b|\blast\b|\bmost recently\b|\brecently\b|\bsince\b|\bhas been\b|\bhave you been\b/i.test(q)) return 'past';
+  return 'present';
 }
+
+const IRREGULAR: Record<string, string> = {
+  go: 'went', be: 'was', have: 'had', do: 'did', see: 'saw', eat: 'ate', take: 'took', get: 'got', make: 'made', come: 'came',
+  buy: 'bought', fly: 'flew', swim: 'swam', meet: 'met', leave: 'left', lose: 'lost', find: 'found', think: 'thought', feel: 'felt',
+  sleep: 'slept', spend: 'spent', drive: 'drove', ride: 'rode', run: 'ran', sit: 'sat', stand: 'stood', write: 'wrote', read: 'read',
+  speak: 'spoke', tell: 'told', say: 'said', know: 'knew', give: 'gave', bring: 'brought', drink: 'drank', begin: 'began', break: 'broke',
+  catch: 'caught', choose: 'chose', fall: 'fell', forget: 'forgot', hear: 'heard', keep: 'kept', learn: 'learnt', pay: 'paid', put: 'put',
+  sell: 'sold', send: 'sent', sing: 'sang', teach: 'taught', win: 'won', wake: 'woke', wear: 'wore',
+};
+const REGULAR_BASE = /^(change|visit|stay|play|travel|walk|watch|enjoy|try|stop|plan|arrive|miss|start|finish|decide|cook|dance|listen|look|move|open|rain|rent|return|use|work|study|live|wait|call|ask|help|book|pack|explore|climb|camp|surf|ski)$/;
+const past = (v: string) => IRREGULAR[v] ?? (v.endsWith('e') ? `${v}d` : /[^aeiou]y$/.test(v) ? `${v.slice(0, -1)}ied` : /^(stop|plan)$/.test(v) ? `${v}${v.slice(-1)}ed` : `${v}ed`);
+
+/** A tense mistake that depends on the question (e.g. a finished trip told in the present). */
+function tenseCheck(answer: string, expect: Expect): Correction | null {
+  if (expect === 'past' && !/\b(will|would|going to|usually|always|every|now|today)\b/i.test(answer)) {
+    const m = answer.match(/\b(I|we|they|you|he|she|my \w+)\s+(\w+)\b/i);
+    if (m) {
+      const v = m[2].toLowerCase();
+      if ((IRREGULAR[v] || REGULAR_BASE.test(v)) && !/^(think|know|feel|be|have)$/.test(v)) {
+        return { said: m[0], better: `${m[1]} ${past(v)}`, why: 'You are talking about a finished past experience → past simple.' };
+      }
+    }
+  }
+  if (expect === 'conditional' && !/\b(would|'d|could|might)\b/i.test(answer)) {
+    const m = answer.match(/\b(I|we)\s+(go|live|buy|travel|visit|change|do|have|be|work|study|invent|make)\b/i);
+    if (m) return { said: m[0], better: `${m[1]} would ${m[2].toLowerCase()}`, why: 'An imaginary situation → would + verb.' };
+  }
+  if (expect === 'future' && !/\b(will|'ll|going to|gonna|'m|am|are|plan|hope|want|might)\b/i.test(answer)) {
+    const m = answer.match(/\b(I|we)\s+(go|travel|visit|work|study|stay|see|meet|finish|start)\b/i);
+    if (m) return { said: m[0], better: `${m[1]}'m going to ${m[2].toLowerCase()}`, why: 'Plans for the future → going to + verb (or will).' };
+  }
+  return null;
+}
+
+const STARTERS: Record<Expect, string> = {
+  past: '“I went to … with … and we …”',
+  conditional: '“I would … because …”',
+  future: '“I’m going to … because …”',
+  present: '“I usually … because …”',
+};
+
+/** Something the learner mentioned, to react to it (a name or place, or the noun after to/in/at). */
+function mention(answer: string): string | null {
+  const names = answer.slice(1).match(/\b[A-Z][a-záéíóúñ]+(?: [A-Z][a-záéíóúñ]+)?\b/g)?.filter((w) => !/^(I|I'm|I've|I'd|I'll)$/.test(w));
+  if (names?.length) return names[0];
+  const m = answer.match(/\b(?:to|in|at|on|with)\s+(?:the |my |a |an )?([a-z]{4,}(?: [a-z]{4,})?)\b/i);
+  return m && !STOP.has(m[1].toLowerCase()) ? m[1] : null;
+}
+
+function reaction(answer: string, seed: number): string {
+  const thing = mention(answer);
+  if (/\b(love|amazing|great|awesome|best|beautiful|fun|incredible|perfect)\b/i.test(answer)) return thing ? `${thing}? That sounds amazing!` : pick(['No way, that sounds amazing!', 'I love that.', 'Okay, now I’m jealous.'], seed);
+  if (/\b(hate|bad|terrible|worst|boring|sad|difficult|hard|lost|missed|problem)\b/i.test(answer)) return pick(['Ouch, that sounds tough.', 'Oh no, I feel you.', "That's rough, for real."], seed);
+  if (thing) return pick([`${thing}? Nice!`, `Oh, ${thing} — cool.`, `${thing}, interesting!`], seed);
+  if (/\b(because|so|although|but)\b/i.test(answer)) return pick(['Good point — I like how you explained that.', 'Makes sense.', 'Interesting, I didn’t think of it that way.'], seed);
+  return pick(['Nice.', 'Interesting!', 'Got it.', 'Cool.', 'Fair enough.'], seed);
+}
+
+/** A follow-up question about the learner's own answer. */
+function followUp(answer: string, expect: Expect, seed: number): string {
+  const thing = mention(answer);
+  if (expect === 'past') return thing ? pick([`What did you like most about ${thing}?`, `When was that, and how long did you stay?`, `What was the best moment there?`], seed) : pick(['What happened next?', 'How did you feel?', 'Who were you with?'], seed);
+  if (expect === 'conditional') return pick(['Why would you choose that?', 'What would be the first thing you’d do?', 'Who would you take with you?'], seed);
+  if (expect === 'future') return pick(['Why that?', 'What are you most looking forward to?', 'Who are you going with?'], seed);
+  return pick(['Why is that?', 'Can you give me an example?', 'How often?'], seed);
+}
+
+// ───────────── the turn ─────────────
 
 /** The next tutor line (and the correction for the learner's last line). */
 export function localTurn(topic: TopicId, turns: Turn[]): { reply: string; correction: Correction | null } {
   const qs = QUESTIONS[topic];
-  const asked = turns.filter((t) => t.role === 'tutor').length;
+  const tutorLines = turns.filter((t) => t.role === 'tutor').map((t) => t.text);
   const last = [...turns].reverse().find((t) => t.role === 'me');
   if (!last) return { reply: `Hey… you came back. ${qs[0]}`, correction: null };
-  const correction = checkSentence(last.text);
-  const words = last.text.trim().split(/\s+/).length;
-  // a very short answer gets a follow-up instead of a new question (once)
-  const prevWasFollowUp = turns.length >= 2 && /\b(why|more about|example)\b/i.test(turns[turns.length - 2]?.text ?? '') && !qs.includes(turns[turns.length - 2]?.text ?? '');
-  const seed = asked * 7 + words;
-  let reply: string;
-  if (words < 6 && !prevWasFollowUp) {
-    reply = `${reaction(last.text, seed)} ${pick(['Why?', 'Can you tell me a bit more about that?', 'Give me an example.'], seed)}`;
-  } else if (asked >= qs.length) {
-    reply = `${reaction(last.text, seed)} That was a great chat. Press “Finish and see my grade” whenever you're ready, or keep talking.`;
-  } else {
-    const next = qs[Math.min(asked, qs.length - 1)];
-    reply = `${reaction(last.text, seed)} ${next}`;
+
+  // the question being answered = the last script question Jake asked
+  const askedIdx = qs.map((q, i) => (tutorLines.some((l) => l.includes(q)) ? i : -1)).filter((i) => i >= 0);
+  const current = askedIdx.length ? Math.max(...askedIdx) : 0;
+  const question = qs[current];
+  const nextQ = qs[current + 1];
+  const expect = expectedTense(question);
+  const text = last.text.trim();
+  const words = text.split(/\s+/).filter(Boolean);
+  const seed = tutorLines.length * 7 + words.length;
+  const prevTutor = tutorLines[tutorLines.length - 1] ?? '';
+  const prevWasFollowUp = !qs.some((q) => prevTutor.includes(q));
+
+  // 1. rude words → keep it friendly, ask again
+  if (RUDE.test(text)) {
+    return { reply: `Whoa, watch the language! 😏 Let's keep it clean. ${question}`, correction: { said: text, better: 'Try a full answer in English', why: 'Avoid rude words, and answer the question with a complete sentence.' } };
   }
-  if (correction) reply = `${pick(['Quick tip:', 'Small thing:', 'Just so you know:'], seed)} we say “${correction.better}”. ${reply}`;
-  return { reply, correction };
+  // 2. Spanish → ask for English, give a starter
+  const es = (text.match(SPANISH) ?? []).length;
+  if (es >= 2 || (es >= 1 && words.length <= 3)) {
+    return { reply: `Ha, nice try — but in English, please! You could start with ${STARTERS[expect]}. ${question}`, correction: { said: text, better: `Answer in English: ${STARTERS[expect].replace(/[“”]/g, '')}`, why: 'This is English practice: try to say it in English, even if it is simple.' } };
+  }
+  // 3. corrections: general rules first, then the tense the question needs
+  const correction = checkSentence(text) ?? tenseCheck(text, expect);
+  const tip = correction ? `${pick(['Quick tip:', 'Small thing:', 'Just so you know:'], seed)} we say “${correction.better}”. ` : '';
+
+  // 4. too short or not about the question → stay on the same question
+  const onTopic = TOPIC_WORDS[topic].test(text) || !!mention(text) || words.some((w) => question.toLowerCase().includes(w.toLowerCase()) && w.length > 3 && !STOP.has(w.toLowerCase()));
+  if (words.length < 4) {
+    return { reply: `${tip}${pick(['Come on, give me a full sentence!', 'Hmm, tell me a bit more.', 'Short and sweet, huh?'], seed)} Try: ${STARTERS[expect]}. ${question}`, correction };
+  }
+  if (!onTopic) {
+    return { reply: `${tip}Hmm, I'm not sure that answers my question. I asked: ${question} You could start with ${STARTERS[expect]}.`, correction };
+  }
+
+  // 5. good answer: react, sometimes dig deeper, then move on
+  const react = reaction(text, seed);
+  if (!prevWasFollowUp && words.length < 14 && seed % 2 === 0) {
+    return { reply: `${tip}${react} ${followUp(text, expect, seed)}`, correction };
+  }
+  if (!nextQ) return { reply: `${tip}${react} That was a great chat. Press “Finish and see my grade” whenever you're ready, or keep talking.`, correction };
+  return { reply: `${tip}${react} ${nextQ}`, correction };
 }
 
 /** Grade the conversation from simple measures. */
