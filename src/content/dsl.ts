@@ -49,12 +49,15 @@ function splitWhy(body: string) {
 const alts = (s: string) => s.split(' ; ').map((x) => x.trim()).filter(Boolean);
 
 export function parseExercise(line: string): Exercise {
+  // optional situation shown above the item: "… >> why @@ context"
+  const [body, ctx] = line.split(' @@ ');
+  line = body;
   const type = line[0];
   let i = 1;
   let d: Difficulty = 1;
   if (/[123]/.test(line[1])) { d = Number(line[1]) as Difficulty; i = 2; }
   const { main, why, more } = splitWhy(line.slice(i).trim());
-  const base = { why, more, d };
+  const base = { why, more, d, ...(ctx ? { sit: ctx.trim() } : {}) };
   switch (type) {
     case '?':
     case 'e':

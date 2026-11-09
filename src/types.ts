@@ -17,6 +17,8 @@ interface ExBase {
   ref?: string;
   /** Instruction of the exercise set this item belongs to (book-style sets) */
   ins?: string;
+  /** Situation that gives context to the item (shown above it). */
+  sit?: string;
 }
 
 /** A numbered exercise set (1.1, 1.2 …) with one instruction and several items. */

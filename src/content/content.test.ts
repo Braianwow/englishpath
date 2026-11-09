@@ -106,6 +106,20 @@ describe('numbered exercise sets', () => {
   });
 });
 
+describe('B1 context in numbered sets', () => {
+  it('every item gives a situation: a longer sentence or a "Situación" line', () => {
+    const missing: string[] = [];
+    Object.values(SETS).forEach((sets) => sets.forEach((s) => s.ex.forEach((e) => {
+      const text = ('q' in e ? e.q : '') ?? '';
+      const ok = (e.t === 'gap' || e.t === 'mc' || e.t === 'spot' || e.t === 'fix')
+        ? !!e.sit || text.split(/\s+/).length >= 10
+        : !!e.sit;
+      if (!ok) missing.push(e.ref ?? s.ref);
+    })));
+    expect(missing).toEqual([]);
+  });
+});
+
 describe('cuadernillo', () => {
   it('has one activity for each of the 145 units, attached to its unit', () => {
     expect(Object.keys(CUADERNILLO).length).toBe(145);
