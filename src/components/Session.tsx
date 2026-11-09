@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X, Trophy, RotateCcw, Zap } from 'lucide-react';
 import type { KeyedExercise } from '../content';
-import { UNIT_BY_ID } from '../content';
+import { UNIT_BY_ID, refreshSaved } from '../content';
 import ExerciseView, { Feedback, type Answered } from './ExerciseView';
 import { Button, Card, Progress, Ring, cx } from './ui';
 import { recordAnswer } from '../store/progress';
@@ -23,7 +23,9 @@ export default function Session({ items: given, title, onFinish, onExit: exit, f
   const saveKey = `session:${title}`;
   const saved = useMemo(() => {
     const s = loadSaved<Saved>(saveKey);
-    return s && s.base?.length && s.queue.every((i) => s.base[i]) && s.idx < s.queue.length ? s : undefined;
+    if (!(s && s.base?.length && s.queue.every((i) => s.base[i]) && s.idx < s.queue.length)) return undefined;
+    const base = refreshSaved(s.base); // use the current version of each exercise
+    return base ? { ...s, base } : undefined;
   }, [saveKey]);
   const items = saved?.base ?? given;
   const [queue, setQueue] = useState<KeyedExercise[]>(() => (saved ? saved.queue.map((i) => saved.base[i]) : items));

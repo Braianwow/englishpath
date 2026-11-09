@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { UNITS, UNIT_STORIES, unitPool } from './index';
+import { UNITS, UNIT_STORIES, refreshSaved, unitPool } from './index';
 import { MODULES } from './modules';
 import { VOCAB } from './vocab';
 import { READINGS } from './readings';
@@ -126,8 +126,17 @@ describe('stories', () => {
     expect(wrong).toEqual([]);
   });
   it('every exercise in the practice pools has a story or situation', () => {
-    const missing = UNITS.flatMap((u) => unitPool(u).filter((k) => !k.ex.sit && !(k.ex.src === 'set')).map((k) => k.key));
+    const missing = UNITS.flatMap((u) => unitPool(u).filter((k) => !k.ex.sit).map((k) => k.key));
     expect(missing).toEqual([]);
+  });
+});
+
+describe('autosaved sessions', () => {
+  it('a saved session is refreshed with the current version of each exercise', () => {
+    const cur = unitPool(UNITS[0])[2];
+    const old = { ...cur, ex: { ...cur.ex, sit: undefined, why: 'versión vieja' } };
+    expect(refreshSaved([old])?.[0]).toStrictEqual(cur);
+    expect(refreshSaved([{ ...cur, key: `${cur.unitId}:no-existe` }])).toBeNull();
   });
 });
 

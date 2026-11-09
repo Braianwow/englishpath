@@ -65,6 +65,25 @@ export function unitPool(u: GrammarUnit): KeyedExercise[] {
   return [...cuad, ...sets, ...authored, ...(authored.length || sets.length ? [] : generated)];
 }
 
+/**
+ * Autosaved sessions keep copies of their exercises. When the content is updated, this swaps
+ * each saved copy for the current version (same key). Returns null if any exercise no longer exists,
+ * so the session starts again with fresh content.
+ */
+export function refreshSaved(items: KeyedExercise[]): KeyedExercise[] | null {
+  const pools = new Map<string, Map<string, KeyedExercise>>();
+  const out: KeyedExercise[] = [];
+  for (const it of items) {
+    if (!it.unitId || !UNIT_BY_ID[it.unitId]) { out.push(it); continue; }
+    let pool = pools.get(it.unitId);
+    if (!pool) { pool = new Map(unitPool(UNIT_BY_ID[it.unitId]).map((k) => [k.key, k])); pools.set(it.unitId, pool); }
+    const cur = pool.get(it.key);
+    if (!cur) return null;
+    out.push(cur);
+  }
+  return out;
+}
+
 export const TAG_LABELS: Record<string, string> = {
   'present-continuous': 'Presente continuo', 'present-simple': 'Presente simple', tenses: 'Tiempos verbales', 'state-verbs': 'Verbos de estado',
   'past-simple': 'Pasado simple', 'past-continuous': 'Pasado continuo', 'irregular-verbs': 'Verbos irregulares', 'present-perfect': 'Present perfect',

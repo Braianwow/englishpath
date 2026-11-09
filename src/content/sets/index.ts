@@ -13,6 +13,7 @@ import { s04 } from './s04';
 import { s05 } from './s05';
 import { s06 } from './s06';
 import { s07 } from './s07';
+import { SET_STORY } from '../stories/sets';
 
 export type RawSet = [string, string, string[]];
 
@@ -21,6 +22,10 @@ const RAW: Record<number, RawSet[]> = { ...s01, ...s02, ...s03, ...s04, ...s05, 
 export const SETS: Record<number, ExerciseSet[]> = Object.fromEntries(
   Object.entries(RAW).map(([n, sets]) => [Number(n), sets.map(([ref, ins, lines]) => ({
     ref, ins,
-    ex: lines.map((l, i) => ({ ...parseExercise(l), d: 1, src: 'set' as const, ref: `${ref} ${String.fromCharCode(97 + i)}`, ins })),
+    ex: lines.map((l, i) => {
+      const ex = parseExercise(l);
+      // the item's own situation if it has one; otherwise the story of the whole set
+      return { ...ex, sit: ex.sit ?? SET_STORY[ref], d: 1 as const, src: 'set' as const, ref: `${ref} ${String.fromCharCode(97 + i)}`, ins };
+    }),
   }))]),
 );

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { X, AlertTriangle, CheckCircle2, ArrowRight, Target } from 'lucide-react';
 import type { ExamKind, ExamResult } from '../types';
 import type { KeyedExercise } from '../content';
-import { UNIT_BY_ID } from '../content';
+import { UNIT_BY_ID, refreshSaved } from '../content';
 import ExerciseView, { Feedback, type Answered } from './ExerciseView';
 import { Badge, Button, Card, LinkButton, Progress, Ring } from './ui';
 import { recordAnswer, PASS_MARK } from '../store/progress';
@@ -20,7 +20,9 @@ export default function ExamRunner({ items: given, title, kind, examId, onFinish
   const saveKey = `exam:${kind}:${examId}`;
   const saved = useMemo(() => {
     const s = loadSaved<{ items: KeyedExercise[]; idx: number; answers: { item: KeyedExercise; ans: Answered }[] }>(saveKey);
-    return s && s.items?.length && s.idx < s.items.length ? s : undefined;
+    if (!(s && s.items?.length && s.idx < s.items.length)) return undefined;
+    const items = refreshSaved(s.items); // use the current version of each exercise
+    return items ? { ...s, items } : undefined;
   }, [saveKey]);
   const items = saved?.items ?? given;
   const [idx, setIdx] = useState(saved?.idx ?? 0);
