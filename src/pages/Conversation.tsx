@@ -9,8 +9,9 @@ import { describeError } from '../lib/assistant';
 import { getSttEngine, listen, recognitionSupported } from '../lib/recognition';
 import { preloadLocalStt } from '../lib/localStt';
 import { aiSupported, loadAiVoice } from '../lib/neuralTts';
+import { llmTurn, llmWanted, startLlm, stopLlm, useLlmStatus, webGpuAvailable } from '../lib/localLlm';
 import { speak, stopSpeaking } from '../lib/speech';
-import { Button, Card, LinkButton, cx } from '../components/ui';
+import { Button, Card, cx } from '../components/ui';
 import SkillHeader from '../components/SkillHeader';
 import { clearSaved, usePersisted } from '../lib/persist';
 
@@ -18,6 +19,9 @@ export default function Conversation() {
   const s = useSettings();
   const [topic, setTopic] = usePersisted<TopicId | null>('conv:topic', null);
   const hasAi = s.aiProvider === 'anthropic' && !!s.aiKey;
+
+  // keep loading the free AI in the background if it was turned on before
+  useEffect(() => { if (!hasAi && llmWanted()) startLlm(); }, [hasAi]);
 
   if (topic) return <Session topic={topic} ai={hasAi} onExit={() => setTopic(null)} />;
 
@@ -31,13 +35,14 @@ export default function Conversation() {
           <p className="text-sm text-slate-500">You speak to him in English, he answers out loud, corrects you when you make a mistake and gives you a grade at the end. Choose what you want to talk about.</p>
         </div>
       </Card>
-      <Card className="mb-5 flex flex-wrap items-center gap-3 p-4">
-        <Sparkles size={20} className="text-brand-500" />
-        {hasAi
-          ? <p className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">AI mode.</strong> Jake answers freely to anything you say, using your Claude API key.</p>
-          : <p className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">Free mode — no key needed.</strong> Jake asks you questions about the topic, reacts to your answers, corrects common mistakes and grades you at the end. Optional: add a Claude API key in Settings for a completely free-flowing chat.</p>}
-        {!hasAi && <LinkButton to="/settings" size="sm" variant="secondary">Settings</LinkButton>}
-      </Card>
+      {hasAi
+        ? (
+          <Card className="mb-5 flex flex-wrap items-center gap-3 p-4">
+            <Sparkles size={20} className="text-brand-500" />
+            <p className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">Claude AI mode.</strong> Jake answers freely to anything you say, using your Claude API key.</p>
+          </Card>
+        )
+        : <FreeAiCard />}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {TOPICS.map((t) => (
           <button key={t.id} onClick={() => setTopic(t.id)}
@@ -57,6 +62,7 @@ export default function Conversation() {
 
 function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onExit: () => void }) {
   const s = useSettings();
+  const llm = useLlmStatus();
   const t = TOPICS.find((x) => x.id === topic)!;
   // autosaved: a reload (F5) keeps the conversation
   const saveKey = `conv:${topic}`;
@@ -99,7 +105,9 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
   const ask = async (history: Turn[]) => {
     setThinking(true); setError('');
     try {
-      const r = ai ? await nextTurn(s, topic, history) : { ...localTurn(topic, history), translation: '' };
+      const r = ai ? await nextTurn(s, topic, history)
+        : llm.state === 'ready' && history.length ? { ...(await llmTurn(topic, history).catch(() => localTurn(topic, history))), translation: '' }
+        : { ...localTurn(topic, history), translation: '' };
       // attach the correction to the student's last line
       const withCorr = history.map((x, i) => (i === history.length - 1 && x.role === 'me' ? { ...x, correction: r.correction } : x));
       setTurns([...withCorr, { role: 'tutor', text: r.reply, es: r.translation }]);
@@ -169,7 +177,7 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
       <div className="mb-4 flex items-center gap-3">
         <button onClick={() => { stopRef.current(); stopSpeaking(); onExit(); }} className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Exit"><ChevronLeft size={20} /></button>
         <div className="min-w-0 flex-1">
-          <div className="font-display text-lg font-bold text-slate-900 dark:text-white">{t.emoji} {t.label} <span className="font-normal text-slate-500">with Jake</span></div>
+          <div className="font-display text-lg font-bold text-slate-900 dark:text-white">{t.emoji} {t.label} <span className="font-normal text-slate-500">with Jake</span>{!ai && llm.state === 'ready' && <span className="ml-2 rounded-full bg-brand-500/15 px-2 py-0.5 align-middle text-[11px] font-semibold text-brand-600 dark:text-brand-300">AI</span>}</div>
           <label className="flex items-center gap-2 text-xs text-slate-500">
             <input type="checkbox" checked={handsFree} disabled={!recognitionSupported()} onChange={(e) => setHandsFree(e.target.checked)} className="h-3.5 w-3.5 accent-brand-500" />
             Hands-free: the microphone opens by itself when Jake finishes speaking
@@ -278,5 +286,35 @@ function ReportView({ report, topicLabel, onAgain }: { report: Report; topicLabe
         <Link to="/my-words" className="pressable inline-flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">See My words</Link>
       </div>
     </div>
+  );
+}
+
+/** Free mode: the script, or a small AI that runs in the browser (optional, needs a graphics card). */
+function FreeAiCard() {
+  const llm = useLlmStatus();
+  const [gpu, setGpu] = useState<boolean | null>(null);
+  useEffect(() => { webGpuAvailable().then(setGpu); }, []);
+  return (
+    <Card className="mb-5 p-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <Sparkles size={20} className="text-brand-500" />
+        <div className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300">
+          {llm.state === 'ready'
+            ? <><strong className="text-slate-900 dark:text-white">Free AI on.</strong> Jake runs on your computer: he follows what you say, corrects you and keeps the topic going. No key, nothing leaves your browser.</>
+            : <><strong className="text-slate-900 dark:text-white">Free mode — no key needed.</strong> Jake follows a set of questions for each topic and corrects common mistakes. Turn on the free AI so he understands anything you say.</>}
+        </div>
+        {llm.state === 'ready' && <Button size="sm" variant="ghost" onClick={stopLlm}>Turn off</Button>}
+        {(llm.state === 'off' || llm.state === 'error') && gpu && <Button size="sm" onClick={startLlm}>Turn on free AI</Button>}
+      </div>
+      {llm.state === 'off' && gpu && <p className="mt-2 text-xs text-slate-500">Downloads a 1.2 GB model once (it stays saved in the browser). Works best on computers with a graphics card. Optional: a Claude API key in <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Settings</Link> gives the smartest Jake.</p>}
+      {gpu === false && llm.state !== 'ready' && <p className="mt-2 text-xs text-slate-500">This browser can't run the free AI (it needs WebGPU: an up-to-date Chrome or Edge on a computer with a graphics card). You can still use the free mode, or add a Claude API key in <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Settings</Link>.</p>}
+      {llm.state === 'loading' && (
+        <div className="mt-3">
+          <div className="mb-1 text-xs text-slate-500">Downloading Jake's brain… {Math.round(llm.progress * 100)}%{llm.mb ? ` of ${(llm.mb / 1000).toFixed(1)} GB` : ''} — you can start talking meanwhile; he switches to AI when it's ready.</div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"><div className="h-full rounded-full bg-brand-500 transition-[width]" style={{ width: `${Math.round(llm.progress * 100)}%` }} /></div>
+        </div>
+      )}
+      {llm.state === 'error' && <p className="mt-2 text-xs text-rose-600">The free AI couldn't start: {llm.message}</p>}
+    </Card>
   );
 }
