@@ -74,7 +74,7 @@ export function listenLocal(opts: ListenOpts): () => void {
     const r = await transcribe(audio);
     progressCb = null;
     if (r.error) opts.onError(`Speech recognition error: ${r.error}`);
-    else if (r.text && !/^\[?(blank_audio|silence|music)\]?$/i.test(r.text)) opts.onText(r.text, true);
+    else if (cleanText(r.text)) opts.onText(cleanText(r.text), true);
     else opts.onError("I couldn't understand that. Try again, a bit louder.");
     opts.onEnd();
   };
