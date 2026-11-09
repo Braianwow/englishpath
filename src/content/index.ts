@@ -3,6 +3,13 @@ import { buildUnit, type UnitSrc } from './dsl';
 import { MODULES } from './modules';
 import { CUADERNILLO } from './cuadernillo';
 import { SETS } from './sets';
+import { S1 } from './stories/u1';
+import { S2 } from './stories/u2';
+import { S3 } from './stories/u3';
+import { S4 } from './stories/u4';
+
+/** Story line for each authored exercise of each unit (same order as the exercises). */
+export const UNIT_STORIES: Record<number, string[]> = { ...S1, ...S2, ...S3, ...S4 };
 import { m01 } from './units/m01';
 import { m02 } from './units/m02';
 import { m03 } from './units/m03';
@@ -22,7 +29,11 @@ import { m16 } from './units/m16';
 
 const SOURCES: UnitSrc[][] = [m01, m02, m03, m04, m05, m06, m07, m08, m09, m10, m11, m12, m13, m14, m15, m16];
 
-export const UNITS: GrammarUnit[] = SOURCES.flatMap((list, i) => list.map((u) => ({ ...buildUnit(u, MODULES[i].id), cuad: CUADERNILLO[u.n], sets: SETS[u.n] })))
+export const UNITS: GrammarUnit[] = SOURCES.flatMap((list, i) => list.map((u) => {
+  const unit = buildUnit(u, MODULES[i].id);
+  const story = UNIT_STORIES[u.n] ?? [];
+  return { ...unit, ex: unit.ex.map((e, j) => (story[j] ? { ...e, sit: story[j] } : e)), cuad: CUADERNILLO[u.n], sets: SETS[u.n] };
+}))
   .sort((a, b) => a.n - b.n);
 export const UNIT_BY_ID: Record<string, GrammarUnit> = Object.fromEntries(UNITS.map((u) => [u.id, u]));
 export const getUnit = (id: string) => UNIT_BY_ID[id];
@@ -49,7 +60,9 @@ export function unitPool(u: GrammarUnit): KeyedExercise[] {
   }));
   const cuad: KeyedExercise[] = u.cuad ? [{ key: `${u.id}:cuad`, unitId: u.id, ex: u.cuad }] : [];
   const sets: KeyedExercise[] = (u.sets ?? []).flatMap((s) => s.ex.map((ex, i) => ({ key: `${u.id}:s${s.ref}.${i}`, unitId: u.id, ex })));
-  return [...cuad, ...sets, ...authored, ...fromErrors, ...fromExamples];
+  // Items generated from the unit's examples and error list have no story, so they are only used when a unit has nothing else.
+  const generated = [...fromErrors, ...fromExamples];
+  return [...cuad, ...sets, ...authored, ...(authored.length || sets.length ? [] : generated)];
 }
 
 export const TAG_LABELS: Record<string, string> = {

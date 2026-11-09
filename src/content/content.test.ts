@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { UNITS, unitPool } from './index';
+import { UNITS, UNIT_STORIES, unitPool } from './index';
 import { MODULES } from './modules';
 import { VOCAB } from './vocab';
 import { READINGS } from './readings';
@@ -116,6 +116,17 @@ describe('B1 context in numbered sets', () => {
         : !!e.sit;
       if (!ok) missing.push(e.ref ?? s.ref);
     })));
+    expect(missing).toEqual([]);
+  });
+});
+
+describe('stories', () => {
+  it('every unit has exactly one story line per exercise', () => {
+    const wrong = UNITS.filter((u) => (UNIT_STORIES[u.n]?.length ?? 0) !== u.ex.length).map((u) => `U${u.n}: ${UNIT_STORIES[u.n]?.length ?? 0} historias / ${u.ex.length} ejercicios`);
+    expect(wrong).toEqual([]);
+  });
+  it('every exercise in the practice pools has a story or situation', () => {
+    const missing = UNITS.flatMap((u) => unitPool(u).filter((k) => !k.ex.sit && !(k.ex.src === 'set')).map((k) => k.key));
     expect(missing).toEqual([]);
   });
 });

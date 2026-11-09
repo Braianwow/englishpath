@@ -14,6 +14,7 @@
  */
 import { parseExercise } from './dsl';
 import type { Exercise } from '../types';
+import { CUAD_SIT } from './stories/cuad';
 
 const RAW: Record<number, string> = {
   1: "_ Look! The baby ___ (sleep). = is sleeping ; 's sleeping >> Acción en curso ahora (Look!) → present continuous.",
@@ -166,6 +167,6 @@ const RAW: Record<number, string> = {
 export const CUADERNILLO: Record<number, Exercise> = Object.fromEntries(
   Object.entries(RAW).map(([n, line]) => {
     const ex = parseExercise(line);
-    return [Number(n), { ...ex, d: 1, src: 'cuad', ref: `${n}.1` } as Exercise];
+    return [Number(n), { ...ex, d: 1, src: 'cuad', ref: `${n}.1`, sit: CUAD_SIT[Number(n)] } as Exercise];
   }),
 );
