@@ -150,7 +150,7 @@ export function weakUnits(s: ProgressState): Weakness[] {
     if (weakMastery || m >= 3 || failedTest) {
       out.push({
         unitId: id, mastery: u.mastery, mistakes: m,
-        reason: failedTest ? 'Evaluación no aprobada todavía' : m >= 3 ? `${m} errores sin corregir` : `Dominio ${Math.round(u.mastery * 100)} %`,
+        reason: failedTest ? 'Test not passed yet' : m >= 3 ? `${m} mistakes not fixed` : `Mastery ${Math.round(u.mastery * 100)}%`,
       });
     }
   }
@@ -207,21 +207,21 @@ export function recommendations(s: ProgressState): Recommendation[] {
   const nu = UNIT_BY_ID[next];
   const started = Object.keys(s.units).length > 0;
 
-  if (!started) recs.push({ kind: 'start', title: `Empezá con la Unidad ${nu.n}: ${nu.es}`, reason: 'Primera lección del recorrido recomendado.', to: `/learn/${next}` });
-  if (mistakes >= 5) recs.push({ kind: 'mistakes', title: `Corregí tus ${mistakes} errores pendientes`, reason: 'Repetir lo que fallaste es la forma más rápida de fijarlo.', to: '/practice?mode=mistakes' });
+  if (!started) recs.push({ kind: 'start', title: `Start with Unit ${nu.n}: ${nu.title}`, reason: 'First lesson on the recommended path.', to: `/learn/${next}` });
+  if (mistakes >= 5) recs.push({ kind: 'mistakes', title: `Fix your ${mistakes} mistakes`, reason: 'Repeating what you got wrong is the fastest way to learn it.', to: '/practice?mode=mistakes' });
   if (weak.length) {
     const w = UNIT_BY_ID[weak[0].unitId];
-    recs.push({ kind: 'weak', title: `Refuerzo: ${w.title}`, reason: `${weak[0].reason}. Te propongo práctica extra de este tema.`, to: `/practice?mode=focus&units=${w.id}` });
+    recs.push({ kind: 'weak', title: `Review: ${w.title}`, reason: `${weak[0].reason}. Here is some extra practice on this topic.`, to: `/practice?mode=focus&units=${w.id}` });
   }
-  if (cards >= 5) recs.push({ kind: 'cards', title: `Repasá ${cards} palabras pendientes`, reason: 'Las tarjetas vencidas se olvidan si no las repasás hoy.', to: '/vocabulary?tab=review' });
+  if (cards >= 5) recs.push({ kind: 'cards', title: `Review ${cards} words that are due`, reason: "Cards that are due get forgotten if you don't review them today.", to: '/vocabulary?tab=review' });
   if (started && nu) {
     const st = s.units[next];
     recs.push(st && st.step > 0
-      ? { kind: 'continue', title: `Continuá la Unidad ${nu.n}: ${nu.es}`, reason: `Vas por el paso ${Math.min(st.step + 1, 5)} de 5.`, to: `/learn/${next}` }
-      : { kind: 'next', title: `Siguiente: Unidad ${nu.n} — ${nu.es}`, reason: 'Próximo tema del recorrido recomendado.', to: `/learn/${next}` });
+      ? { kind: 'continue', title: `Continue Unit ${nu.n}: ${nu.title}`, reason: `You're on step ${Math.min(st.step + 1, 5)} of 5.`, to: `/learn/${next}` }
+      : { kind: 'next', title: `Next: Unit ${nu.n} — ${nu.title}`, reason: 'Next topic on the recommended path.', to: `/learn/${next}` });
   }
-  if (due.length) recs.push({ kind: 'review', title: `Repaso espaciado de ${due.length} unidad(es)`, reason: 'Ya pasó el tiempo de repaso de temas que aprobaste.', to: '/practice?mode=due' });
-  if (mistakes > 0 && mistakes < 5) recs.push({ kind: 'mistakes', title: `Corregí tus ${mistakes} errores pendientes`, reason: 'Sesión corta con los ejercicios que fallaste.', to: '/practice?mode=mistakes' });
+  if (due.length) recs.push({ kind: 'review', title: `Spaced review of ${due.length} unit(s)`, reason: "It's time to review some topics you've passed.", to: '/practice?mode=due' });
+  if (mistakes > 0 && mistakes < 5) recs.push({ kind: 'mistakes', title: `Fix your ${mistakes} mistakes`, reason: 'A short session with the exercises you got wrong.', to: '/practice?mode=mistakes' });
   return recs;
 }
 
@@ -232,8 +232,8 @@ export function recommendations(s: ProgressState): Recommendation[] {
 export function estimatedLevel(s: ProgressState): { label: string; detail: string; pct: number } {
   const mastered = Object.entries(s.units).filter(([id, u]) => UNIT_BY_ID[id] && u.completed && u.mastery >= 0.7).length;
   const pct = mastered / UNITS.length;
-  const label = mastered === 0 ? 'B1 (inicio)' : pct < 0.25 ? 'B1' : pct < 0.5 ? 'B1+' : pct < 0.85 ? 'B2' : 'B2+';
-  return { label, pct, detail: `${mastered} de ${UNITS.length} unidades dominadas (aprobadas con ≥ 70 % de dominio)` };
+  const label = mastered === 0 ? 'B1 (starting)' : pct < 0.25 ? 'B1' : pct < 0.5 ? 'B1+' : pct < 0.85 ? 'B2' : 'B2+';
+  return { label, pct, detail: `${mastered} of ${UNITS.length} units mastered (passed with ≥ 70% mastery)` };
 }
 
 export function overallAccuracy(s: ProgressState): number | null {

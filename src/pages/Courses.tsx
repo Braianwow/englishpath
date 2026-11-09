@@ -38,10 +38,10 @@ export default function Courses() {
     <div>
       <SkillTabs active="grammar" />
       <div className="flex items-end justify-between gap-3">
-        <h1 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">Gramática</h1>
-        <Link to="/grammar" className="pressable rounded-xl px-3 py-1.5 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:text-brand-300 dark:hover:bg-brand-500/10">Ver índice (Contents)</Link>
+        <h1 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">Grammar</h1>
+        <Link to="/grammar" className="pressable rounded-xl px-3 py-1.5 text-sm font-medium text-brand-600 hover:bg-brand-50 dark:text-brand-300 dark:hover:bg-brand-500/10">See contents</Link>
       </div>
-      <p className="mt-1 text-slate-500">145 unidades en 16 temas. Avanzá en orden o elegí el tema que necesites.</p>
+      <p className="mt-1 text-slate-500">145 units in 16 topics. Go in order or choose the topic you need.</p>
 
       <div className="mt-4 flex items-center gap-3">
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
@@ -62,10 +62,10 @@ export default function Courses() {
               <button onClick={() => setOpen(isOpen ? null : m.id)} aria-expanded={isOpen} className="flex w-full items-center gap-4 p-4 text-left sm:p-5">
                 <NumberRing n={i + 1} pct={units.length ? c / units.length : 0} color={color} />
                 <div className="min-w-0 flex-1">
-                  <div className="font-semibold text-slate-900 dark:text-white">{m.es}</div>
-                  <div className="text-sm text-slate-500">{units.length} unidades · {c} aprobadas</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">{m.title}</div>
+                  <div className="text-sm text-slate-500">{units.length} units · {c} passed</div>
                 </div>
-                {m.id === currentModule && !isOpen && <span className="hidden rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 sm:inline dark:bg-brand-500/15 dark:text-brand-200">Estás acá</span>}
+                {m.id === currentModule && !isOpen && <span className="hidden rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 sm:inline dark:bg-brand-500/15 dark:text-brand-200">You are here</span>}
                 <ChevronDown size={20} className={cx('shrink-0 text-slate-400 transition-transform duration-300', isOpen && 'rotate-180')} />
               </button>
 
@@ -82,7 +82,7 @@ export default function Courses() {
                         <li key={u.id} className="relative flex items-start gap-4">
                           {/* line to the next node */}
                           {!last && <span className="absolute bottom-0 left-[19px] top-11 w-0.5 rounded-full bg-slate-200 dark:bg-slate-700" style={completed ? { background: color } : undefined} aria-hidden />}
-                          <Link to={`/learn/${u.id}`} className="pressable relative z-10 mt-1 shrink-0" aria-label={`Unidad ${u.n}`}>
+                          <Link to={`/learn/${u.id}`} className="pressable relative z-10 mt-1 shrink-0" aria-label={`Unit ${u.n}`}>
                             <span
                               className={cx('flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold',
                                 completed ? 'border-transparent text-white' : isCurrent ? 'border-transparent text-white ring-4 ring-offset-2 ring-offset-white dark:ring-offset-slate-900' : 'border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900')}
@@ -94,12 +94,12 @@ export default function Courses() {
                           </Link>
                           <Link to={`/learn/${u.id}`} className={cx('pressable -mx-2 mb-2 flex min-w-0 flex-1 items-center justify-between gap-3 rounded-2xl px-2 py-2', isCurrent ? 'bg-slate-50 dark:bg-slate-800/60' : 'hover:bg-slate-50 dark:hover:bg-slate-800/40')}>
                             <div className="min-w-0">
-                              <div className={cx('truncate font-medium', isCurrent ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-200')}>{u.es}</div>
+                              <div className={cx('truncate font-medium', isCurrent ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-200')}>{u.title}</div>
                               <div className="truncate text-xs text-slate-400">{u.title}</div>
                             </div>
                             {isCurrent ? (
                               <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-semibold text-white" style={{ background: color }}>
-                                <Play size={13} fill="currentColor" /> {startedU ? 'Seguir' : 'Empezar'}
+                                <Play size={13} fill="currentColor" /> {startedU ? 'Continue' : 'Start'}
                               </span>
                             ) : completed ? (
                               <span className="shrink-0 text-xs font-semibold text-emerald-600 dark:text-emerald-400">{up!.best}%</span>
@@ -112,7 +112,7 @@ export default function Courses() {
                     })}
                   </ol>
                   <div className="flex justify-end border-t border-slate-100 px-5 py-3 dark:border-slate-800">
-                    <Link to={`/exam/module/${m.id}`} className="pressable rounded-xl px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">Examen del módulo →</Link>
+                    <Link to={`/exam/module/${m.id}`} className="pressable rounded-xl px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">Module test →</Link>
                   </div>
                 </div>
               </div>
@@ -125,8 +125,8 @@ export default function Courses() {
       <div className="mt-8 grid grid-cols-3 gap-3">
         {[
           { to: '/workbook', icon: NotebookPen, label: 'Objective First' },
-          { to: '/readings', icon: BookOpen, label: 'Lecturas' },
-          { to: '/plan', icon: CalendarCheck, label: 'Plan de 2 h' },
+          { to: '/readings', icon: BookOpen, label: 'Reading' },
+          { to: '/plan', icon: CalendarCheck, label: '2-hour plan' },
         ].map(({ to, icon: Icon, label }) => (
           <Link key={to} to={to} className="pressable flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-medium text-slate-700 hover:shadow-md dark:bg-slate-900 dark:text-slate-200">
             <Icon size={20} className="text-brand-500" /> {label}

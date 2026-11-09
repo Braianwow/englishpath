@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, KeyRound, Languages, Loader2, Mic, MicOff, Send, Square, Star, Volume2 } from 'lucide-react';
+import { ChevronLeft, Sparkles, Languages, Loader2, Mic, MicOff, Send, Square, Star, Volume2 } from 'lucide-react';
 import { addMyWords, recordSkill, setLast, useSettings } from '../store/progress';
 import { notify } from '../store/toast';
 import { TOPICS, finalReport, nextTurn, type Report, type TopicId, type Turn } from '../lib/conversation';
+import { localReport, localTurn } from '../lib/freeTutor';
 import { describeError } from '../lib/assistant';
 import { listen, recognitionSupported } from '../lib/recognition';
 import { speak, stopSpeaking } from '../lib/speech';
@@ -16,7 +17,7 @@ export default function Conversation() {
   const [topic, setTopic] = usePersisted<TopicId | null>('conv:topic', null);
   const hasAi = s.aiProvider === 'anthropic' && !!s.aiKey;
 
-  if (topic && hasAi) return <Session topic={topic} onExit={() => setTopic(null)} />;
+  if (topic) return <Session topic={topic} ai={hasAi} onExit={() => setTopic(null)} />;
 
   return (
     <div>
@@ -24,20 +25,20 @@ export default function Conversation() {
       <Card className="mb-5 flex flex-wrap items-center gap-4 p-5">
         <div className="text-4xl">😏</div>
         <div className="min-w-0 flex-1">
-          <div className="font-display text-lg font-bold text-slate-900 dark:text-white">Conversación cara a cara con Jake</div>
-          <p className="text-sm text-slate-500">Le hablás en inglés, te contesta con voz, te corrige cuando te equivocás y al final te pone una nota. Elegí de qué quieren hablar.</p>
+          <div className="font-display text-lg font-bold text-slate-900 dark:text-white">Face-to-face conversation with Jake</div>
+          <p className="text-sm text-slate-500">You speak to him in English, he answers out loud, corrects you when you make a mistake and gives you a grade at the end. Choose what you want to talk about.</p>
         </div>
       </Card>
-      {!hasAi && (
-        <Card className="mb-5 flex flex-wrap items-center gap-3 border-amber-300 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-500/10">
-          <KeyRound size={20} className="text-amber-600" />
-          <p className="min-w-0 flex-1 text-sm text-amber-800 dark:text-amber-200">Para conversar de verdad hace falta una IA: activá la IA y cargá tu clave de API de Claude en Ajustes (se paga por uso en console.anthropic.com).</p>
-          <LinkButton to="/settings" size="sm">Ir a Ajustes</LinkButton>
-        </Card>
-      )}
+      <Card className="mb-5 flex flex-wrap items-center gap-3 p-4">
+        <Sparkles size={20} className="text-brand-500" />
+        {hasAi
+          ? <p className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">AI mode.</strong> Jake answers freely to anything you say, using your Claude API key.</p>
+          : <p className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">Free mode — no key needed.</strong> Jake asks you questions about the topic, reacts to your answers, corrects common mistakes and grades you at the end. Optional: add a Claude API key in Settings for a completely free-flowing chat.</p>}
+        {!hasAi && <LinkButton to="/settings" size="sm" variant="secondary">Settings</LinkButton>}
+      </Card>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {TOPICS.map((t) => (
-          <button key={t.id} disabled={!hasAi} onClick={() => setTopic(t.id)}
+          <button key={t.id} onClick={() => setTopic(t.id)}
             className="pressable flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-brand-500/60 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900">
             <span className="text-3xl">{t.emoji}</span>
             <span>
@@ -47,12 +48,12 @@ export default function Conversation() {
           </button>
         ))}
       </div>
-      {!recognitionSupported() && <p className="mt-4 text-sm text-slate-500">Tu navegador no reconoce voz: vas a poder escribir tus respuestas. Para hablar, usá Chrome o Edge.</p>}
+      {!recognitionSupported() && <p className="mt-4 text-sm text-slate-500">Your browser doesn't support speech recognition, so you can type your answers. To speak, use Chrome or Edge.</p>}
     </div>
   );
 }
 
-function Session({ topic, onExit: exit }: { topic: TopicId; onExit: () => void }) {
+function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onExit: () => void }) {
   const s = useSettings();
   const t = TOPICS.find((x) => x.id === topic)!;
   // autosaved: a reload (F5) keeps the conversation
@@ -90,7 +91,8 @@ function Session({ topic, onExit: exit }: { topic: TopicId; onExit: () => void }
   const ask = async (history: Turn[]) => {
     setThinking(true); setError('');
     try {
-      const r = await nextTurn(s, topic, history);
+      const r = ai ? await nextTurn(s, topic, history) : { ...localTurn(topic, history), translation: '' };
+      if (!ai) await new Promise((res) => setTimeout(res, 600)); // a short pause so it feels like a reply
       // attach the correction to the student's last line
       const withCorr = history.map((x, i) => (i === history.length - 1 && x.role === 'me' ? { ...x, correction: r.correction } : x));
       setTurns([...withCorr, { role: 'tutor', text: r.reply, es: r.translation }]);
@@ -107,7 +109,7 @@ function Session({ topic, onExit: exit }: { topic: TopicId; onExit: () => void }
   useEffect(() => {
     if (opened.current) return;
     opened.current = true;
-    setLast({ kind: 'speaking', id: topic, title: `Conversación: ${t.label}`, path: '/conversation' });
+    setLast({ kind: 'speaking', id: topic, title: `Conversation: ${t.label}`, path: '/conversation' });
     if (!turnsRef.current.length) ask([]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -139,11 +141,11 @@ function Session({ topic, onExit: exit }: { topic: TopicId; onExit: () => void }
     if (!turns.some((x) => x.role === 'me')) { onExit(); return; }
     setEnding(true); setError('');
     try {
-      const r = await finalReport(s, topic, turns);
+      const r = ai ? await finalReport(s, topic, turns) : localReport(topic, turns);
       setReport(r);
       clearSaved(saveKey);
       const mine = turns.filter((x) => x.role === 'me').length;
-      recordSkill('speaking', `Conversación: ${t.label}`, r.score, 10, 15 + mine * 3);
+      recordSkill('speaking', `Conversation: ${t.label}`, r.score, 10, 15 + mine * 3);
     } catch (e) {
       setError(describeError(e) || (e as Error).message);
     } finally {
@@ -157,15 +159,15 @@ function Session({ topic, onExit: exit }: { topic: TopicId; onExit: () => void }
   return (
     <div className="mx-auto flex max-w-2xl flex-col">
       <div className="mb-4 flex items-center gap-3">
-        <button onClick={() => { stopRef.current(); stopSpeaking(); onExit(); }} className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Salir"><ChevronLeft size={20} /></button>
+        <button onClick={() => { stopRef.current(); stopSpeaking(); onExit(); }} className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Exit"><ChevronLeft size={20} /></button>
         <div className="min-w-0 flex-1">
-          <div className="font-display text-lg font-bold text-slate-900 dark:text-white">{t.emoji} {t.label} <span className="font-normal text-slate-500">con Jake</span></div>
+          <div className="font-display text-lg font-bold text-slate-900 dark:text-white">{t.emoji} {t.label} <span className="font-normal text-slate-500">with Jake</span></div>
           <label className="flex items-center gap-2 text-xs text-slate-500">
             <input type="checkbox" checked={handsFree} disabled={!recognitionSupported()} onChange={(e) => setHandsFree(e.target.checked)} className="h-3.5 w-3.5 accent-brand-500" />
-            Manos libres: el micrófono se abre solo cuando Jake termina de hablar
+            Hands-free: the microphone opens by itself when Jake finishes speaking
           </label>
         </div>
-        <Button variant="secondary" size="sm" onClick={finish} disabled={busy}>{ending ? <Loader2 size={14} className="animate-spin" /> : <Star size={14} />} Terminar y ver nota</Button>
+        <Button variant="secondary" size="sm" onClick={finish} disabled={busy}>{ending ? <Loader2 size={14} className="animate-spin" /> : <Star size={14} />} Finish and see my grade</Button>
       </div>
 
       <div className="flex min-h-[50vh] flex-col gap-3 pb-40">
@@ -175,8 +177,8 @@ function Session({ topic, onExit: exit }: { topic: TopicId; onExit: () => void }
             <div className="max-w-[85%]">
               <div className="rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-slate-800 shadow-sm dark:bg-slate-900 dark:text-slate-100">{x.text}</div>
               <div className="mt-1 flex gap-1">
-                <button onClick={() => say(x.text)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><Volume2 size={13} /> Repetir</button>
-                {x.es && <button onClick={() => setShowEs({ ...showEs, [i]: !showEs[i] })} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><Languages size={13} /> {showEs[i] ? 'Ocultar' : 'Traducir'}</button>}
+                <button onClick={() => say(x.text)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><Volume2 size={13} /> Repeat</button>
+                {x.es && s.showSpanish && <button onClick={() => setShowEs({ ...showEs, [i]: !showEs[i] })} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><Languages size={13} /> {showEs[i] ? 'Hide' : 'Translate'}</button>}
               </div>
               {showEs[i] && <div className="mt-1 rounded-xl bg-slate-100 px-3 py-2 text-sm italic text-slate-600 dark:bg-slate-800 dark:text-slate-300">{x.es}</div>}
             </div>
@@ -193,7 +195,7 @@ function Session({ topic, onExit: exit }: { topic: TopicId; onExit: () => void }
           </div>
         ))}
         {interim && <div className="self-end max-w-[85%] rounded-2xl rounded-tr-sm border-2 border-dashed border-brand-500/60 px-4 py-3 text-slate-500">{interim}…</div>}
-        {thinking && <div className="flex items-center gap-2 text-sm text-slate-500"><Loader2 size={16} className="animate-spin" /> Jake está pensando…</div>}
+        {thinking && <div className="flex items-center gap-2 text-sm text-slate-500"><Loader2 size={16} className="animate-spin" /> Jake is thinking…</div>}
         {error && <div className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</div>}
         <div ref={endRef} />
       </div>
@@ -203,7 +205,7 @@ function Session({ topic, onExit: exit }: { topic: TopicId; onExit: () => void }
         <div className="mx-auto flex max-w-2xl items-center gap-3">
           {recognitionSupported() && (
             <button onClick={listening ? stopListening : startListening} disabled={busy}
-              aria-label={listening ? 'Dejar de escuchar' : 'Hablar'}
+              aria-label={listening ? 'Stop listening' : 'Speak'}
               className={cx('pressable relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full shadow-lg transition disabled:opacity-50',
                 listening ? 'bg-rose-500 text-white shadow-rose-500/30' : 'bg-brand-500 text-slate-950 shadow-brand-500/30 hover:bg-brand-400')}>
               {listening && <span className="absolute inset-0 animate-ping rounded-full bg-rose-500/40" />}
@@ -211,10 +213,10 @@ function Session({ topic, onExit: exit }: { topic: TopicId; onExit: () => void }
             </button>
           )}
           <form className="flex min-w-0 flex-1 gap-2" onSubmit={(e) => { e.preventDefault(); send(typed); }}>
-            <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={listening ? 'Te escucho…' : speaking ? 'Jake está hablando…' : 'Hablá con el micrófono o escribí acá'} className="input py-2.5" disabled={busy || listening} />
-            <Button type="submit" disabled={!typed.trim() || busy} aria-label="Enviar"><Send size={16} /></Button>
+            <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={listening ? 'Listening…' : speaking ? 'Jake is speaking…' : 'Speak into the microphone or type here'} className="input py-2.5" disabled={busy || listening} />
+            <Button type="submit" disabled={!typed.trim() || busy} aria-label="Send"><Send size={16} /></Button>
           </form>
-          {!recognitionSupported() && <MicOff size={18} className="text-slate-400" aria-label="Sin micrófono" />}
+          {!recognitionSupported() && <MicOff size={18} className="text-slate-400" aria-label="No microphone" />}
         </div>
       </div>
     </div>
@@ -226,15 +228,15 @@ function ReportView({ report, topicLabel, onAgain }: { report: Report; topicLabe
   const save = () => {
     addMyWords(report.words.map((w) => ({ word: w.en, sentence: w.example, meaning: w.es })));
     setSaved(true);
-    notify({ kind: 'info', title: `${report.words.length} palabras guardadas en Mis palabras` });
+    notify({ kind: 'info', title: `${report.words.length} words saved to My words` });
   };
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4">
       <Card className="flex flex-col items-center gap-2 p-6 text-center">
-        <div className="text-sm text-slate-500">Conversación · {topicLabel}</div>
+        <div className="text-sm text-slate-500">Conversation · {topicLabel}</div>
         <div className="font-display text-6xl font-extrabold text-slate-900 dark:text-white">{report.score}<span className="text-2xl text-slate-400">/10</span></div>
         <div className="grid w-full grid-cols-3 gap-2 pt-2">
-          {([['Fluidez', report.fluency], ['Gramática', report.grammar], ['Vocabulario', report.vocabulary]] as const).map(([l, v]) => (
+          {([['Fluency', report.fluency], ['Grammar', report.grammar], ['Vocabulary', report.vocabulary]] as const).map(([l, v]) => (
             <div key={l} className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800"><div className="text-xl font-bold text-slate-900 dark:text-white">{v}</div><div className="text-xs text-slate-500">{l}</div></div>
           ))}
         </div>
@@ -243,7 +245,7 @@ function ReportView({ report, topicLabel, onAgain }: { report: Report; topicLabe
       </Card>
       {report.mistakes.length > 0 && (
         <Card>
-          <div className="mb-2 font-semibold text-slate-900 dark:text-white">Errores para corregir</div>
+          <div className="mb-2 font-semibold text-slate-900 dark:text-white">Mistakes to fix</div>
           <ul className="flex flex-col gap-2">
             {report.mistakes.map((m, i) => (
               <li key={i} className="text-sm"><span className="text-rose-600 line-through dark:text-rose-400">{m.said}</span> → <span className="font-semibold text-emerald-700 dark:text-emerald-400">{m.better}</span><div className="text-xs text-slate-500">{m.why}</div></li>
@@ -254,8 +256,8 @@ function ReportView({ report, topicLabel, onAgain }: { report: Report; topicLabe
       {report.words.length > 0 && (
         <Card>
           <div className="mb-2 flex items-center justify-between gap-2">
-            <div className="font-semibold text-slate-900 dark:text-white">Palabras para aprender</div>
-            <Button size="sm" variant="secondary" disabled={saved} onClick={save}>{saved ? 'Guardadas ✓' : 'Guardar en Mis palabras'}</Button>
+            <div className="font-semibold text-slate-900 dark:text-white">Words to learn</div>
+            <Button size="sm" variant="secondary" disabled={saved} onClick={save}>{saved ? 'Saved ✓' : 'Save to My words'}</Button>
           </div>
           <ul className="grid gap-2 sm:grid-cols-2">
             {report.words.map((w, i) => <li key={i} className="rounded-xl bg-slate-100 px-3 py-2 text-sm dark:bg-slate-800"><strong className="text-slate-900 dark:text-white">{w.en}</strong> · {w.es}<div className="text-xs italic text-slate-500">{w.example}</div></li>)}
@@ -263,8 +265,8 @@ function ReportView({ report, topicLabel, onAgain }: { report: Report; topicLabe
         </Card>
       )}
       <div className="flex justify-center gap-2">
-        <Button onClick={onAgain}>Otra conversación</Button>
-        <Link to="/my-words" className="pressable inline-flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">Ver Mis palabras</Link>
+        <Button onClick={onAgain}>Another conversation</Button>
+        <Link to="/my-words" className="pressable inline-flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">See My words</Link>
       </div>
     </div>
   );

@@ -24,9 +24,9 @@ export default function Vocabulary() {
   return (
     <div>
       <SkillTabs active="vocabulary" />
-      <PageHeader title="Vocabulario" subtitle="Tarjetas con repetición espaciada: las palabras que te cuestan vuelven más seguido." actions={<LinkButton to="/exam/vocab" variant="secondary"><ClipboardCheck size={16} /> Prueba de vocabulario</LinkButton>} />
+      <PageHeader title="Vocabulario" subtitle="Flashcards with spaced repetition: the words you find hard come back more often." actions={<LinkButton to="/exam/vocab" variant="secondary"><ClipboardCheck size={16} /> Vocabulary quiz</LinkButton>} />
       <div className="mb-5 inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
-        {([['review', 'Repasar', Repeat], ['mine', 'Mis palabras', NotebookPen], ['browse', 'Explorar', Layers], ['stats', 'Estadísticas', BarChart3]] as const).map(([id, label, Icon]) => (
+        {([['review', 'Review', Repeat], ['mine', 'My words', NotebookPen], ['browse', 'Browse', Layers], ['stats', 'Statistics', BarChart3]] as const).map(([id, label, Icon]) => (
           <button key={id} onClick={() => setTab(id)} className={cx('inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition', tab === id ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500')}>
             <Icon size={15} /> {label}
           </button>
@@ -67,35 +67,35 @@ function Review() {
   const start = () => {
     setQueue(preview);
     setI(0); setFlipped(false); setStats({ again: 0, ok: 0 });
-    setLast({ kind: 'vocab', id: cat, title: 'Repaso de vocabulario', path: '/vocabulary?tab=review' });
+    setLast({ kind: 'vocab', id: cat, title: 'Vocabulary review', path: '/vocabulary?tab=review' });
   };
 
   if (!queue) {
     return (
       <div className="grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <div className="mb-4 font-semibold text-slate-900 dark:text-white">Nueva sesión de repaso</div>
-          <label className="mb-1 block text-sm font-medium">Categoría</label>
+          <div className="mb-4 font-semibold text-slate-900 dark:text-white">New review session</div>
+          <label className="mb-1 block text-sm font-medium">Category</label>
           <select value={cat} onChange={(e) => setCat(e.target.value)} className="mb-4 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900">
-            <option value="all">Todas las categorías ({VOCAB.length} palabras)</option>
+            <option value="all">All categories ({VOCAB.length} words)</option>
             {VOCAB_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.es}</option>)}
           </select>
-          <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={reverse} onChange={(e) => setReverse(e.target.checked)} className="h-4 w-4 rounded" /> Modo inverso (ver en español, recordar en inglés)</label>
+          <label className="mb-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={reverse} onChange={(e) => setReverse(e.target.checked)} className="h-4 w-4 rounded" /> Reverse mode (see the meaning, remember the English word)</label>
           <div className="mb-4 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-xl bg-amber-50 p-3 dark:bg-amber-500/10"><div className="text-xl font-bold text-amber-700 dark:text-amber-300">{dueCount}</div><div className="text-xs text-slate-500">para repasar</div></div>
-            <div className="rounded-xl bg-brand-50 p-3 dark:bg-brand-500/10"><div className="text-xl font-bold text-brand-700 dark:text-brand-300">{Math.max(0, preview.length - dueCount)}</div><div className="text-xs text-slate-500">nuevas / difíciles</div></div>
-            <div className="rounded-xl bg-emerald-50 p-3 dark:bg-emerald-500/10"><div className="text-xl font-bold text-emerald-700 dark:text-emerald-300">{doneToday}</div><div className="text-xs text-slate-500">repasadas hoy</div></div>
+            <div className="rounded-xl bg-amber-50 p-3 dark:bg-amber-500/10"><div className="text-xl font-bold text-amber-700 dark:text-amber-300">{dueCount}</div><div className="text-xs text-slate-500">to review</div></div>
+            <div className="rounded-xl bg-brand-50 p-3 dark:bg-brand-500/10"><div className="text-xl font-bold text-brand-700 dark:text-brand-300">{Math.max(0, preview.length - dueCount)}</div><div className="text-xs text-slate-500">new / hard</div></div>
+            <div className="rounded-xl bg-emerald-50 p-3 dark:bg-emerald-500/10"><div className="text-xl font-bold text-emerald-700 dark:text-emerald-300">{doneToday}</div><div className="text-xs text-slate-500">reviewed today</div></div>
           </div>
           <Button size="lg" onClick={start} disabled={!preview.length} className="w-full sm:w-auto"><Brain size={18} /> Empezar ({preview.length} tarjetas)</Button>
-          {!preview.length && <p className="mt-3 text-sm text-slate-500">¡No hay tarjetas pendientes en esta categoría! Volvé más tarde o elegí otra.</p>}
+          {!preview.length && <p className="mt-3 text-sm text-slate-500">No cards due in this category! Come back later or choose another one.</p>}
         </Card>
         <Card>
-          <div className="mb-2 font-semibold text-slate-900 dark:text-white">¿Cómo funciona?</div>
+          <div className="mb-2 font-semibold text-slate-900 dark:text-white">How does it work?</div>
           <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-            <li><strong>Otra vez</strong>: la tarjeta vuelve en 10 minutos.</li>
-            <li><strong>Difícil / Bien / Fácil</strong>: el intervalo crece (1 día, 6 días, semanas…).</li>
-            <li>Si fallás una palabra dos veces se marca como <strong>difícil</strong> y aparece más seguido.</li>
-            <li>Una palabra cuenta como <strong>aprendida</strong> cuando su intervalo supera 21 días o la marcás vos.</li>
+            <li><strong>Again</strong>: the card comes back in 10 minutes.</li>
+            <li><strong>Hard / Good / Easy</strong>: the interval grows (1 day, 6 days, weeks…).</li>
+            <li>If you get a word wrong twice it is marked as <strong>hard</strong> and appears more often.</li>
+            <li>A word counts as <strong>learnt</strong> when its interval is over 21 days or you mark it yourself.</li>
           </ul>
         </Card>
       </div>
@@ -106,15 +106,15 @@ function Review() {
     return (
       <Card className="mx-auto flex max-w-lg flex-col items-center gap-3 p-8 text-center">
         <CheckCircle2 size={44} className="text-emerald-500" />
-        <div className="font-display text-2xl font-bold text-slate-900 dark:text-white">¡Sesión terminada!</div>
-        <div className="text-slate-500">{queue.length} tarjetas · {stats.ok} recordadas · {stats.again} para volver a ver</div>
-        <div className="flex gap-2"><Button onClick={() => setQueue(null)}>Volver</Button><Button variant="secondary" onClick={start}><RefreshCw size={16} /> Otra sesión</Button></div>
+        <div className="font-display text-2xl font-bold text-slate-900 dark:text-white">Session finished!</div>
+        <div className="text-slate-500">{queue.length} cards · {stats.ok} remembered · {stats.again} to see again</div>
+        <div className="flex gap-2"><Button onClick={() => setQueue(null)}>Back</Button><Button variant="secondary" onClick={start}><RefreshCw size={16} /> Another session</Button></div>
       </Card>
     );
   }
 
   const w = WORD_BY_ID[queue[i]];
-  if (!w) return <Card className="p-6 text-center"><Button onClick={() => setQueue(null)}>Volver</Button></Card>;
+  if (!w) return <Card className="p-6 text-center"><Button onClick={() => setQueue(null)}>Back</Button></Card>;
   const card = p.cards[w.id] ?? newCard();
   const grade = (g: Grade) => {
     reviewCard(w.id, g);
@@ -133,14 +133,14 @@ function Review() {
       </div>
       <Flashcard w={w} flipped={flipped} onFlip={() => setFlipped(!flipped)} reverse={reverse} difficult={card.difficult} />
       <div className="flex justify-center gap-2">
-        <button onClick={() => setCardFlags(w.id, { difficult: !card.difficult })} className={cx('inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium', card.difficult ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800')}><Flag size={14} /> {card.difficult ? 'Difícil' : 'Marcar difícil'}</button>
-        <button onClick={() => { setCardFlags(w.id, { learned: true }); setFlipped(false); setI(i + 1); }} className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><Star size={14} /> Ya la sé</button>
+        <button onClick={() => setCardFlags(w.id, { difficult: !card.difficult })} className={cx('inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium', card.difficult ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800')}><Flag size={14} /> {card.difficult ? 'Hard' : 'Mark as hard'}</button>
+        <button onClick={() => { setCardFlags(w.id, { learned: true }); setFlipped(false); setI(i + 1); }} className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><Star size={14} /> I know it</button>
       </div>
       {!flipped ? (
-        <Button size="lg" onClick={() => setFlipped(true)}>Mostrar respuesta</Button>
+        <Button size="lg" onClick={() => setFlipped(true)}>Show answer</Button>
       ) : (
         <div className="grid grid-cols-4 gap-2">
-          {([[0, 'Otra vez', 'bg-rose-600 hover:bg-rose-700'], [1, 'Difícil', 'bg-amber-500 hover:bg-amber-600'], [2, 'Bien', 'bg-emerald-600 hover:bg-emerald-700'], [3, 'Fácil', 'bg-sky-600 hover:bg-sky-700']] as [Grade, string, string][]).map(([g, label, cls]) => (
+          {([[0, 'Again', 'bg-rose-600 hover:bg-rose-700'], [1, 'Hard', 'bg-amber-500 hover:bg-amber-600'], [2, 'Good', 'bg-emerald-600 hover:bg-emerald-700'], [3, 'Easy', 'bg-sky-600 hover:bg-sky-700']] as [Grade, string, string][]).map(([g, label, cls]) => (
             <button key={g} onClick={() => grade(g)} className={cx('flex flex-col items-center rounded-xl px-2 py-2.5 font-semibold text-white transition active:scale-95', cls)}>
               <span className="text-sm">{label}</span><span className="text-[11px] font-normal opacity-80">{previewInterval(card, g)}</span>
             </button>
@@ -153,8 +153,8 @@ function Review() {
 
 /** Part of speech in plain Spanish (the data uses dictionary abbreviations like "n" or "phr v"). */
 const POS: Record<string, string> = {
-  n: 'sustantivo', v: 'verbo', adj: 'adjetivo', adv: 'adverbio', prep: 'preposición', phr: 'expresión',
-  'phr v': 'phrasal verb', 'adj + prep': 'adjetivo + preposición', 'v + prep': 'verbo + preposición', 'n + prep': 'sustantivo + preposición',
+  n: 'sustantivo', v: 'verbo', adj: 'adjetivo', adv: 'adverbio', prep: 'preposition', phr: 'expression',
+  'phr v': 'phrasal verb', 'adj + prep': 'adjective + preposition', 'v + prep': 'verb + preposition', 'n + prep': 'noun + preposition',
 };
 export const posLabel = (p: string) => POS[p] ?? p;
 
@@ -168,7 +168,7 @@ function Flashcard({ w, flipped, onFlip, reverse, difficult }: { w: VocabWord; f
   const kind = <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">{posLabel(w.pos)}</span>;
   const front = reverse ? (
     <>
-      <div className="text-sm text-slate-500">¿Cómo se dice en inglés?</div>
+      <div className="text-sm text-slate-500">What's the English word?</div>
       <div className="font-display text-3xl font-bold text-slate-900 dark:text-white">{w.es}</div>
       {kind}
     </>
@@ -178,23 +178,23 @@ function Flashcard({ w, flipped, onFlip, reverse, difficult }: { w: VocabWord; f
         <span className="font-display text-4xl font-bold text-slate-900 dark:text-white">{w.en}</span>
         <SpeakBtn text={w.en} />
       </div>
-      <div className="text-sm text-slate-500">Se pronuncia <span className="font-mono text-slate-600 dark:text-slate-300">/{w.ipa}/</span></div>
+      <div className="text-sm text-slate-500">It's pronounced <span className="font-mono text-slate-600 dark:text-slate-300">/{w.ipa}/</span></div>
       {kind}
-      <div className="mt-1 text-sm text-slate-500">¿Qué significa?</div>
+      <div className="mt-1 text-sm text-slate-500">What does it mean?</div>
     </>
   );
   return (
     <div className="flip h-80 cursor-pointer select-none" onClick={onFlip}>
       <div className={cx('flip-inner relative h-full w-full', flipped && 'flipped')}>
         <Card className="flip-face absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
-          {difficult && <Badge tone="rose" className="absolute right-4 top-4">difícil</Badge>}
+          {difficult && <Badge tone="rose" className="absolute right-4 top-4">hard</Badge>}
           {front}
-          <div className="absolute bottom-4 text-xs text-slate-400">Tocá la tarjeta para ver la respuesta</div>
+          <div className="absolute bottom-4 text-xs text-slate-400">Tap the card to see the answer</div>
         </Card>
         <Card className="flip-face flip-back absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
           <div className="text-sm text-slate-500">{w.en} · {posLabel(w.pos)}</div>
           <div className="font-display text-3xl font-bold text-brand-700 dark:text-brand-400">{w.es}</div>
-          <div className="mt-3 text-xs uppercase tracking-wide text-slate-400">Ejemplo</div>
+          <div className="mt-3 text-xs uppercase tracking-wide text-slate-400">Example</div>
           <div className="flex items-center gap-1 rounded-xl bg-slate-50 px-4 py-2 text-lg italic text-slate-700 dark:bg-slate-800 dark:text-slate-200">“<Example w={w} />” <SpeakBtn text={w.ex} /></div>
         </Card>
       </div>
@@ -215,10 +215,10 @@ function Browse() {
     <div className="flex flex-col gap-4">
       <div className="relative">
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar palabra en inglés o español…" className="input pl-10" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search for a word…" className="input pl-10" />
       </div>
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => setCat(null)} className={cx('rounded-xl px-3 py-1.5 text-sm font-medium', !cat ? 'bg-brand-500 text-slate-950' : 'bg-slate-100 dark:bg-slate-800')}>Todas</button>
+        <button onClick={() => setCat(null)} className={cx('rounded-xl px-3 py-1.5 text-sm font-medium', !cat ? 'bg-brand-500 text-slate-950' : 'bg-slate-100 dark:bg-slate-800')}>All</button>
         {VOCAB_CATEGORIES.map((c) => {
           const total = VOCAB.filter((w) => w.cat === c.id).length;
           const learned = VOCAB.filter((w) => w.cat === c.id && (p.cards[w.id]?.learned || (p.cards[w.id]?.reps ?? 0) >= 2)).length;
@@ -228,12 +228,12 @@ function Browse() {
       {cat && (
         <Card className="flex flex-wrap items-center justify-between gap-2 p-4">
           <div><div className="font-semibold text-slate-900 dark:text-white">{VOCAB_CATEGORIES.find((c) => c.id === cat)?.es}</div>
-            {CATEGORY_REF[cat]?.startsWith('wb') && <Link to={`/workbook/${CATEGORY_REF[cat]}`} className="text-sm text-sky-700 hover:underline dark:text-sky-300">Ver Objective First · Unit {WB_BY_ID[CATEGORY_REF[cat]!]?.n}</Link>}
+            {CATEGORY_REF[cat]?.startsWith('wb') && <Link to={`/workbook/${CATEGORY_REF[cat]}`} className="text-sm text-sky-700 hover:underline dark:text-sky-300">See Objective First · Unit {WB_BY_ID[CATEGORY_REF[cat]!]?.n}</Link>}
           </div>
           <SourceTag src={VOCAB_CATEGORIES.find((c) => c.id === cat)!.src} />
         </Card>
       )}
-      {words.length === 0 ? <Empty title="No hay palabras que coincidan" /> : (
+      {words.length === 0 ? <Empty title="No matching words" /> : (
         <div className="grid gap-2 md:grid-cols-2">
           {words.map((w) => {
             const c = p.cards[w.id];
@@ -246,8 +246,8 @@ function Browse() {
                   <div className="mt-1 text-sm italic text-slate-500">{w.ex}</div>
                 </div>
                 <div className="flex shrink-0 flex-col gap-1">
-                  <button onClick={() => setCardFlags(w.id, { learned: !c?.learned })} title="Marcar como aprendida" className={cx('rounded-lg p-1.5', learned ? 'text-emerald-600' : 'text-slate-300 hover:text-emerald-500')}><CheckCircle2 size={18} /></button>
-                  <button onClick={() => setCardFlags(w.id, { difficult: !c?.difficult })} title="Marcar como difícil" className={cx('rounded-lg p-1.5', c?.difficult ? 'text-rose-600' : 'text-slate-300 hover:text-rose-500')}><Flag size={18} /></button>
+                  <button onClick={() => setCardFlags(w.id, { learned: !c?.learned })} title="Mark as learnt" className={cx('rounded-lg p-1.5', learned ? 'text-emerald-600' : 'text-slate-300 hover:text-emerald-500')}><CheckCircle2 size={18} /></button>
+                  <button onClick={() => setCardFlags(w.id, { difficult: !c?.difficult })} title="Mark as hard" className={cx('rounded-lg p-1.5', c?.difficult ? 'text-rose-600' : 'text-slate-300 hover:text-rose-500')}><Flag size={18} /></button>
                 </div>
               </Card>
             );
@@ -269,12 +269,12 @@ function Stats() {
   return (
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-        {[['Vistas', seen.length], ['Aprendidas', learned.length], ['Dominadas (21+ días)', mastered.length], ['Difíciles', difficult.length], ['Pendientes hoy', due.length]].map(([l, v]) => (
+        {[['Vistas', seen.length], ['Aprendidas', learned.length], ['Mastered (21+ days)', mastered.length], ['Hard', difficult.length], ['Due today', due.length]].map(([l, v]) => (
           <Card key={l as string} className="p-4 text-center"><div className="font-display text-2xl font-bold text-slate-900 dark:text-white">{v}</div><div className="text-xs text-slate-500">{l}</div></Card>
         ))}
       </div>
       <Card>
-        <div className="mb-3 font-semibold text-slate-900 dark:text-white">Progreso por categoría</div>
+        <div className="mb-3 font-semibold text-slate-900 dark:text-white">Progress by category</div>
         <div className="grid gap-3 md:grid-cols-2">
           {VOCAB_CATEGORIES.map((c) => {
             const ws = VOCAB.filter((w) => w.cat === c.id);
@@ -290,7 +290,7 @@ function Stats() {
       </Card>
       {hardest.length > 0 && (
         <Card>
-          <div className="mb-3 font-semibold text-slate-900 dark:text-white">Palabras que más te cuestan</div>
+          <div className="mb-3 font-semibold text-slate-900 dark:text-white">Words you find hardest</div>
           <div className="flex flex-wrap gap-2">{hardest.map((w) => <Badge key={w.id} tone="rose">{w.en} · {w.es}</Badge>)}</div>
         </Card>
       )}

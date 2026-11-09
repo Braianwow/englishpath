@@ -4,12 +4,12 @@ import { cx } from './ui';
 
 /** The six study areas from the 2-hour study plan, as a single selector. */
 export const SKILLS = [
-  { id: 'grammar', to: '/courses', label: 'Gramática', icon: Layers, desc: 'Las 145 unidades, paso a paso.' },
-  { id: 'vocabulary', to: '/vocabulary', label: 'Vocabulario', icon: Brain, desc: 'Tarjetas con repaso espaciado.' },
-  { id: 'listening', to: '/listening', label: 'Listening', icon: Ear, desc: 'Dictados y comprensión auditiva.' },
-  { id: 'speaking', to: '/speaking', label: 'Speaking', icon: Mic, desc: 'Pronunciación, shadowing y conversación.' },
-  { id: 'reading', to: '/readings', label: 'Reading', icon: BookOpen, desc: 'Textos con preguntas de comprensión.' },
-  { id: 'writing', to: '/writing', label: 'Writing', icon: PenLine, desc: 'Cartas, emails, ensayos y relatos.' },
+  { id: 'grammar', to: '/courses', label: 'Grammar', icon: Layers, desc: 'All 145 units, step by step.' },
+  { id: 'vocabulary', to: '/vocabulary', label: 'Vocabulary', icon: Brain, desc: 'Flashcards with spaced repetition.' },
+  { id: 'listening', to: '/listening', label: 'Listening', icon: Ear, desc: 'Dictation and listening comprehension.' },
+  { id: 'speaking', to: '/speaking', label: 'Speaking', icon: Mic, desc: 'Pronunciation, shadowing and conversation.' },
+  { id: 'reading', to: '/readings', label: 'Reading', icon: BookOpen, desc: 'Texts with comprehension questions.' },
+  { id: 'writing', to: '/writing', label: 'Writing', icon: PenLine, desc: 'Letters, emails, essays and stories.' },
 ] as const;
 
 export type SkillId = (typeof SKILLS)[number]['id'];

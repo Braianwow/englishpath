@@ -22,11 +22,11 @@ export default function ExamPage() {
   const meta = useMemo(() => {
     if (kind === 'module') {
       const m = MODULES.find((x) => x.id === id);
-      return m ? { title: `Examen del módulo: ${m.es}`, desc: '20 preguntas de todas las unidades del módulo.', examId: m.id } : null;
+      return m ? { title: `Module test: ${m.title}`, desc: '20 questions from all the units in the module.', examId: m.id } : null;
     }
-    if (kind === 'cumulative') return { title: 'Examen acumulativo', desc: '25 preguntas de las unidades que estudiaste, para comprobar que recordás lo anterior.', examId: 'cumulative' };
-    if (kind === 'grammar') return { title: 'Prueba de gramática', desc: '15 preguntas de unidades al azar de todo el libro.', examId: 'grammar' };
-    if (kind === 'vocab') return { title: 'Prueba de vocabulario', desc: '15 preguntas: significado, traducción inversa y palabra en contexto.', examId: 'vocab' };
+    if (kind === 'cumulative') return { title: 'Cumulative test', desc: '25 questions from the units you have studied, to check you remember earlier topics.', examId: 'cumulative' };
+    if (kind === 'grammar') return { title: 'Grammar quiz', desc: '15 questions from random units across the whole book.', examId: 'grammar' };
+    if (kind === 'vocab') return { title: 'Vocabulary quiz', desc: '15 questions: meaning, reverse translation and words in context.', examId: 'vocab' };
     return null;
   }, [kind, id]);
 
@@ -44,21 +44,21 @@ export default function ExamPage() {
   const begin = () => { setStarted(true); setLast({ kind: 'exam', id: meta.examId, title: meta.title, path: `/exam/${kind}${id ? `/${id}` : ''}` }); };
 
   if (outcome) {
-    return <ExamReport outcome={outcome} onRetry={() => { setOutcome(null); setAttempt((a) => a + 1); }} nextTo="/exams" nextLabel="Más evaluaciones" />;
+    return <ExamReport outcome={outcome} onRetry={() => { setOutcome(null); setAttempt((a) => a + 1); }} nextTo="/exams" nextLabel="More tests" />;
   }
   if (!started) {
     return (
       <Card className="mx-auto flex max-w-xl flex-col items-center gap-4 p-8 text-center">
         <ClipboardCheck size={40} className="text-amber-500" />
         <div className="font-display text-2xl font-bold text-slate-900 dark:text-white">{meta.title}</div>
-        <p className="text-slate-500">{meta.desc} No vas a ver si acertaste hasta el final.</p>
+        <p className="text-slate-500">{meta.desc} You will only see your results at the end.</p>
         {kind === 'vocab' && (
           <select value={cat} onChange={(e) => setCat(e.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900">
-            <option value="">Palabras que ya estudiaste (o todas)</option>
+            <option value="">Words you have studied (or all of them)</option>
             {VOCAB_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.es}</option>)}
           </select>
         )}
-        <div className="flex gap-2"><Button size="lg" onClick={begin}>Empezar</Button><Button size="lg" variant="ghost" onClick={() => nav('/exams')}>Volver</Button></div>
+        <div className="flex gap-2"><Button size="lg" onClick={begin}>Start</Button><Button size="lg" variant="ghost" onClick={() => nav('/exams')}>Back</Button></div>
       </Card>
     );
   }

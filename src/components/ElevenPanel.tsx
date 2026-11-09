@@ -28,25 +28,25 @@ export default function ElevenPanel() {
   return (
     <div className="mt-4 flex flex-col gap-3">
       <p className="text-sm text-slate-500">
-        Creá una cuenta en elevenlabs.io, entrá a <em>Developers → API Keys</em> y pegá la clave acá. Se guarda solo en este navegador y se envía únicamente a api.elevenlabs.io.
-        Cada frase leída usa créditos de tu cuenta (el plan gratis trae unos minutos por mes).
+        Create an account at elevenlabs.io, go to <em>Developers → API Keys</em> and paste the key here. It is stored only in this browser and sent only to api.elevenlabs.io.
+        Every sentence read aloud uses credits from your account (the free plan includes a few minutes a month).
       </p>
       <div className="flex gap-2">
-        <input type="password" autoComplete="off" value={key} onChange={(e) => setKey(e.target.value)} placeholder="Clave de API de ElevenLabs" className="input" />
-        <Button onClick={save} disabled={!key.trim() || busy}>{busy ? 'Cargando…' : 'Guardar'}</Button>
+        <input type="password" autoComplete="off" value={key} onChange={(e) => setKey(e.target.value)} placeholder="ElevenLabs API key" className="input" />
+        <Button onClick={save} disabled={!key.trim() || busy}>{busy ? 'Loading…' : 'Save'}</Button>
       </div>
       {err && <p className="text-sm text-rose-600 dark:text-rose-400">{err}</p>}
       {s.elevenKey && voices && (
         <>
-          <label className="text-sm">Calidad
+          <label className="text-sm">Quality
             <select value={s.elevenModel ?? 'eleven_multilingual_v2'} onChange={(e) => updateSettings({ elevenModel: e.target.value as 'eleven_flash_v2_5' | 'eleven_multilingual_v2' })}
               className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 sm:w-1/2 dark:border-slate-700 dark:bg-slate-900">
-              <option value="eleven_multilingual_v2">Más expresiva (Multilingual v2)</option>
-              <option value="eleven_flash_v2_5">Más rápida y barata (Flash v2.5), ideal para conversar</option>
+              <option value="eleven_multilingual_v2">More expressive (Multilingual v2)</option>
+              <option value="eleven_flash_v2_5">Faster and cheaper (Flash v2.5), best for conversation</option>
             </select>
           </label>
           <div className="text-sm font-medium">
-            Elegí la voz <span className="font-normal text-slate-500">(tocá una para escucharla). Para voces con más actitud, agregalas desde la Voice Library de ElevenLabs y tocá “Volver a cargar”.</span>
+            Choose a voice <span className="font-normal text-slate-500">(tap one to hear it). For voices with more attitude, add them from the ElevenLabs Voice Library and tap “Reload voices”.</span>
           </div>
           <div className="grid max-h-80 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
             {voices.map((v) => (
@@ -57,8 +57,8 @@ export default function ElevenPanel() {
               </button>
             ))}
           </div>
-          <Button variant="secondary" size="sm" className="self-start" onClick={() => load()}>Volver a cargar voces</Button>
-          {!s.elevenVoiceId && <p className="text-sm text-amber-600 dark:text-amber-400">Elegí una voz para empezar a usarla. Mientras tanto suena la voz gratis.</p>}
+          <Button variant="secondary" size="sm" className="self-start" onClick={() => load()}>Reload voices</Button>
+          {!s.elevenVoiceId && <p className="text-sm text-amber-600 dark:text-amber-400">Choose a voice to start using it. Until then, the free voice is used.</p>}
         </>
       )}
     </div>

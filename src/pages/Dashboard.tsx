@@ -12,12 +12,12 @@ import { DAILY_GOAL_MIN, SECTION_GOAL_SECS, dayMinutes, fmtClock } from '../lib/
 import { SKILLS } from '../components/SkillHeader';
 import { LinkButton, cx } from '../components/ui';
 
-const STEP_NAMES = ['Aprender', 'Ejemplos', 'Práctica', 'Práctica avanzada', 'Evaluación'];
+const STEP_NAMES = ['Learn', 'Examples', 'Practice', 'Advanced practice', 'Test'];
 const panel = 'rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900';
 
 function greeting() {
   const h = new Date().getHours();
-  return h < 12 ? 'Buen día' : h < 20 ? 'Buenas tardes' : 'Buenas noches';
+  return h < 12 ? 'Good morning' : h < 20 ? 'Good afternoon' : 'Good evening';
 }
 
 function SectionTitle({ children, info, right }: { children: React.ReactNode; info?: string; right?: React.ReactNode }) {
@@ -52,10 +52,10 @@ export default function Dashboard() {
           <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
             Tu nivel estimado: <span className="font-semibold text-brand-700 dark:text-brand-500">{level.label}</span>
             <span className="mx-1.5">·</span>
-            Seguís en: <span className="font-semibold text-brand-700 dark:text-brand-500">Unidad {u.n}</span>
+            You're on: <span className="font-semibold text-brand-700 dark:text-brand-500">Unit {u.n}</span>
           </p>
         </div>
-        <LinkButton to="/progress" variant="secondary" size="sm" className="px-5 py-2.5">Ver progreso</LinkButton>
+        <LinkButton to="/progress" variant="secondary" size="sm" className="px-5 py-2.5">See progress</LinkButton>
       </div>
 
       <Recommended currentId={u.id} mistakes={mistakes} cards={cards} />
@@ -63,32 +63,32 @@ export default function Dashboard() {
       {/* Study + daily goal */}
       <div className="grid gap-4 lg:grid-cols-[1fr_1fr_0.9fr]">
         <div className="lg:col-span-2">
-          <SectionTitle>Tu estudio</SectionTitle>
+          <SectionTitle>Your study</SectionTitle>
           <div className="grid gap-4 sm:grid-cols-2">
             <FeatureCard
-              tag="Gramática" title="Aprendé paso a paso" glow="lime" icon={GraduationCap}
-              text={<>Unidad {u.n}: <strong className="text-slate-900 dark:text-white">{u.es}</strong>. Paso {step + 1} de 5 · {STEP_NAMES[step]}.</>}
-              to={`/learn/${u.id}`} cta={started ? 'Continuar' : 'Empezar'}
+              tag="Grammar" title="Learn step by step" glow="lime" icon={GraduationCap}
+              text={<>Unit {u.n}: <strong className="text-slate-900 dark:text-white">{u.title}</strong>. Step {step + 1} of 5 · {STEP_NAMES[step]}.</>}
+              to={`/learn/${u.id}`} cta={started ? 'Continue' : 'Start'}
               extra={<div className="mt-4 flex gap-1">{STEP_NAMES.map((n, i) => <span key={n} className={cx('h-1.5 flex-1 rounded-full', i < step ? 'bg-brand-500' : i === step ? 'bg-brand-500/50' : 'bg-slate-200 dark:bg-slate-800')} />)}</div>}
             />
             <FeatureCard
-              tag="Práctica" title="Practicá lo que aprendiste" glow="pink" icon={Target}
-              text={<>{mistakes ? <><strong className="text-slate-900 dark:text-white">{mistakes} errores</strong> para corregir</> : 'Sin errores pendientes'}{cards ? <> y <strong className="text-slate-900 dark:text-white">{cards} palabras</strong> para repasar</> : ''}. Ejercicios mezclados según lo que más te cuesta.</>}
-              to={mistakes ? '/practice?mode=mistakes' : '/practice'} cta="Practicar"
+              tag="Practice" title="Practise what you've learnt" glow="pink" icon={Target}
+              text={<>{mistakes ? <><strong className="text-slate-900 dark:text-white">{mistakes} mistakes</strong> to fix</> : 'No mistakes to fix'}{cards ? <> and <strong className="text-slate-900 dark:text-white">{cards} words</strong> to review</> : ''}. Mixed exercises based on what you find hardest.</>}
+              to={mistakes ? '/practice?mode=mistakes' : '/practice'} cta="Practise"
             />
           </div>
         </div>
         <div>
-          <SectionTitle info="Cada día necesitás 2 horas de estudio (por ejemplo, 4 bloques de 30 minutos) para que sume a tu racha.">Meta diaria</SectionTitle>
+          <SectionTitle info="You need 2 hours of study every day (for example, 4 blocks of 30 minutes) for the day to count towards your streak.">Daily goal</SectionTitle>
           <div className={cx(panel, 'flex flex-col p-4')}>
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-1.5 font-display text-xl font-bold text-slate-900 dark:text-white">
-                  <Flame size={19} className={st.activeToday ? 'text-orange-500' : 'text-slate-400'} /> {st.current} {st.current === 1 ? 'día' : 'días'}
+                  <Flame size={19} className={st.activeToday ? 'text-orange-500' : 'text-slate-400'} /> {st.current} {st.current === 1 ? 'day' : 'days'}
                 </div>
-                <div className="text-xs text-slate-500">Racha · mejor: {st.best}</div>
+                <div className="text-xs text-slate-500">Streak · best: {st.best}</div>
               </div>
-              <div className="text-right text-xs text-slate-500">{st.activeToday ? <span className="font-semibold text-brand-700 dark:text-brand-500">¡Cumplida hoy!</span> : <>Faltan <strong className="text-slate-800 dark:text-slate-200">{st.missingMin} min</strong></>}</div>
+              <div className="text-right text-xs text-slate-500">{st.activeToday ? <span className="font-semibold text-brand-700 dark:text-brand-500">Done today!</span> : <>Still to go: <strong className="text-slate-800 dark:text-slate-200">{st.missingMin} min</strong></>}</div>
             </div>
             <div className="mt-3 flex items-center gap-3">
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800"><div className="h-full rounded-full bg-brand-500 transition-all duration-700" style={{ width: `${Math.min(100, (minutes / DAILY_GOAL_MIN) * 100)}%` }} /></div>
@@ -99,14 +99,14 @@ export default function Dashboard() {
                 const v = secs[id] ?? 0;
                 const done = v >= SECTION_GOAL_SECS;
                 return (
-                  <Link key={id} to={to} className="pressable flex items-center justify-between rounded-lg bg-slate-100 px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700" title={`${label}: ${fmtClock(v)} de 30:00`}>
+                  <Link key={id} to={to} className="pressable flex items-center justify-between rounded-lg bg-slate-100 px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700" title={`${label}: ${fmtClock(v)} of 30:00`}>
                     {label}
                     {done ? <CheckCircle2 size={15} className="text-brand-600 dark:text-brand-500" /> : v > 0 ? <span className="tabular-nums text-slate-500">{Math.floor(v / 60)}m</span> : <CheckCircle2 size={15} className="text-slate-300 dark:text-slate-600" />}
                   </Link>
                 );
               })}
             </div>
-            <LinkButton to="/plan" variant="secondary" size="sm" className="mt-3 w-full">Ver plan de estudio</LinkButton>
+            <LinkButton to="/plan" variant="secondary" size="sm" className="mt-3 w-full">See study plan</LinkButton>
           </div>
         </div>
       </div>
@@ -139,19 +139,19 @@ function Recommended({ currentId, mistakes, cards }: { currentId: string; mistak
 
   const mine = Object.keys(p.myWords ?? {}).length;
   const extra = [
-    { key: 'mine', to: '/my-words', badge: 'Mis palabras', title: mine ? 'Repasar mis palabras' : 'Agregar mis palabras', sub: mine ? `${mine} guardadas · agregá más` : 'palabra = oración = significado', icon: NotebookPen, glow: 'bg-brand-500' },
-    mistakes > 0 && { key: 'mist', to: '/practice?mode=mistakes', badge: 'Repaso', title: 'Corregir mis errores', sub: `${mistakes} pendientes`, icon: Wrench, glow: 'bg-rose-500' },
-    cards > 0 && { key: 'cards', to: '/vocabulary?tab=review', badge: 'Palabras', title: 'Repasar vocabulario', sub: `${cards} para hoy`, icon: Brain, glow: 'bg-violet-500' },
+    { key: 'mine', to: '/my-words', badge: 'My words', title: mine ? 'Review my words' : 'Add my words', sub: mine ? `${mine} saved · add more` : 'word = sentence = meaning', icon: NotebookPen, glow: 'bg-brand-500' },
+    mistakes > 0 && { key: 'mist', to: '/practice?mode=mistakes', badge: 'Review', title: 'Fix my mistakes', sub: `${mistakes} to fix`, icon: Wrench, glow: 'bg-rose-500' },
+    cards > 0 && { key: 'cards', to: '/vocabulary?tab=review', badge: 'Words', title: 'Review vocabulary', sub: `${cards} for today`, icon: Brain, glow: 'bg-violet-500' },
   ].filter(Boolean) as { key: string; to: string; badge: string; title: string; sub: string; icon: typeof Brain; glow: string }[];
 
   return (
     <section>
-      <SectionTitle info="Tu unidad actual, las que siguen en el recorrido y los repasos pendientes."
+      <SectionTitle info="Your current unit, the next ones on the path and the reviews that are due."
         right={<div className="flex gap-1">
-          <button onClick={() => scroll(-1)} aria-label="Anterior" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"><ChevronLeft size={18} /></button>
-          <button onClick={() => scroll(1)} aria-label="Siguiente" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"><ChevronRight size={18} /></button>
+          <button onClick={() => scroll(-1)} aria-label="Previous" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"><ChevronLeft size={18} /></button>
+          <button onClick={() => scroll(1)} aria-label="Next" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"><ChevronRight size={18} /></button>
         </div>}>
-        Recomendado para vos
+        Recommended for you
       </SectionTitle>
       <div ref={track} className="-mx-4 flex snap-x gap-3 overflow-x-auto scroll-smooth px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
         {units.map((id) => {
@@ -165,11 +165,11 @@ function Recommended({ currentId, mistakes, cards }: { currentId: string; mistak
                 <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(125,140,165,.18)_1px,transparent_1px),linear-gradient(90deg,rgba(125,140,165,.18)_1px,transparent_1px)] [background-size:16px_16px]" />
                 <div className={cx('absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-50 blur-2xl transition group-hover:opacity-80', COLOR[m?.color ?? 'indigo']?.bg)} />
                 <div className="absolute inset-0 flex items-center justify-center font-display text-5xl font-extrabold text-slate-900/80 dark:text-white/90">{unit.n}</div>
-                <span className="absolute left-2 top-2 rounded bg-white/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800/90 dark:text-slate-300">{id === currentId ? 'Actual' : 'Unidad'}</span>
+                <span className="absolute left-2 top-2 rounded bg-white/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800/90 dark:text-slate-300">{id === currentId ? 'Current' : 'Unit'}</span>
                 {Icon && <Icon size={16} className="absolute right-2 top-2 text-brand-600 dark:text-brand-500" />}
               </div>
-              <div className="mt-3 line-clamp-1 font-semibold text-slate-900 dark:text-white">{unit.es}</div>
-              <div className="mt-1 line-clamp-1 text-xs text-slate-500">{m?.es}</div>
+              <div className="mt-3 line-clamp-1 font-semibold text-slate-900 dark:text-white">{unit.title}</div>
+              <div className="mt-1 line-clamp-1 text-xs text-slate-500">{m?.title}</div>
             </Link>
           );
         })}
@@ -213,10 +213,10 @@ function Week() {
   const { minutes } = useStudyTime();
   const today = todayKey();
   const days = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6));
-  const DOW = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   return (
     <section>
-      <SectionTitle info="Un día con 2 horas o más suma a tu racha (llama naranja).">Tu semana</SectionTitle>
+      <SectionTitle info="A day with 2 hours or more counts towards your streak (orange flame).">Your week</SectionTitle>
       <div className="grid grid-cols-7 gap-2">
         {days.map((k) => {
           const m = k === today ? minutes : dayMinutes(p.days[k]);

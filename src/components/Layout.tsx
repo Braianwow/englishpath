@@ -14,30 +14,30 @@ import { SKILLS } from './SkillHeader';
 import { useStudyTime, useStudyTimer } from '../store/timer';
 import { sectionFor } from '../lib/studyTime';
 
-/** The five things a learner does every day. Everything else lives under "Más". */
+/** The five things a learner does every day. Everything else lives under "More". */
 const MAIN = [
-  { to: '/', label: 'Inicio', icon: Home, end: true },
-  { to: '/courses', label: 'Aprender', icon: GraduationCap },
-  { to: '/practice', label: 'Practicar', icon: Target },
-  { to: '/vocabulary', label: 'Palabras', icon: Brain },
-  { to: '/my-words', label: 'Mis palabras', icon: NotebookPen },
-  { to: '/progress', label: 'Progreso', icon: TrendingUp },
+  { to: '/', label: 'Home', icon: Home, end: true },
+  { to: '/courses', label: 'Learn', icon: GraduationCap },
+  { to: '/practice', label: 'Practise', icon: Target },
+  { to: '/vocabulary', label: 'Words', icon: Brain },
+  { to: '/my-words', label: 'My words', icon: NotebookPen },
+  { to: '/progress', label: 'Progress', icon: TrendingUp },
 ];
 
 const MORE = [
-  { to: '/exams', label: 'Evaluaciones', icon: ClipboardCheck },
-  { to: '/grammar', label: 'Fichas de gramática', icon: Layers },
+  { to: '/exams', label: 'Tests', icon: ClipboardCheck },
+  { to: '/grammar', label: 'Grammar sheets', icon: Layers },
   { to: '/workbook', label: 'Objective First', icon: NotebookPen },
-  { to: '/readings', label: 'Lecturas', icon: BookOpen },
-  { to: '/assistant', label: 'Asistente', icon: MessageCircle },
-  { to: '/plan', label: 'Plan de estudio', icon: CalendarCheck },
-  { to: '/reference', label: 'Referencia', icon: BookText },
-  { to: '/settings', label: 'Ajustes', icon: Settings },
+  { to: '/readings', label: 'Reading', icon: BookOpen },
+  { to: '/assistant', label: 'Assistant', icon: MessageCircle },
+  { to: '/plan', label: 'Study plan', icon: CalendarCheck },
+  { to: '/reference', label: 'Reference', icon: BookText },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
 function Brand() {
   return (
-    <NavLink to="/" aria-label="EnglishPath: ir al inicio" title="Ir al inicio" className="pressable -m-1.5 flex items-center gap-2.5 rounded-xl p-1.5 transition hover:opacity-80">
+    <NavLink to="/" aria-label="EnglishPath: go to home" title="Go to home" className="pressable -m-1.5 flex items-center gap-2.5 rounded-xl p-1.5 transition hover:opacity-80">
       <LibraryBig size={26} strokeWidth={2.2} className="text-brand-600 dark:text-brand-500" />
       <span className="font-display text-[15px] font-extrabold uppercase tracking-[0.14em] text-slate-900 dark:text-white">English<span className="text-brand-600 dark:text-brand-500">Path</span></span>
     </NavLink>
@@ -51,7 +51,7 @@ export function ThemeSwitch() {
   return (
     <button
       onClick={(e) => toggleThemeAnimated(e)}
-      role="switch" aria-checked={dark} aria-label={dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+      role="switch" aria-checked={dark} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
       className="relative h-8 w-14 shrink-0 rounded-full bg-slate-200 transition-colors duration-500 dark:bg-slate-800"
     >
       <span className={cx(
@@ -70,7 +70,7 @@ function StreakPill() {
   const st = streak(p, minutes);
   return (
     <NavLink to="/" className={cx('pressable inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-semibold', st.activeToday ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400')}
-      title={st.activeToday ? 'Racha: hoy ya cumpliste las 2 horas' : `Racha: te faltan ${st.missingMin} min hoy`}>
+      title={st.activeToday ? 'Streak: you have done your 2 hours today' : `Streak: ${st.missingMin} min left today`}>
       <Flame size={15} /> {st.current}
     </NavLink>
   );
@@ -106,7 +106,7 @@ function MoreMenu({ active }: { active: boolean }) {
   }, [open]);
   return (
     <div ref={ref} className="relative">
-      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Más secciones" title="Más secciones"
+      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label="More sections" title="More sections"
         className={cx('pressable flex h-9 w-9 items-center justify-center rounded-xl transition', open || active ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800')}>
         <LayoutGrid size={18} />
       </button>
@@ -168,18 +168,18 @@ export default function Layout() {
           </NavLink>
         ))}
         <button onClick={() => setSheet(true)} className={cx('pressable flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium', inSheet ? 'text-brand-700 dark:text-brand-400' : 'text-slate-500')}>
-          <MoreHorizontal size={21} /> Más
+          <MoreHorizontal size={21} /> More
         </button>
       </nav>
 
-      {/* Mobile "Más" sheet */}
+      {/* Mobile "More" sheet */}
       {sheet && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-slate-950/50 animate-[fade-in_.2s_ease-out]" onClick={() => setSheet(false)} />
           <div className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white p-4 pb-8 shadow-2xl animate-[sheet-up_.3s_cubic-bezier(.2,.8,.2,1)] dark:bg-slate-900">
             <div className="mb-3 flex items-center justify-between px-1">
-              <span className="font-semibold text-slate-900 dark:text-white">Más</span>
-              <button onClick={() => setSheet(false)} className="pressable rounded-xl p-2 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Cerrar"><X size={20} /></button>
+              <span className="font-semibold text-slate-900 dark:text-white">More</span>
+              <button onClick={() => setSheet(false)} className="pressable rounded-xl p-2 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close"><X size={20} /></button>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[MAIN.find((m) => m.to === '/progress')!, ...MORE].map(({ to, label, icon: Icon }) => (

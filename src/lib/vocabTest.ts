@@ -15,13 +15,13 @@ export function vocabExercise(w: VocabWord, kind: 0 | 1 | 2): KeyedExercise {
   if (kind === 2 && new RegExp(`\\b${w.en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(w.ex)) {
     const q = w.ex.replace(new RegExp(`\\b${w.en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'), '___');
     const opts = shuffle([w.en, ...distractors(w, 'en')]);
-    ex = { t: 'mc', kind: 'context', q, opts, a: opts.indexOf(w.en), why: `“${w.en}” significa “${w.es}”.`, more: w.ex };
+    ex = { t: 'mc', kind: 'context', q, opts, a: opts.indexOf(w.en), why: `“${w.en}” means “${w.es}”.`, more: w.ex };
   } else if (kind === 1) {
     const opts = shuffle([w.en, ...distractors(w, 'en')]);
-    ex = { t: 'mc', q: `¿Cómo se dice “${w.es}” en inglés?`, opts, a: opts.indexOf(w.en), why: `${w.en} /${w.ipa}/ = ${w.es}.`, more: w.ex };
+    ex = { t: 'mc', q: `Which English word means “${w.es}”?`, opts, a: opts.indexOf(w.en), why: `${w.en} /${w.ipa}/ = ${w.es}.`, more: w.ex };
   } else {
     const opts = shuffle([w.es, ...distractors(w, 'es')]);
-    ex = { t: 'mc', kind: 'tr-en-es', q: `¿Qué significa “${w.en}”?`, opts, a: opts.indexOf(w.es), why: `${w.en} /${w.ipa}/ = ${w.es}.`, more: w.ex };
+    ex = { t: 'mc', kind: 'tr-en-es', q: `What does “${w.en}” mean?`, opts, a: opts.indexOf(w.es), why: `${w.en} /${w.ipa}/ = ${w.es}.`, more: w.ex };
   }
   return { key: `v:${w.id}:${kind}`, unitId: null, ex };
 }

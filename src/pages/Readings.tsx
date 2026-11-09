@@ -16,19 +16,19 @@ export default function Readings() {
   return (
     <div>
       <SkillTabs active="reading" />
-      <PageHeader title="Reading" subtitle="Comprensión lectora sobre los temas del workbook. Leé el texto y respondé las preguntas." />
+      <PageHeader title="Reading" subtitle="Reading comprehension on the workbook topics. Read the text and answer the questions." />
       <div className="grid gap-4 sm:grid-cols-2">
         {READINGS.map((r) => (
           <Link key={r.id} to={`/readings/${r.id}`}>
             <Card className="h-full transition hover:-translate-y-0.5 hover:shadow-md">
               <div className="mb-2 flex items-center justify-between gap-2"><Badge tone="sky">{r.theme}</Badge>{p.readings[r.id] && <Badge tone={p.readings[r.id].best >= 70 ? 'green' : 'amber'}>Mejor: {p.readings[r.id].best}%</Badge>}</div>
               <div className="font-semibold text-slate-900 dark:text-white">{r.title}</div>
-              <div className="mt-1 text-sm text-slate-500">{r.qs.length} preguntas{r.ref && WB_BY_ID[r.ref] ? ` · Tema de Objective First Unit ${WB_BY_ID[r.ref].n}` : ''}</div>
+              <div className="mt-1 text-sm text-slate-500">{r.qs.length} questions{r.ref && WB_BY_ID[r.ref] ? ` · Objective First Unit ${WB_BY_ID[r.ref].n} topic` : ''}</div>
             </Card>
           </Link>
         ))}
       </div>
-      <p className="mt-6 text-sm text-slate-500">Los textos son material complementario escrito para esta plataforma sobre los temas del workbook; no son los textos originales del libro.</p>
+      <p className="mt-6 text-sm text-slate-500">These texts are extra material written for this platform on the workbook topics; they are not the original texts from the book.</p>
     </div>
   );
 }
@@ -39,12 +39,12 @@ function ReadingView({ id }: { id: string }) {
   const [phase, setPhase] = useState<'read' | 'quiz' | 'done'>('read');
   const [outcome, setOutcome] = useState<ExamOutcome | null>(null);
   const [k, setK] = useState(0);
-  useEffect(() => { setLast({ kind: 'reading', id, title: `Lectura: ${r.title}`, path: `/readings/${id}` }); }, [id, r.title]);
+  useEffect(() => { setLast({ kind: 'reading', id, title: `Reading: ${r.title}`, path: `/readings/${id}` }); }, [id, r.title]);
   const items = r.qs.map((ex, i) => ({ key: `r:${id}:${i}`, unitId: null, ex }));
 
   return (
     <div className="flex flex-col gap-5">
-      <Link to="/readings" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-600"><ChevronLeft size={16} /> Lecturas</Link>
+      <Link to="/readings" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-600"><ChevronLeft size={16} /> Reading</Link>
       {phase !== 'quiz' && (
         <Card className="mx-auto w-full max-w-3xl p-6 sm:p-8">
           <div className="mb-2 flex flex-wrap items-center gap-2"><Badge tone="sky">{r.theme}</Badge><SourceTag src={r.src} /></div>
@@ -53,18 +53,18 @@ function ReadingView({ id }: { id: string }) {
             <SpeakBtn text={r.text} />
           </div>
           <div className="space-y-4 text-[17px] leading-relaxed text-slate-800 dark:text-slate-200">{r.text.split('\n\n').map((t, i) => <p key={i}>{t}</p>)}</div>
-          {phase === 'read' && <Button size="lg" className="mt-6" onClick={() => setPhase('quiz')}><BookOpen size={18} /> Responder preguntas</Button>}
+          {phase === 'read' && <Button size="lg" className="mt-6" onClick={() => setPhase('quiz')}><BookOpen size={18} /> Answer the questions</Button>}
         </Card>
       )}
       {phase === 'quiz' && (
-        <ExamRunner key={k} items={items} title={`Comprensión: ${r.title}`} kind="reading" examId={r.id} recordAnswers={false}
+        <ExamRunner key={k} items={items} title={`Comprehension: ${r.title}`} kind="reading" examId={r.id} recordAnswers={false}
           onExit={() => setPhase('read')}
           onFinish={(o) => { recordReading(r.id, o.result.score); recordExam(o.result, o.result.correct * 5); setOutcome(o); setPhase('done'); }} />
       )}
       {phase === 'done' && outcome && (
-        <ExamReport outcome={outcome} onRetry={() => { setK(k + 1); setPhase('quiz'); }} nextTo="/readings" nextLabel="Otras lecturas" />
+        <ExamReport outcome={outcome} onRetry={() => { setK(k + 1); setPhase('quiz'); }} nextTo="/readings" nextLabel="More texts" />
       )}
-      {phase === 'done' && <div className="text-center"><button onClick={() => nav('/readings')} className="text-sm text-brand-600 hover:underline">Volver a la lista</button></div>}
+      {phase === 'done' && <div className="text-center"><button onClick={() => nav('/readings')} className="text-sm text-brand-600 hover:underline">Back to the list</button></div>}
     </div>
   );
 }

@@ -125,7 +125,7 @@ write wrote written escribir`).split('\n').map((l) => {
 });
 
 export const TENSES: string[][] = [
-  ['Tiempo', 'Forma', 'Ejemplo', 'Unidades'],
+  ['Tense', 'Form', 'Example', 'Units'],
   ['Present simple', 'I do / he does', 'I work in a bank.', '2–4'],
   ['Present continuous', 'I am doing', "I'm working now.", '1, 3–4'],
   ['Present perfect', 'I have done', "I've finished my work.", '7–8, 13–14'],
@@ -137,32 +137,32 @@ export const TENSES: string[][] = [
 ];
 
 export const FUTURE: string[][] = [
-  ['Forma', 'Uso', 'Ejemplo', 'Unidad'],
-  ['Present continuous', 'Planes ya organizados', "I'm meeting Tom tomorrow.", '19'],
-  ['Present simple', 'Horarios y programas', 'The train leaves at 8.', '19'],
-  ['be going to', 'Intención ya decidida / evidencia presente', "I'm going to buy a car. Look, it's going to rain.", '20, 23'],
-  ['will', 'Decisión en el momento, predicción, ofrecimiento, promesa', "I'll help you. I think it'll rain.", '21–23'],
-  ['will be doing', 'Acción en curso en un momento futuro', "This time tomorrow I'll be flying.", '24'],
-  ['will have done', 'Acción terminada antes de un momento futuro', "By 2030 I'll have finished.", '24'],
-  ['when / if + presente', 'Futuro después de conjunciones de tiempo', 'Call me when you arrive.', '25'],
+  ['Form', 'Use', 'Example', 'Unit'],
+  ['Present continuous', 'Plans already arranged', "I'm meeting Tom tomorrow.", '19'],
+  ['Present simple', 'Timetables and schedules', 'The train leaves at 8.', '19'],
+  ['be going to', 'An intention already decided / present evidence', "I'm going to buy a car. Look, it's going to rain.", '20, 23'],
+  ['will', 'A decision made now, a prediction, an offer, a promise', "I'll help you. I think it'll rain.", '21–23'],
+  ['will be doing', 'An action in progress at a time in the future', "This time tomorrow I'll be flying.", '24'],
+  ['will have done', 'An action finished before a time in the future', "By 2030 I'll have finished.", '24'],
+  ['when / if + present', 'The future after time conjunctions', 'Call me when you arrive.', '25'],
 ];
 
 export const MODALS: string[][] = [
-  ['Modal', 'Significado', 'Ejemplo', 'Unidades'],
-  ['can / could', 'Habilidad, posibilidad, permiso, pedidos', 'Can you swim? Could you help me?', '26–27, 37'],
-  ['be able to', 'Habilidad (en otros tiempos)', "I haven't been able to sleep.", '26'],
-  ['must / can’t', 'Deducción segura', 'She must be tired. It can’t be true.', '28'],
-  ['may / might', 'Posibilidad', 'It might rain later.', '29–30'],
-  ['have to / must', 'Obligación', 'I have to work. You must stop.', '31'],
-  ['mustn’t / needn’t', 'Prohibición / falta de necesidad', 'You mustn’t smoke. You needn’t come.', '32'],
-  ['should', 'Consejo, lo correcto', 'You should see a doctor.', '33–34'],
-  ['had better', 'Consejo fuerte para una situación concreta', "You'd better go now.", '35'],
-  ['would', 'Situaciones imaginarias, hábitos pasados, pedidos', 'I would like a coffee.', '36–37'],
-  ['modal + have + participio', 'Pasado: deducción, posibilidad, crítica', 'He must have left. You should have told me.', '27–29, 33'],
+  ['Modal', 'Meaning', 'Example', 'Units'],
+  ['can / could', 'Ability, possibility, permission, requests', 'Can you swim? Could you help me?', '26–27, 37'],
+  ['be able to', 'Ability (in other tenses)', "I haven't been able to sleep.", '26'],
+  ['must / can’t', 'A certain deduction', 'She must be tired. It can’t be true.', '28'],
+  ['may / might', 'Possibility', 'It might rain later.', '29–30'],
+  ['have to / must', 'Obligation', 'I have to work. You must stop.', '31'],
+  ['mustn’t / needn’t', 'Prohibition / no need', 'You mustn’t smoke. You needn’t come.', '32'],
+  ['should', 'Advice, the right thing to do', 'You should see a doctor.', '33–34'],
+  ['had better', 'Strong advice for a specific situation', "You'd better go now.", '35'],
+  ['would', 'Imaginary situations, past habits, requests', 'I would like a coffee.', '36–37'],
+  ['modal + have + past participle', 'Past: deduction, possibility, criticism', 'He must have left. You should have told me.', '27–29, 33'],
 ];
 
 export const SHORT_FORMS: string[][] = [
-  ['Forma completa', 'Contracción'],
+  ['Full form', 'Short form'],
   ['I am', "I'm"], ['you are / we are / they are', "you're / we're / they're"], ['he is / she is / it is', "he's / she's / it's"],
   ['I have', "I've"], ['he has', "he's"], ['I will', "I'll"], ['I would / I had', "I'd"],
   ['is not / are not', "isn't / aren't"], ['was not / were not', "wasn't / weren't"], ['do not / does not / did not', "don't / doesn't / didn't"],
@@ -171,26 +171,26 @@ export const SHORT_FORMS: string[][] = [
 ];
 
 export const SPELLING: { rule: string; ex: string }[] = [
-  { rule: 'Verbos terminados en -s, -sh, -ch, -x, -o: agregan -es en 3.ª persona.', ex: 'pass → passes, wash → washes, go → goes' },
-  { rule: 'Consonante + y: cambia a -ies / -ied (pero vocal + y no cambia).', ex: 'study → studies → studied; play → plays → played' },
-  { rule: 'Verbos terminados en -e: pierden la e antes de -ing / -ed.', ex: 'make → making, hope → hoped (pero be → being, see → seeing)' },
+  { rule: 'Verbs ending in -s, -sh, -ch, -x, -o add -es in the 3rd person.', ex: 'pass → passes, wash → washes, go → goes' },
+  { rule: 'Consonant + y changes to -ies / -ied (but vowel + y does not change).', ex: 'study → studies → studied; play → plays → played' },
+  { rule: 'Verbs ending in -e lose the e before -ing / -ed.', ex: 'make → making, hope → hoped (but be → being, see → seeing)' },
   { rule: '-ie → -ying.', ex: 'lie → lying, die → dying' },
-  { rule: 'Una sílaba (o sílaba final acentuada) terminada en consonante + vocal + consonante: se duplica la consonante.', ex: 'stop → stopped, plan → planning, prefer → preferred, begin → beginning' },
-  { rule: 'No se duplica si la sílaba final no está acentuada.', ex: 'visit → visited, remember → remembering' },
-  { rule: 'En inglés británico, -l final se duplica después de una vocal corta aunque no esté acentuada.', ex: 'travel → travelling (US: traveling), cancel → cancelled' },
-  { rule: 'Adjetivo → adverbio: + -ly; -y → -ily; -le → -ly; -ic → -ically.', ex: 'quick → quickly, easy → easily, terrible → terribly, basic → basically' },
+  { rule: 'One syllable (or a stressed final syllable) ending in consonant + vowel + consonant: double the consonant.', ex: 'stop → stopped, plan → planning, prefer → preferred, begin → beginning' },
+  { rule: 'Do not double it if the final syllable is not stressed.', ex: 'visit → visited, remember → remembering' },
+  { rule: 'In British English, a final -l is doubled after a short vowel even if it is not stressed.', ex: 'travel → travelling (US: traveling), cancel → cancelled' },
+  { rule: 'Adjective → adverb: + -ly; -y → -ily; -le → -ly; -ic → -ically.', ex: 'quick → quickly, easy → easily, terrible → terribly, basic → basically' },
 ];
 
 export const AMERICAN: string[][] = [
-  ['Británico', 'Americano', 'Nota'],
-  ['I’ve just had lunch. / Have you finished yet?', 'I just had lunch. / Did you finish yet?', 'En EE.UU. se usa más el past simple con just, already, yet.'],
+  ['British', 'American', 'Note'],
+  ['I’ve just had lunch. / Have you finished yet?', 'I just had lunch. / Did you finish yet?', 'In the US, the past simple is more common with just, already, yet.'],
   ['have got', 'have', 'I’ve got a car (GB) / I have a car (US).'],
   ['at the weekend', 'on the weekend', ''],
   ['in a street', 'on a street', ''],
   ['different from / to', 'different from / than', ''],
-  ['Shall I…?', 'Should I…?', 'shall es poco común en EE.UU.'],
-  ['gotten no se usa', 'gotten (participio de get)', 'Your English has gotten better (US).'],
-  ['travelling, cancelled', 'traveling, canceled', 'Diferencias de ortografía.'],
+  ['Shall I…?', 'Should I…?', 'shall is unusual in the US.'],
+  ['gotten is not used', 'gotten (past participle of get)', 'Your English has gotten better (US).'],
+  ['travelling, cancelled', 'traveling, canceled', 'Spelling differences.'],
   ['colour, centre, organise', 'color, center, organize', ''],
-  ['underground / flat / holiday', 'subway / apartment / vacation', 'Vocabulario distinto.'],
+  ['underground / flat / holiday', 'subway / apartment / vacation', 'Different vocabulary.'],
 ];

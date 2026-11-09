@@ -27,9 +27,9 @@ export default function Writing() {
                 <span className="rounded-xl bg-brand-50 p-2.5 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300"><PenLine size={18} /></span>
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium text-slate-900 dark:text-white">{t.title}</span>
-                  <span className="text-sm text-slate-500">{t.type} · {t.words[0]}–{t.words[1]} palabras</span>
+                  <span className="text-sm text-slate-500">{t.type} · {t.words[0]}–{t.words[1]} words</span>
                 </span>
-                {draft && <Badge tone={countWords(draft.text) >= t.words[0] ? 'green' : 'slate'}>{countWords(draft.text)} palabras</Badge>}
+                {draft && <Badge tone={countWords(draft.text) >= t.words[0] ? 'green' : 'slate'}>{countWords(draft.text)} words</Badge>}
               </button>
             );
           })}
@@ -61,36 +61,36 @@ function Editor({ task, onExit }: { task: WritingTask; onExit: () => void }) {
   const submit = () => {
     saveWriting(task.id, text, checks);
     recordSkill('writing', task.title, checks.length, task.checklist.length, 20 + checks.length * 5);
-    notify({ kind: 'info', title: 'Texto entregado', body: `${words} palabras · ${checks.length}/${task.checklist.length} puntos cumplidos` });
+    notify({ kind: 'info', title: 'Text submitted', body: `${words} words · ${checks.length}/${task.checklist.length} points done` });
   };
   const correct = async () => {
     setBusy(true); setFeedback('');
     try {
-      const prompt = `Corregí este texto en inglés de un estudiante B1–B2. Tarea (${task.type}): "${task.prompt}"\n\nTexto del estudiante:\n${text}\n\nDevolvé: 1) los errores, cada uno con la corrección y una explicación breve en español; 2) una versión mejorada; 3) una nota orientativa de 1 a 10 con dos consejos.`;
+      const prompt = `Correct this English text by a B1–B2 student. Task (${task.type}): "${task.prompt}"\n\nStudent's text:\n${text}\n\nGive: 1) the mistakes, each with the correction and a short explanation in simple English; 2) an improved version; 3) an approximate grade from 1 to 10 with two tips.`;
       setFeedback(await askClaude([{ role: 'user', text: prompt }], settings));
     } catch (e) { setFeedback(describeError(e)); } finally { setBusy(false); }
   };
 
   return (
     <div className="flex flex-col gap-4">
-      <button onClick={onExit} className="pressable self-start rounded-xl px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><ChevronLeft size={16} className="inline" /> Todas las tareas</button>
+      <button onClick={onExit} className="pressable self-start rounded-xl px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><ChevronLeft size={16} className="inline" /> All tasks</button>
       <Card>
         <div className="flex flex-wrap items-center gap-2"><Badge tone="brand">{task.type}</Badge>{task.wb && WB_BY_ID[task.wb] && <Link to={`/workbook/${task.wb}`} className="text-xs text-sky-700 hover:underline dark:text-sky-300">Tema de Objective First Unit {WB_BY_ID[task.wb].n}</Link>}</div>
         <h2 className="mt-2 font-display text-xl font-bold text-slate-900 dark:text-white">{task.title}</h2>
         <p className="mt-2 text-slate-700 dark:text-slate-300">{task.prompt}</p>
-        <div className="mt-3 flex flex-wrap gap-1.5">{task.useful.map((u) => <button key={u} onClick={() => setText((t) => (t && !t.endsWith(' ') && !t.endsWith('\n') ? `${t} ${u}` : t + u))} className="pressable rounded-lg bg-slate-100 px-2 py-1 text-xs text-slate-600 hover:bg-brand-50 hover:text-brand-700 dark:bg-slate-800 dark:text-slate-300" title="Insertar en el texto">{u}</button>)}</div>
+        <div className="mt-3 flex flex-wrap gap-1.5">{task.useful.map((u) => <button key={u} onClick={() => setText((t) => (t && !t.endsWith(' ') && !t.endsWith('\n') ? `${t} ${u}` : t + u))} className="pressable rounded-lg bg-slate-100 px-2 py-1 text-xs text-slate-600 hover:bg-brand-50 hover:text-brand-700 dark:bg-slate-800 dark:text-slate-300" title="Insert into the text">{u}</button>)}</div>
       </Card>
 
       <div>
-        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={12} spellCheck lang="en" placeholder="Escribí tu texto en inglés acá…" className="input min-h-[260px] resize-y font-[450] leading-relaxed" />
+        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={12} spellCheck lang="en" placeholder="Write your text in English here…" className="input min-h-[260px] resize-y font-[450] leading-relaxed" />
         <div className="mt-1 flex justify-between px-1 text-sm">
-          <span className={cx(inRange ? 'text-emerald-600' : 'text-slate-500')}>{words} palabras {inRange && '✓'} <span className="text-slate-400">(objetivo {task.words[0]}–{task.words[1]})</span></span>
-          <span className="text-slate-400">Se guarda solo</span>
+          <span className={cx(inRange ? 'text-emerald-600' : 'text-slate-500')}>{words} words {inRange && '✓'} <span className="text-slate-400">(goal {task.words[0]}–{task.words[1]})</span></span>
+          <span className="text-slate-400">Saves automatically</span>
         </div>
       </div>
 
       <Card>
-        <div className="mb-2 font-semibold text-slate-900 dark:text-white">Revisá tu texto</div>
+        <div className="mb-2 font-semibold text-slate-900 dark:text-white">Check your text</div>
         <div className="flex flex-col gap-1">
           {task.checklist.map((c, i) => (
             <button key={i} onClick={() => toggle(i)} className="pressable flex items-start gap-3 rounded-xl px-2 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60">
@@ -102,11 +102,11 @@ function Editor({ task, onExit }: { task: WritingTask; onExit: () => void }) {
       </Card>
 
       <div className="flex flex-wrap gap-2">
-        <Button onClick={submit} disabled={words < 20}>Entregar</Button>
+        <Button onClick={submit} disabled={words < 20}>Submit</Button>
         {ai ? (
           <Button variant="secondary" onClick={correct} disabled={busy || words < 20}>{busy ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />} Corregir con IA</Button>
         ) : (
-          <span className="self-center text-sm text-slate-500">Para corrección automática del texto, conectá la IA en <Link to="/settings" className="text-brand-600 hover:underline">Ajustes</Link>.</span>
+          <span className="self-center text-sm text-slate-500">For automatic correction, connect the AI in <Link to="/settings" className="text-brand-600 hover:underline">Settings</Link>.</span>
         )}
       </div>
       {feedback && <Card className="whitespace-pre-wrap text-[15px] leading-relaxed animate-fade-up">{feedback}</Card>}

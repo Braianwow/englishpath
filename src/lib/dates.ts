@@ -10,12 +10,12 @@ export const addDays = (key: string, n: number) => {
 export function relTime(ms: number): string {
   const diff = Date.now() - ms;
   const min = Math.round(diff / 60000);
-  if (min < 1) return 'hace un momento';
-  if (min < 60) return `hace ${min} min`;
+  if (min < 1) return 'just now';
+  if (min < 60) return `${min} min ago`;
   const h = Math.round(min / 60);
-  if (h < 24) return `hace ${h} h`;
+  if (h < 24) return `${h} h ago`;
   const d = Math.round(h / 24);
-  return d === 1 ? 'ayer' : `hace ${d} días`;
+  return d === 1 ? 'ayer' : `${d} days ago`;
 }
 
 export function fmtMinutes(min: number): string {

@@ -15,8 +15,8 @@ export function stopSpeaking() { stopAi(); stopEleven(); try { window.speechSynt
 let warned = false;
 
 export const VOICE_STYLES = {
-  canchero: { label: 'Canchero 😏', desc: 'Voz masculina, grave y relajada, sin apuro.', pitch: 0.8, rate: 0.93 },
-  normal: { label: 'Normal', desc: 'La voz en inglés que trae tu dispositivo, sin cambios.', pitch: 1, rate: 1 },
+  canchero: { label: 'Cocky 😏', desc: 'Deep, relaxed male voice, never in a hurry.', pitch: 0.8, rate: 0.93 },
+  normal: { label: 'Normal', desc: "Your device's English voice, unchanged.", pitch: 1, rate: 1 },
 } as const;
 
 // Common male voice names on Windows, macOS, Android, Chrome and Edge.
@@ -49,7 +49,7 @@ export function speak(text: string, lang = 'en-GB', rate = 0.92, onEnd?: () => v
     stopAi();
     try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
     speakEleven(clean, s.elevenKey, s.elevenVoiceId, s.elevenModel ?? 'eleven_multilingual_v2', rate * (s.voiceRate ?? 1), onEnd).catch((e: Error) => {
-      notify({ kind: 'info', title: 'No se pudo usar ElevenLabs', body: e.message });
+      notify({ kind: 'info', title: "Couldn't use ElevenLabs", body: e.message });
       speakLocal(clean, lang, rate, onEnd, 'system');
     });
     return;
@@ -71,13 +71,13 @@ function speakLocal(clean: string, lang: string, rate: number, onEnd: (() => voi
     // Already downloaded before: it loads from the cache in a few seconds, so wait for it.
     if (st !== 'error' && aiVoiceCached()) {
       loadAiVoice();
-      if (!warned) { warned = true; notify({ kind: 'info', title: 'Preparando la voz con IA…', body: 'Tarda unos segundos al abrir la app. Ya te lo leo.' }); }
+      if (!warned) { warned = true; notify({ kind: 'info', title: 'Getting the AI voice ready…', body: 'It takes a few seconds when the app opens. Reading it in a moment.' }); }
       whenAiReady().then((ok) => (ok ? run() : speakSystem(clean, lang, rate, onEnd)));
       return;
     }
     if (st !== 'error') {
       loadAiVoice();
-      if (!warned) { warned = true; notify({ kind: 'info', title: 'Descargando la voz con IA…', body: 'Es una sola vez (entre 90 y 330 MB según tu compu). Mientras tanto suena la voz del sistema.' }); }
+      if (!warned) { warned = true; notify({ kind: 'info', title: 'Descargando la voz con IA…', body: "It's only once (90 to 330 MB depending on your computer). Until then, the system voice is used." }); }
     }
   }
   speakSystem(clean, lang, rate, onEnd);

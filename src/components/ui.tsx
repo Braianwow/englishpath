@@ -110,12 +110,12 @@ export function Empty({ icon, title, children }: { icon?: ReactNode; title: stri
 
 export function SourceTag({ src }: { src: 'egu' | 'obj' | 'plan' | 'extra' | 'cuad' | 'set' }) {
   const map = {
-    cuad: ['Cuadernillo B1–B2', 'green'],
-    set: ['Ejercicios por unidad', 'brand'],
+    cuad: ['B1–B2 workbook', 'green'],
+    set: ['Unit exercises', 'brand'],
     egu: ['English Grammar in Use', 'brand'],
     obj: ['Objective First Workbook', 'sky'],
-    plan: ['Plan de estudio B1–B2', 'amber'],
-    extra: ['Complementario', 'slate'],
+    plan: ['B1–B2 study plan', 'amber'],
+    extra: ['Extra', 'slate'],
   } as const;
   const [label, tone] = map[src];
   return <Badge tone={tone}>{label}</Badge>;

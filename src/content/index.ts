@@ -59,7 +59,7 @@ export function unitPool(u: GrammarUnit): KeyedExercise[] {
   });
   const fromExamples: KeyedExercise[] = sentences.map((e, i) => ({
     key: `${u.id}:go${i}`, unitId: u.id, generated: true,
-    ex: { t: 'order', a: [e.en], es: e.es, why: e.es ? `Significa: “${e.es}”.` : 'Oración modelo de la unidad.', d: 1 },
+    ex: { t: 'order', a: [e.en], es: e.es, why: e.es ? `Example: “${e.en}”.` : 'A model sentence from the unit.', d: 1 },
   }));
   const cuad: KeyedExercise[] = u.cuad ? [{ key: `${u.id}:cuad`, unitId: u.id, ex: u.cuad }] : [];
   const sets: KeyedExercise[] = (u.sets ?? []).flatMap((s) => s.ex.map((ex, i) => ({ key: `${u.id}:s${s.ref}.${i}`, unitId: u.id, ex })));
@@ -88,13 +88,13 @@ export function refreshSaved(items: KeyedExercise[]): KeyedExercise[] | null {
 }
 
 export const TAG_LABELS: Record<string, string> = {
-  'present-continuous': 'Presente continuo', 'present-simple': 'Presente simple', tenses: 'Tiempos verbales', 'state-verbs': 'Verbos de estado',
-  'past-simple': 'Pasado simple', 'past-continuous': 'Pasado continuo', 'irregular-verbs': 'Verbos irregulares', 'present-perfect': 'Present perfect',
-  'present-perfect-continuous': 'Present perfect continuo', 'for-since': 'for / since', 'past-perfect': 'Past perfect', 'used-to': 'used to', have: 'have / have got',
-  future: 'Futuro', 'going-to': 'going to', will: 'will / shall', modals: 'Modales', conditionals: 'Condicionales', wish: 'wish', passive: 'Voz pasiva',
-  'reported-speech': 'Estilo indirecto', questions: 'Preguntas', auxiliaries: 'Auxiliares', 'question-tags': 'Question tags', 'ing-to': '-ing / to + infinitivo',
-  prepositions: 'Preposiciones', articles: 'Artículos', nouns: 'Sustantivos', countable: 'Contables / incontables', pronouns: 'Pronombres', determiners: 'Determinantes',
-  quantifiers: 'Cuantificadores', relative: 'Oraciones de relativo', adjectives: 'Adjetivos', adverbs: 'Adverbios', comparison: 'Comparativos y superlativos',
-  'word-order': 'Orden de palabras', conjunctions: 'Conectores', 'phrasal-verbs': 'Phrasal verbs', time: 'Expresiones de tiempo', place: 'Lugar y posición',
+  'present-continuous': 'Present continuous', 'present-simple': 'Present simple', tenses: 'Verb tenses', 'state-verbs': 'State verbs',
+  'past-simple': 'Past simple', 'past-continuous': 'Past continuous', 'irregular-verbs': 'Irregular verbs', 'present-perfect': 'Present perfect',
+  'present-perfect-continuous': 'Present perfect continuous', 'for-since': 'for / since', 'past-perfect': 'Past perfect', 'used-to': 'used to', have: 'have / have got',
+  future: 'Futuro', 'going-to': 'going to', will: 'will / shall', modals: 'Modales', conditionals: 'Condicionales', wish: 'wish', passive: 'Passive',
+  'reported-speech': 'Reported speech', questions: 'Preguntas', auxiliaries: 'Auxiliares', 'question-tags': 'Question tags', 'ing-to': '-ing / to + infinitive',
+  prepositions: 'Preposiciones', articles: 'Articles', nouns: 'Sustantivos', countable: 'Countable / uncountable', pronouns: 'Pronombres', determiners: 'Determinantes',
+  quantifiers: 'Cuantificadores', relative: 'Relative clauses', adjectives: 'Adjetivos', adverbs: 'Adverbios', comparison: 'Comparatives and superlatives',
+  'word-order': 'Word order', conjunctions: 'Conectores', 'phrasal-verbs': 'Phrasal verbs', time: 'Time expressions', place: 'Place and position',
 };
 export const tagLabel = (t: string) => TAG_LABELS[t] ?? t;

@@ -9,12 +9,12 @@ import { SpeakBtn } from '../components/ExerciseView';
 interface Msg extends ChatTurn { hits?: SearchHit; error?: boolean }
 
 const SUGGESTIONS = [
-  '¿Cuál es la diferencia entre present perfect y past simple?',
-  '¿Cuándo uso for y cuándo since?',
-  'Corregí esta oración: I am living here since 2019.',
-  '¿Qué significa "put up with"?',
-  'Practiquemos una conversación en un restaurante.',
-  'Dame ejemplos de wish con past perfect.',
+  'What is the difference between the present perfect and the past simple?',
+  'When do I use for and when do I use since?',
+  'Correct this sentence: I am living here since 2019.',
+  'What does "put up with" mean?',
+  "Let's practise a conversation in a restaurant.",
+  'Give me examples of wish with the past perfect.',
 ];
 const KEY = 'ep.chat';
 
@@ -38,7 +38,7 @@ export default function Assistant() {
     const hits = searchContent(t);
     if (!ai) {
       const found = hits.units.length + hits.words.length;
-      setMsgs([...next, { role: 'assistant', hits, text: found ? 'Encontré esto en el material de la plataforma:' : 'No encontré nada en el material con esas palabras. Probá con el nombre del tema en inglés (por ejemplo "present perfect", "unless", "phrasal verbs") o con una palabra concreta.' }]);
+      setMsgs([...next, { role: 'assistant', hits, text: found ? 'I found this in the platform material:' : 'I couldn\'t find anything in the material with those words. Try the name of the topic (for example "present perfect", "unless", "phrasal verbs") or a specific word.' }]);
       return;
     }
     setBusy(true);
@@ -53,16 +53,16 @@ export default function Assistant() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="English Assistant" subtitle="Dudas de gramática, significados, ejemplos, correcciones y práctica de conversación."
-        actions={msgs.length > 0 && <Button variant="ghost" size="sm" onClick={() => setMsgs([])}><Trash2 size={15} /> Limpiar chat</Button>} />
+      <PageHeader title="English Assistant" subtitle="Grammar questions, meanings, examples, corrections and conversation practice."
+        actions={msgs.length > 0 && <Button variant="ghost" size="sm" onClick={() => setMsgs([])}><Trash2 size={15} /> Clear chat</Button>} />
 
       <Card className={cx('flex items-start gap-3 p-4', ai ? 'border-emerald-200 dark:border-emerald-500/30' : 'border-amber-200 dark:border-amber-500/30')}>
         {ai ? <Sparkles className="mt-0.5 shrink-0 text-emerald-500" size={20} /> : <PlugZap className="mt-0.5 shrink-0 text-amber-500" size={20} />}
         <div className="text-sm">
           {ai ? (
-            <><strong className="text-slate-900 dark:text-white">IA conectada</strong> ({settings.aiModel}). Las respuestas usan fragmentos del material y separan “Según el material” de la “Explicación complementaria”.</>
+            <><strong className="text-slate-900 dark:text-white">AI connected</strong> ({settings.aiModel}). Answers use extracts from the material and separate “From the material” from “Extra explanation”.</>
           ) : (
-            <><strong className="text-slate-900 dark:text-white">Modo sin IA.</strong> No hay ninguna IA conectada: el asistente busca tus preguntas en el contenido de la plataforma (unidades de gramática y vocabulario) y te muestra lo que encuentra. Para respuestas conversacionales, correcciones libres y práctica de diálogo, conectá una clave de la API de Claude en <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Ajustes</Link>.</>
+            <><strong className="text-slate-900 dark:text-white">No-AI mode.</strong> No AI is connected: the assistant searches the platform content (grammar units and vocabulary) for your question and shows you what it finds. For conversational answers, free corrections and dialogue practice, add a Claude API key in <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Settings</Link>.</>
           )}
         </div>
       </Card>
@@ -72,7 +72,7 @@ export default function Assistant() {
           {msgs.length === 0 && (
             <div className="flex flex-col items-center gap-4 py-8 text-center">
               <Bot size={40} className="text-brand-400" />
-              <div className="text-slate-500">Probá con una de estas preguntas:</div>
+              <div className="text-slate-500">Try one of these questions:</div>
               <div className="flex flex-wrap justify-center gap-2">
                 {SUGGESTIONS.map((s) => <button key={s} onClick={() => send(s)} className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm hover:border-brand-300 hover:bg-brand-50 dark:border-slate-700 dark:hover:bg-brand-500/10">{s}</button>)}
               </div>
@@ -89,11 +89,11 @@ export default function Assistant() {
               </div>
             </div>
           ))}
-          {busy && <div className="flex items-center gap-2 text-sm text-slate-500"><Loader2 size={16} className="animate-spin" /> Pensando…</div>}
+          {busy && <div className="flex items-center gap-2 text-sm text-slate-500"><Loader2 size={16} className="animate-spin" /> Thinking…</div>}
           <div ref={endRef} />
         </div>
         <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex gap-2 border-t border-slate-200 p-3 dark:border-slate-800">
-          <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={ai ? 'Escribí tu pregunta o una oración para corregir…' : 'Buscá un tema o palabra: "since", "unless", "comparativos"…'} className="input" />
+          <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={ai ? 'Write your question or a sentence to correct…' : 'Search for a topic or word: "since", "unless", "comparatives"…'} className="input" />
           <Button type="submit" disabled={!input.trim() || busy} aria-label="Enviar"><Send size={18} /></Button>
         </form>
       </Card>
@@ -115,10 +115,10 @@ function Hits({ hits, compact }: { hits: SearchHit; compact: boolean }) {
   if (!hits.units.length && !hits.words.length) return null;
   return (
     <div className="mt-3 flex flex-col gap-2">
-      {compact && <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Material relacionado</div>}
+      {compact && <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Related material</div>}
       {hits.units.map((u) => (
         <Link key={u.id} to={`/grammar/${u.id}`} className="block rounded-xl bg-white p-3 transition hover:ring-2 hover:ring-brand-300 dark:bg-slate-900">
-          <div className="flex items-center justify-between gap-2"><span className="font-semibold text-slate-900 dark:text-white">Unidad {u.n}: {u.title}</span><SourceTag src="egu" /></div>
+          <div className="flex items-center justify-between gap-2"><span className="font-semibold text-slate-900 dark:text-white">Unit {u.n}: {u.title}</span><SourceTag src="egu" /></div>
           {!compact && <div className="mt-1 line-clamp-3 text-sm text-slate-600 dark:text-slate-300">{u.explain.replace(/\*+/g, '').split('\n\n')[0]}</div>}
           {!compact && u.aff[0] && <div className="mt-1 text-sm italic text-brand-700 dark:text-brand-300">“{u.aff[0].en}”</div>}
         </Link>

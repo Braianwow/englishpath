@@ -1,20 +1,21 @@
 import { useMemo, useState } from 'react';
 import { ChevronDown, Lightbulb } from 'lucide-react';
 import type { Exercise, GrammarUnit } from '../types';
+import { getSettings } from '../store/progress';
 import { normalize } from '../lib/grade';
 import { cx } from './ui';
 import { SpeakBtn } from './ExerciseView';
 
 /** What the learner has to do, in plain words, for each exercise type. */
 const HOW: Record<string, string> = {
-  mc: 'Leé la oración entera y elegí la opción que la completa bien.',
-  gap: 'Escribí en el espacio la forma correcta. Si hay un verbo entre paréntesis, conjugalo según la regla.',
-  order: 'Tocá las palabras en el orden correcto para armar la oración.',
-  tr: 'Escribí la oración en inglés aplicando la regla de esta unidad.',
-  fix: 'La oración tiene un error. Reescribila corregida.',
-  spot: 'Tocá la palabra que está mal. Si está todo bien, tocá “La oración es correcta”.',
-  match: 'Uní cada elemento de la izquierda con su pareja de la derecha.',
-  build: 'Armá una oración completa con esas palabras, conjugando los verbos.',
+  mc: 'Read the whole sentence and choose the option that completes it correctly.',
+  gap: 'Write the correct form in the gap. If there is a verb in brackets, use the right form according to the rule.',
+  order: 'Tap the words in the right order to build the sentence.',
+  tr: 'Write the sentence in English using the rule from this unit.',
+  fix: 'The sentence has a mistake. Write it again correctly.',
+  spot: 'Tap the wrong word. If everything is fine, tap “The sentence is correct”.',
+  match: 'Match each item on the left with its partner on the right.',
+  build: 'Build a complete sentence with these words, using the right verb forms.',
 };
 
 function answerText(ex: Exercise): string {
@@ -62,15 +63,15 @@ export default function ExampleHint({ unit, ex }: { unit: GrammarUnit; ex: Exerc
       <div className={cx('grid transition-all duration-300', open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}>
         <div className="overflow-hidden">
           <div className="space-y-2 px-4 pb-4 text-[15px] text-slate-700 dark:text-slate-300">
-            <div><span className="font-semibold text-slate-900 dark:text-white">Qué hacer: </span>{HOW[ex.t]}</div>
-            <div><span className="font-semibold text-slate-900 dark:text-white">Regla ({unit.es}): </span>{rule}</div>
+            <div><span className="font-semibold text-slate-900 dark:text-white">What to do: </span>{HOW[ex.t]}</div>
+            <div><span className="font-semibold text-slate-900 dark:text-white">Rule ({unit.title}): </span>{rule}</div>
             {formRow && <div className="text-sm text-slate-500">{formRow}</div>}
             {example && (
               <div className="flex items-start justify-between gap-2 rounded-xl bg-white/80 px-3 py-2 dark:bg-slate-900/60">
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">Ejemplo</div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">Example</div>
                   <div className="font-medium text-slate-900 dark:text-white">{example.en}</div>
-                  {example.es && <div className="text-sm text-slate-500">{example.es}</div>}
+                  {example.es && getSettings().showSpanish && <div className="text-sm text-slate-500">{example.es}</div>}
                 </div>
                 <SpeakBtn text={example.en} />
               </div>

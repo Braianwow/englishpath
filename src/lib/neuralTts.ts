@@ -2,15 +2,15 @@ import { useSyncExternalStore } from 'react';
 
 /** Male English voices of the Kokoro model, with a short description in Spanish. */
 export const AI_VOICES = [
-  { id: 'am_michael', label: 'Michael', desc: 'Suave y seguro de sí mismo (EE. UU.)' },
-  { id: 'am_puck', label: 'Puck', desc: 'Pícaro y juguetón (EE. UU.)' },
-  { id: 'am_fenrir', label: 'Fenrir', desc: 'Grave, con onda de chico malo (EE. UU.)' },
-  { id: 'am_onyx', label: 'Onyx', desc: 'Profundo y tranquilo (EE. UU.)' },
-  { id: 'am_eric', label: 'Eric', desc: 'Relajado (EE. UU.)' },
-  { id: 'am_liam', label: 'Liam', desc: 'Joven (EE. UU.)' },
-  { id: 'bm_george', label: 'George', desc: 'Británico, seductor' },
-  { id: 'bm_fable', label: 'Fable', desc: 'Británico, narrador' },
-  { id: 'bm_lewis', label: 'Lewis', desc: 'Británico, grave' },
+  { id: 'am_michael', label: 'Michael', desc: 'Smooth and confident (US)' },
+  { id: 'am_puck', label: 'Puck', desc: 'Cheeky and playful (US)' },
+  { id: 'am_fenrir', label: 'Fenrir', desc: 'Deep, bad-boy vibe (US)' },
+  { id: 'am_onyx', label: 'Onyx', desc: 'Deep and calm (US)' },
+  { id: 'am_eric', label: 'Eric', desc: 'Relaxed (US)' },
+  { id: 'am_liam', label: 'Liam', desc: 'Young (US)' },
+  { id: 'bm_george', label: 'George', desc: 'British, charming' },
+  { id: 'bm_fable', label: 'Fable', desc: 'British, storyteller' },
+  { id: 'bm_lewis', label: 'Lewis', desc: 'British, deep' },
 ] as const;
 export const DEFAULT_AI_VOICE = 'am_michael';
 

@@ -41,5 +41,5 @@ export function previewInterval(card: CardState, grade: Grade): string {
   const ms = next.due;
   if (ms < DAY) return `${Math.round(ms / 60_000)} min`;
   const d = Math.round(ms / DAY);
-  return d >= 30 ? `${Math.round(d / 30)} mes` : `${d} d`;
+  return d >= 30 ? `${Math.round(d / 30)} mo` : `${d} d`;
 }

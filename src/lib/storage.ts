@@ -20,7 +20,7 @@ function safeGet(key: string): string | null {
   try { return localStorage.getItem(key); } catch { return null; }
 }
 function safeSet(key: string, v: string) {
-  try { localStorage.setItem(key, v); } catch (e) { console.warn('No se pudo guardar el progreso', e); }
+  try { localStorage.setItem(key, v); } catch (e) { console.warn("Couldn't save your progress", e); }
 }
 
 export class LocalStorageRepository implements ProgressRepository {

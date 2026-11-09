@@ -8,22 +8,22 @@ const range = (a: number, b: number) => Array.from({ length: b - a + 1 }, (_, i)
  * difficulty; the "recommended path" in `path.ts` suggests a learning order.
  */
 export const MODULES: Module[] = [
-  { id: 'm1', title: 'Present and past', es: 'Presente y pasado', color: 'indigo', units: range(1, 6), desc: 'Presente simple y continuo, pasado simple y continuo.' },
-  { id: 'm2', title: 'Present perfect and past', es: 'Presente perfecto y pasado', color: 'violet', units: range(7, 18), desc: 'Present perfect simple y continuo, for/since, past perfect, have got, used to.' },
-  { id: 'm3', title: 'Future', es: 'Futuro', color: 'sky', units: range(19, 25), desc: 'Presentes con valor de futuro, going to, will/shall, futuro continuo y perfecto.' },
-  { id: 'm4', title: 'Modals', es: 'Verbos modales', color: 'emerald', units: range(26, 37), desc: 'can, could, must, may, might, have to, should, had better, would y peticiones.' },
-  { id: 'm5', title: 'if and wish', es: 'Condicionales y wish', color: 'amber', units: range(38, 41), desc: 'Condicionales reales, irreales y en pasado; wish.' },
-  { id: 'm6', title: 'Passive', es: 'Voz pasiva', color: 'rose', units: range(42, 46), desc: 'Voz pasiva en todos los tiempos, it is said that…, have something done.' },
-  { id: 'm7', title: 'Reported speech', es: 'Estilo indirecto', color: 'orange', units: range(47, 48), desc: 'Contar lo que otra persona dijo.' },
-  { id: 'm8', title: 'Questions and auxiliary verbs', es: 'Preguntas y auxiliares', color: 'teal', units: range(49, 52), desc: 'Formación de preguntas, preguntas indirectas, auxiliares y question tags.' },
-  { id: 'm9', title: '-ing and to …', es: '-ing y to + infinitivo', color: 'cyan', units: range(53, 68), desc: 'Verbos seguidos de -ing o to, preposición + -ing, cláusulas -ing.' },
-  { id: 'm10', title: 'Articles and nouns', es: 'Artículos y sustantivos', color: 'lime', units: range(69, 81), desc: 'Contables e incontables, a/an/the, nombres con y sin the, plurales, posesivo.' },
-  { id: 'm11', title: 'Pronouns and determiners', es: 'Pronombres y determinantes', color: 'fuchsia', units: range(82, 91), desc: 'Reflexivos, some/any, no/none, much/many, all/most, both/either, each/every.' },
-  { id: 'm12', title: 'Relative clauses', es: 'Oraciones de relativo', color: 'pink', units: range(92, 97), desc: 'who/that/which, whose/whom/where, cláusulas explicativas y participios.' },
-  { id: 'm13', title: 'Adjectives and adverbs', es: 'Adjetivos y adverbios', color: 'yellow', units: range(98, 112), desc: 'Adjetivos -ing/-ed, orden, adverbios, so/such, enough/too, comparativos, orden de palabras.' },
+  { id: 'm1', title: 'Present and past', es: 'Presente y pasado', color: 'indigo', units: range(1, 6), desc: 'Present simple and continuous, past simple and continuous.' },
+  { id: 'm2', title: 'Present perfect and past', es: 'Presente perfecto y pasado', color: 'violet', units: range(7, 18), desc: 'Present perfect simple and continuous, for/since, past perfect, have got, used to.' },
+  { id: 'm3', title: 'Future', es: 'Futuro', color: 'sky', units: range(19, 25), desc: 'Present tenses for the future, going to, will/shall, future continuous and perfect.' },
+  { id: 'm4', title: 'Modals', es: 'Verbos modales', color: 'emerald', units: range(26, 37), desc: 'can, could, must, may, might, have to, should, had better, would and requests.' },
+  { id: 'm5', title: 'if and wish', es: 'Condicionales y wish', color: 'amber', units: range(38, 41), desc: 'Real, unreal and past conditionals; wish.' },
+  { id: 'm6', title: 'Passive', es: 'Voz pasiva', color: 'rose', units: range(42, 46), desc: 'The passive in all tenses, it is said that…, have something done.' },
+  { id: 'm7', title: 'Reported speech', es: 'Estilo indirecto', color: 'orange', units: range(47, 48), desc: 'Telling people what someone else said.' },
+  { id: 'm8', title: 'Questions and auxiliary verbs', es: 'Preguntas y auxiliares', color: 'teal', units: range(49, 52), desc: 'Making questions, indirect questions, auxiliary verbs and question tags.' },
+  { id: 'm9', title: '-ing and to …', es: '-ing y to + infinitivo', color: 'cyan', units: range(53, 68), desc: 'Verbs followed by -ing or to, preposition + -ing, -ing clauses.' },
+  { id: 'm10', title: 'Articles and nouns', es: 'Artículos y sustantivos', color: 'lime', units: range(69, 81), desc: 'Countable and uncountable, a/an/the, names with and without the, plurals, possessive.' },
+  { id: 'm11', title: 'Pronouns and determiners', es: 'Pronombres y determinantes', color: 'fuchsia', units: range(82, 91), desc: 'Reflexives, some/any, no/none, much/many, all/most, both/either, each/every.' },
+  { id: 'm12', title: 'Relative clauses', es: 'Oraciones de relativo', color: 'pink', units: range(92, 97), desc: 'who/that/which, whose/whom/where, extra-information clauses and participles.' },
+  { id: 'm13', title: 'Adjectives and adverbs', es: 'Adjetivos y adverbios', color: 'yellow', units: range(98, 112), desc: '-ing/-ed adjectives, order, adverbs, so/such, enough/too, comparatives, word order.' },
   { id: 'm14', title: 'Conjunctions and prepositions', es: 'Conectores', color: 'blue', units: range(113, 120), desc: 'although, in case, unless, as, like, during/while, by/until.' },
-  { id: 'm15', title: 'Prepositions', es: 'Preposiciones', color: 'green', units: range(121, 136), desc: 'at/on/in de tiempo y lugar, to/into, by, sustantivo/adjetivo/verbo + preposición.' },
-  { id: 'm16', title: 'Phrasal verbs', es: 'Phrasal verbs', color: 'purple', units: range(137, 145), desc: 'Verbos frasales con in/out, on/off, up/down, away/back.' },
+  { id: 'm15', title: 'Prepositions', es: 'Preposiciones', color: 'green', units: range(121, 136), desc: 'at/on/in for time and place, to/into, by, noun/adjective/verb + preposition.' },
+  { id: 'm16', title: 'Phrasal verbs', es: 'Phrasal verbs', color: 'purple', units: range(137, 145), desc: 'Phrasal verbs with in/out, on/off, up/down, away/back.' },
 ];
 
 export const moduleOf = (unitId: string) => MODULES.find((m) => m.units.includes(unitId));

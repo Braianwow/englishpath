@@ -17,10 +17,10 @@ export class ElevenError extends Error {
 }
 
 function explain(status: number, body: string): string {
-  if (status === 401) return 'La clave de ElevenLabs no es válida.';
-  if (status === 402 || /quota|credits/i.test(body)) return 'Se terminaron los créditos de tu cuenta de ElevenLabs.';
-  if (status === 429) return 'ElevenLabs está limitando las solicitudes. Esperá un momento.';
-  return `ElevenLabs respondió con un error (${status}).`;
+  if (status === 401) return 'The ElevenLabs key is not valid.';
+  if (status === 402 || /quota|credits/i.test(body)) return 'Your ElevenLabs account has run out of credits.';
+  if (status === 429) return 'ElevenLabs is limiting requests. Wait a moment.';
+  return `ElevenLabs returned an error (${status}).`;
 }
 
 export async function listVoices(key: string): Promise<ElevenVoice[]> {

@@ -19,7 +19,7 @@ export default function Workbook() {
   const p = useProgress();
   return (
     <div>
-      <PageHeader title="Objective First" subtitle="Las 24 unidades temáticas del workbook: vocabulario, phrasal verbs y la gramática que trabaja cada una." actions={<SourceTag src="obj" />} />
+      <PageHeader title="Objective First" subtitle="The workbook's 24 topic units: vocabulary, phrasal verbs and the grammar each one practises." actions={<SourceTag src="obj" />} />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {WORKBOOK.map((w) => {
           const s = wbStats(w.id, p);

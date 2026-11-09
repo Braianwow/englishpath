@@ -24,16 +24,16 @@ export function FormTable({ rows }: { rows: string[][] }) {
 }
 
 export function ExampleList({ items, tone }: { items: Example[]; tone: 'aff' | 'neg' | 'q' }) {
-  const { showTranslations } = useSettings();
+  const { showSpanish } = useSettings();
   const color = tone === 'aff' ? 'border-emerald-400' : tone === 'neg' ? 'border-rose-400' : 'border-sky-400';
-  if (!items.length) return <div className="text-sm text-slate-500">Esta unidad no tiene ejemplos de este tipo.</div>;
+  if (!items.length) return <div className="text-sm text-slate-500">This unit has no examples of this type.</div>;
   return (
     <ul className="flex flex-col gap-2">
       {items.map((e, i) => (
         <li key={i} className={cx('flex items-start justify-between gap-2 rounded-xl border-l-4 bg-slate-50 px-4 py-3 dark:bg-slate-800/50', color)}>
           <div>
             <div className="text-[17px] font-medium text-slate-900 dark:text-white">{e.en}</div>
-            {e.es && showTranslations && <div className="mt-0.5 text-sm text-slate-500">{e.es}</div>}
+            {e.es && showSpanish && <div className="mt-0.5 text-sm text-slate-500">{e.es}</div>}
           </div>
           <SpeakBtn text={e.en} />
         </li>
@@ -44,11 +44,11 @@ export function ExampleList({ items, tone }: { items: Example[]; tone: 'aff' | '
 
 export function ExamplesTabs({ u }: { u: GrammarUnit }) {
   const [tab, setTab] = useState<'aff' | 'neg' | 'q'>('aff');
-  const { showTranslations } = useSettings();
+  const { showSpanish } = useSettings();
   const tabs = [
-    { id: 'aff' as const, label: 'Afirmativas', n: u.aff.length },
-    { id: 'neg' as const, label: 'Negativas', n: u.neg.length },
-    { id: 'q' as const, label: 'Preguntas', n: u.q.length },
+    { id: 'aff' as const, label: 'Affirmative', n: u.aff.length },
+    { id: 'neg' as const, label: 'Negative', n: u.neg.length },
+    { id: 'q' as const, label: 'Questions', n: u.q.length },
   ];
   return (
     <div>
@@ -60,8 +60,8 @@ export function ExamplesTabs({ u }: { u: GrammarUnit }) {
             </button>
           ))}
         </div>
-        <button onClick={() => updateSettings({ showTranslations: !showTranslations })} className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
-          {showTranslations ? <EyeOff size={15} /> : <Eye size={15} />} {showTranslations ? 'Ocultar traducción' : 'Mostrar traducción'}
+        <button onClick={() => updateSettings({ showSpanish: !showSpanish })} className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          {showSpanish ? <EyeOff size={15} /> : <Eye size={15} />} {showSpanish ? 'Hide translation' : 'Show translation'}
         </button>
       </div>
       <ExampleList items={u[tab]} tone={tab} />
@@ -87,11 +87,11 @@ export function CompareBox({ u }: { u: GrammarUnit }) {
   if (!u.compare) return null;
   return (
     <div className="rounded-xl bg-violet-50 p-4 dark:bg-violet-500/10">
-      <div className="mb-1 flex items-center gap-2 font-semibold text-violet-800 dark:text-violet-200"><ArrowLeftRight size={16} /> Comparación con estructuras similares</div>
+      <div className="mb-1 flex items-center gap-2 font-semibold text-violet-800 dark:text-violet-200"><ArrowLeftRight size={16} /> Compare with similar structures</div>
       <p className="text-slate-700 dark:text-slate-300">{u.compare.text}</p>
       <div className="mt-2 flex flex-wrap gap-2">
         {u.compare.with.map((id) => UNIT_BY_ID[id] && (
-          <Link key={id} to={`/grammar/${id}`} className="rounded-lg bg-white px-2 py-1 text-sm font-medium text-violet-700 hover:underline dark:bg-slate-800 dark:text-violet-300">Unidad {UNIT_BY_ID[id].n}: {UNIT_BY_ID[id].es}</Link>
+          <Link key={id} to={`/grammar/${id}`} className="rounded-lg bg-white px-2 py-1 text-sm font-medium text-violet-700 hover:underline dark:bg-slate-800 dark:text-violet-300">Unit {UNIT_BY_ID[id].n}: {UNIT_BY_ID[id].title}</Link>
         ))}
       </div>
     </div>

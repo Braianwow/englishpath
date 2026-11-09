@@ -5,17 +5,24 @@ import { todayKey } from '../lib/dates';
 import { DAILY_GOAL_MIN, SECTION_GOAL_SECS, type SectionId, totalSecs } from '../lib/studyTime';
 
 /**
- * Live study timer. Seconds are counted only while a study section is open,
- * the tab is visible and the learner did something in the last 2 minutes.
- * Pending seconds are saved into the day log every 15 s and when the tab is hidden.
+ * Manual study timer. It starts paused and only counts after the learner presses Play;
+ * from then on it keeps counting (switching sections or browser tabs does not pause it)
+ * until the learner presses Pause. Time goes to the section that is open; pages that are
+ * not a study section don't add time. Elapsed time is measured with timestamps, so a
+ * background tab (where browsers slow down timers) still counts correctly.
  */
-const IDLE_MS = 2 * 60_000;
 const FLUSH_EVERY = 15;
+const MAX_STEP = 10 * 60; // never add more than 10 min in one tick (e.g. after the computer slept)
 
-type Status = 'running' | 'idle' | 'off';
+/** running = counting · paused = waiting for Play · idle = playing on a page that isn't a study section */
+type Status = 'running' | 'idle' | 'paused' | 'off';
 let pending: Record<string, number> = {};
 let pendingDate = todayKey();
 let status: Status = 'off';
+let current: SectionId | null = null;
+let playing = false;
+let lastTick = Date.now();
+let carry = 0; // fractions of a second not added yet
 let version = 0;
 const listeners = new Set<() => void>();
 const emit = () => { version++; listeners.forEach((l) => l()); };
@@ -28,6 +35,18 @@ function flush() {
     addStudySeconds(pendingDate, delta);
   }
   pendingDate = todayKey();
+}
+
+const computeStatus = (): Status => (!playing ? (current ? 'paused' : 'off') : current ? 'running' : 'idle');
+function refresh() { const s = computeStatus(); if (s !== status) { status = s; emit(); } }
+
+/** Start or pause the timer. */
+export function togglePlay() {
+  playing = !playing;
+  lastTick = Date.now(); carry = 0;
+  if (!playing) flush();
+  status = computeStatus();
+  emit();
 }
 
 /** Seconds per section for today, including the ones not saved yet. */
@@ -43,48 +62,51 @@ export function useStudyTime() {
   useSyncExternalStore(subscribe, () => version);
   const secs = todaySecs();
   const minutes = Math.max(getProgress().days[todayKey()]?.minutes ?? 0, Math.floor(totalSecs(secs) / 60));
-  return { secs, minutes, status };
+  return { secs, minutes, status, playing };
+}
+
+function tick(label: string) {
+  const now = Date.now();
+  const elapsed = Math.min(MAX_STEP, (now - lastTick) / 1000 + carry);
+  lastTick = now;
+  if (pendingDate !== todayKey()) flush(); // midnight: close the previous day
+  if (!playing || !current) { carry = 0; refresh(); return; }
+  const add = Math.floor(elapsed);
+  carry = elapsed - add;
+  if (add <= 0) return;
+  const before = todaySecs();
+  pending[current] = (pending[current] ?? 0) + add;
+  const sec = before[current] ?? 0;
+  if (sec < SECTION_GOAL_SECS && sec + add >= SECTION_GOAL_SECS) {
+    notify({ kind: 'info', title: `30 minutes of ${label}!`, body: 'Block complete. Keep going or move on to another section.' });
+    flush();
+  }
+  const total = totalSecs(before);
+  if (total < DAILY_GOAL_MIN * 60 && total + add >= DAILY_GOAL_MIN * 60) {
+    notify({ kind: 'level', title: '2 hours done!', body: 'Today counts towards your streak.' });
+    flush();
+  }
+  if (totalSecs(pending) >= FLUSH_EVERY) flush();
+  status = 'running';
+  emit();
 }
 
 /** Mount once (in the layout) with the section of the current page. */
 export function useStudyTimer(section: SectionId | null, label: string) {
   useEffect(() => {
-    let last = Date.now();
-    const mark = () => { last = Date.now(); if (status === 'idle') { status = section ? 'running' : 'off'; emit(); } };
-    const events = ['pointerdown', 'keydown', 'scroll', 'touchstart', 'wheel'] as const;
-    events.forEach((e) => window.addEventListener(e, mark, { passive: true }));
-    const onHide = () => { if (document.visibilityState === 'hidden') flush(); };
+    tick(label); // close the time spent in the previous section
+    current = section;
+    refresh();
+    const onHide = () => { if (document.visibilityState === 'hidden') { tick(label); flush(); } else tick(label); };
     document.addEventListener('visibilitychange', onHide);
     window.addEventListener('pagehide', flush);
-
-    const id = window.setInterval(() => {
-      if (pendingDate !== todayKey()) flush(); // midnight: close the previous day
-      const active = !!section && document.visibilityState === 'visible' && Date.now() - last < IDLE_MS;
-      const next: Status = !section ? 'off' : active ? 'running' : 'idle';
-      if (!active) { if (next !== status) { status = next; emit(); } return; }
-      status = 'running';
-      const before = todaySecs();
-      pending[section] = (pending[section] ?? 0) + 1;
-      const sec = before[section] ?? 0;
-      if (sec + 1 === SECTION_GOAL_SECS) {
-        notify({ kind: 'info', title: `¡30 minutos de ${label}!`, body: 'Bloque completado. Podés seguir o pasar a otra sección.' });
-        flush();
-      }
-      if (totalSecs(before) + 1 === DAILY_GOAL_MIN * 60) {
-        notify({ kind: 'level', title: '¡2 horas cumplidas!', body: 'Hoy suma a tu racha.' });
-        flush();
-      }
-      if (totalSecs(pending) >= FLUSH_EVERY) flush();
-      emit();
-    }, 1000);
-
-    status = section ? 'running' : 'off';
+    const id = window.setInterval(() => tick(label), 1000);
     emit();
     return () => {
-      events.forEach((e) => window.removeEventListener(e, mark));
       document.removeEventListener('visibilitychange', onHide);
       window.removeEventListener('pagehide', flush);
       window.clearInterval(id);
+      tick(label);
       flush();
     };
   }, [section, label]);

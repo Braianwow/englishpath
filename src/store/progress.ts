@@ -17,7 +17,7 @@ export function emptyProgress(): ProgressState {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  theme: 'system', dailyXpGoal: 100, dailyCardsGoal: 15, showTranslations: true,
+  theme: 'system', dailyXpGoal: 100, dailyCardsGoal: 15, showSpanish: false,
   aiProvider: 'none', aiKey: '', aiModel: 'claude-opus-5-5', sound: false,
 };
 
@@ -43,7 +43,7 @@ function commit(next: ProgressState) {
     next = { ...next, achievements: { ...next.achievements } };
     for (const a of unlocked) {
       next.achievements[a.id] = Date.now();
-      notify({ kind: 'achievement', title: `Logro desbloqueado: ${a.title}`, body: a.desc });
+      notify({ kind: 'achievement', title: `Achievement unlocked: ${a.title}`, body: a.desc });
     }
   }
   state = next;
@@ -260,7 +260,7 @@ export function exportProgress(): string {
 
 export function importProgress(json: string) {
   const data = JSON.parse(json);
-  if (!data?.progress?.version) throw new Error('El archivo no tiene el formato esperado.');
+  if (!data?.progress?.version) throw new Error("The file doesn't have the expected format.");
   state = { ...emptyProgress(), ...data.progress };
   repository.saveProgress(state);
   emit();

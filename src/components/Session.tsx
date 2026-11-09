@@ -16,7 +16,7 @@ export interface SessionSummary { total: number; correct: number; xp: number; wr
  * Practice session: immediate feedback after each answer; items answered
  * wrongly come back once at the end of the session so the learner fixes them.
  */
-export default function Session({ items: given, title, onFinish, onExit: exit, finishLabel = 'Terminar', extra }: {
+export default function Session({ items: given, title, onFinish, onExit: exit, finishLabel = 'Finish', extra }: {
   items: KeyedExercise[]; title: string; onFinish?: (s: SessionSummary) => void; onExit?: () => void; finishLabel?: string; extra?: React.ReactNode;
 }) {
   // Autosave: a reload (F5) continues the same exercises at the same point.
@@ -40,7 +40,7 @@ export default function Session({ items: given, title, onFinish, onExit: exit, f
   }, [saveKey, items, queue, idx, summary, done, retryKeys]);
   const onExit = exit && (() => { clearSaved(saveKey); exit(); });
 
-  if (!items.length) return <Card>No hay ejercicios disponibles para esta sesión.</Card>;
+  if (!items.length) return <Card>There are no exercises available for this session.</Card>;
 
   const cur = queue[idx];
 
@@ -77,18 +77,18 @@ export default function Session({ items: given, title, onFinish, onExit: exit, f
             <div className="font-display text-3xl font-bold text-slate-900 dark:text-white">{Math.round(pct * 100)}%</div>
           </Ring>
           <div>
-            <div className="font-display text-2xl font-bold text-slate-900 dark:text-white">{pct >= 0.9 ? '¡Excelente!' : pct >= 0.7 ? '¡Bien hecho!' : 'Sigamos practicando'}</div>
-            <div className="text-slate-500">{summary.correct} de {summary.total} correctas al primer intento · <span className="inline-flex items-center gap-1 font-semibold text-brand-600"><Zap size={14} />+{summary.xp} XP</span></div>
+            <div className="font-display text-2xl font-bold text-slate-900 dark:text-white">{pct >= 0.9 ? 'Excellent!' : pct >= 0.7 ? 'Well done!' : "Let's keep practising"}</div>
+            <div className="text-slate-500">{summary.correct} of {summary.total} right first time · <span className="inline-flex items-center gap-1 font-semibold text-brand-600"><Zap size={14} />+{summary.xp} XP</span></div>
           </div>
           {extra}
         </Card>
         {summary.wrong.length > 0 && (
           <Card>
-            <div className="mb-3 font-semibold text-slate-900 dark:text-white">Repasá lo que fallaste</div>
+            <div className="mb-3 font-semibold text-slate-900 dark:text-white">Review what you got wrong</div>
             <div className="flex flex-col gap-3">
               {summary.wrong.map(({ item, ans }) => (
                 <div key={item.key}>
-                  <div className="mb-1 text-sm text-slate-500">{item.unitId && UNIT_BY_ID[item.unitId] ? `Unidad ${UNIT_BY_ID[item.unitId].n} · ${UNIT_BY_ID[item.unitId].es}` : ''}</div>
+                  <div className="mb-1 text-sm text-slate-500">{item.unitId && UNIT_BY_ID[item.unitId] ? `Unit ${UNIT_BY_ID[item.unitId].n} · ${UNIT_BY_ID[item.unitId].title}` : ''}</div>
                   <div className="mb-2 font-medium text-slate-800 dark:text-slate-100">{'q' in item.ex ? item.ex.q : item.ex.t === 'order' ? (item.ex.es ?? '') : ''}</div>
                   <Feedback ex={item.ex} result={ans} compact />
                 </div>
@@ -99,9 +99,9 @@ export default function Session({ items: given, title, onFinish, onExit: exit, f
         <div className="flex flex-wrap justify-center gap-2">
           {onExit && <Button onClick={onExit}>{finishLabel}</Button>}
           <Button variant="secondary" onClick={() => { setQueue(items); setIdx(0); setDone(false); retryKeys.clear(); setSummary({ total: items.length, correct: 0, xp: 0, wrong: [], firstTry: {} }); }}>
-            <RotateCcw size={16} /> Repetir sesión
+            <RotateCcw size={16} /> Repeat session
           </Button>
-          <Link to="/practice" className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"><Trophy size={16} /> Refuerzo inteligente</Link>
+          <Link to="/practice" className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"><Trophy size={16} /> Smart review</Link>
         </div>
       </div>
     );
@@ -117,9 +117,9 @@ export default function Session({ items: given, title, onFinish, onExit: exit, f
       </div>
       <div className="flex items-center justify-between text-sm text-slate-500">
         <span>{title}</span>
-        {cur.unitId && UNIT_BY_ID[cur.unitId] && <span className="hidden sm:inline">Unidad {UNIT_BY_ID[cur.unitId].n}</span>}
+        {cur.unitId && UNIT_BY_ID[cur.unitId] && <span className="hidden sm:inline">Unit {UNIT_BY_ID[cur.unitId].n}</span>}
       </div>
-      {isRetry && <div className={cx('rounded-xl bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800 dark:bg-amber-500/10 dark:text-amber-200')}>Segundo intento: este ejercicio lo fallaste antes.</div>}
+      {isRetry && <div className={cx('rounded-xl bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800 dark:bg-amber-500/10 dark:text-amber-200')}>Second try: you got this one wrong before.</div>}
       <Card className="p-6 sm:p-8">
         <ExerciseView key={`${cur.key}-${idx}`} ex={cur.ex} mode="practice" onChecked={onChecked} onDone={next} seed={seed + idx} unit={cur.unitId ? UNIT_BY_ID[cur.unitId] : undefined} />
       </Card>

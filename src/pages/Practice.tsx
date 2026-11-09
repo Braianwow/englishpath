@@ -24,8 +24,8 @@ function PracticeSession({ mode, units }: { mode: 'mistakes' | 'focus' | 'due'; 
     if (mode === 'due') { const d = buildDueReview(p); return { items: d.items, dueIds: d.units }; }
     return { items: buildFocusPractice(units, p, 10), dueIds: [] };
   });
-  useEffect(() => setLast({ kind: 'review', id: mode, title: mode === 'mistakes' ? 'Corrección de errores' : mode === 'due' ? 'Repaso espaciado' : 'Práctica de refuerzo', path: `/practice?mode=${mode}${units.length ? `&units=${units.join(',')}` : ''}` }), []); // eslint-disable-line react-hooks/exhaustive-deps
-  const title = mode === 'mistakes' ? 'Corregí tus errores' : mode === 'due' ? 'Repaso espaciado' : `Refuerzo: ${units.map((id) => `U${UNIT_BY_ID[id].n}`).join(', ')}`;
+  useEffect(() => setLast({ kind: 'review', id: mode, title: mode === 'mistakes' ? 'Fixing mistakes' : mode === 'due' ? 'Spaced review' : 'Review practice', path: `/practice?mode=${mode}${units.length ? `&units=${units.join(',')}` : ''}` }), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const title = mode === 'mistakes' ? 'Fix your mistakes' : mode === 'due' ? 'Spaced review' : `Review:${units.map((id) => `U${UNIT_BY_ID[id].n}`).join(', ')}`;
 
   const finish = (s: SessionSummary) => {
     const acc = s.total ? s.correct / s.total : 0;
@@ -42,13 +42,13 @@ function PracticeSession({ mode, units }: { mode: 'mistakes' | 'focus' | 'due'; 
   if (!items.length) {
     return (
       <div className="mx-auto max-w-xl">
-        <Empty icon={<Sparkles size={32} />} title={mode === 'mistakes' ? '¡No tenés errores pendientes!' : 'No hay nada para repasar ahora'}>
-          <div className="mt-3"><LinkButton to="/practice">Volver</LinkButton></div>
+        <Empty icon={<Sparkles size={32} />} title={mode === 'mistakes' ? 'You have no mistakes to fix!' : 'There is nothing to review right now'}>
+          <div className="mt-3"><LinkButton to="/practice">Back</LinkButton></div>
         </Empty>
       </div>
     );
   }
-  return <Session items={items} title={title} onFinish={finish} onExit={() => nav('/practice')} finishLabel="Volver al refuerzo" />;
+  return <Session items={items} title={title} onFinish={finish} onExit={() => nav('/practice')} finishLabel="Back to review" />;
 }
 
 function Overview() {
@@ -62,38 +62,38 @@ function Overview() {
 
   return (
     <div>
-      <PageHeader title="Refuerzo inteligente" subtitle="La plataforma analiza tus respuestas y te propone práctica según tus dificultades." />
+      <PageHeader title="Smart review" subtitle="The platform analyses your answers and suggests practice based on what you find difficult." />
       <div className="mb-6 grid gap-4 md:grid-cols-3">
         <Card>
-          <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Wrench size={18} className="text-rose-500" /> Banco de errores</div>
+          <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Wrench size={18} className="text-rose-500" /> Mistakes bank</div>
           <div className="font-display text-3xl font-bold text-slate-900 dark:text-white">{mistakes}</div>
-          <p className="mb-3 text-sm text-slate-500">Ejercicios que fallaste y todavía no respondiste bien. Desaparecen al acertarlos.</p>
-          <LinkButton to="/practice?mode=mistakes" variant={mistakes ? 'primary' : 'secondary'}>Corregir errores</LinkButton>
+          <p className="mb-3 text-sm text-slate-500">Exercises you got wrong and haven't answered correctly yet. They disappear when you get them right.</p>
+          <LinkButton to="/practice?mode=mistakes" variant={mistakes ? 'primary' : 'secondary'}>Fix mistakes</LinkButton>
         </Card>
         <Card>
-          <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Clock3 size={18} className="text-amber-500" /> Repaso espaciado</div>
+          <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Clock3 size={18} className="text-amber-500" /> Spaced review</div>
           <div className="font-display text-3xl font-bold text-slate-900 dark:text-white">{due.length}</div>
-          <p className="mb-3 text-sm text-slate-500">Unidades aprobadas cuyo repaso vence hoy. Si las dominás, el próximo repaso se aleja; si fallás, vuelve antes.</p>
-          <LinkButton to="/practice?mode=due" variant={due.length ? 'primary' : 'secondary'}>Repasar</LinkButton>
+          <p className="mb-3 text-sm text-slate-500">Passed units that are due for review today. If you know them well, the next review is later; if you make mistakes, it comes back sooner.</p>
+          <LinkButton to="/practice?mode=due" variant={due.length ? 'primary' : 'secondary'}>Review</LinkButton>
         </Card>
         <Card>
-          <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Brain size={18} className="text-violet-500" /> Vocabulario</div>
+          <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Brain size={18} className="text-violet-500" /> Vocabulary</div>
           <div className="font-display text-3xl font-bold text-slate-900 dark:text-white">{cards}</div>
-          <p className="mb-3 text-sm text-slate-500">Palabras cuyo repaso venció. Las que olvidás vuelven a aparecer en la misma sesión.</p>
-          <LinkButton to="/vocabulary?tab=review" variant={cards ? 'primary' : 'secondary'}>Repasar palabras</LinkButton>
+          <p className="mb-3 text-sm text-slate-500">Words that are due for review. The ones you forget come back in the same session.</p>
+          <LinkButton to="/vocabulary?tab=review" variant={cards ? 'primary' : 'secondary'}>Review words</LinkButton>
         </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <div className="mb-3 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><AlertTriangle size={18} className="text-rose-500" /> Temas con dificultad</div>
-          {weak.length === 0 ? <p className="text-sm text-slate-500">No se detectaron temas débiles todavía. Se marca un tema cuando tu dominio baja del 60 %, acumulás 3+ errores sin corregir o no aprobaste su evaluación.</p> : (
+          <div className="mb-3 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><AlertTriangle size={18} className="text-rose-500" /> Difficult topics</div>
+          {weak.length === 0 ? <p className="text-sm text-slate-500">No weak topics detected yet. A topic is marked when your mastery drops below 60%, you have 3+ unfixed mistakes or you didn't pass its test.</p> : (
             <div className="flex flex-col gap-2">{weak.slice(0, 8).map((w) => <WeakRow key={w.unitId} w={w} />)}</div>
           )}
         </Card>
         <Card>
-          <div className="mb-3 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Target size={18} className="text-brand-500" /> Errores por categoría gramatical</div>
-          {tags.length === 0 ? <p className="text-sm text-slate-500">Cuando acumules errores, verás aquí en qué áreas (por ejemplo preposiciones o present perfect) se concentran, con una práctica específica para cada una.</p> : (
+          <div className="mb-3 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Target size={18} className="text-brand-500" /> Mistakes by grammar category</div>
+          {tags.length === 0 ? <p className="text-sm text-slate-500">When you have some mistakes, you'll see here which areas they are in (for example prepositions or the present perfect), with specific practice for each one.</p> : (
             <div className="flex flex-col gap-3">
               {tags.slice(0, 8).map((t) => (
                 <div key={t.tag} className="flex items-center gap-3">
@@ -101,12 +101,12 @@ function Overview() {
                     <div className="flex justify-between text-sm"><span className="font-medium text-slate-900 dark:text-white">{t.label}</span><span className="text-slate-500">{t.errors} errores</span></div>
                     <Progress value={Math.min(1, t.errors / 10)} color="bg-rose-500" className="mt-1" />
                   </div>
-                  <LinkButton size="sm" to={`/practice?mode=focus&units=${t.units.join(',')}`}>Practicar</LinkButton>
+                  <LinkButton size="sm" to={`/practice?mode=focus&units=${t.units.join(',')}`}>Practise</LinkButton>
                 </div>
               ))}
             </div>
           )}
-          {strong > 0 && <p className="mt-4 text-sm text-emerald-700 dark:text-emerald-300">Dominás {strong} unidad(es) (≥ 85 %): su frecuencia de repaso se redujo automáticamente.</p>}
+          {strong > 0 && <p className="mt-4 text-sm text-emerald-700 dark:text-emerald-300">You have mastered {strong} unit(s) (≥ 85%): they will be reviewed less often automatically.</p>}
         </Card>
       </div>
     </div>
@@ -122,8 +122,8 @@ function WeakRow({ w }: { w: Weakness }) {
         <div className="flex items-center gap-2 text-xs text-slate-500"><Badge tone="rose">{w.reason}</Badge></div>
       </div>
       <div className="flex gap-2">
-        <LinkButton size="sm" variant="secondary" to={`/grammar/${u.id}`}>Teoría</LinkButton>
-        <LinkButton size="sm" to={`/practice?mode=focus&units=${u.id}`}>Practicar</LinkButton>
+        <LinkButton size="sm" variant="secondary" to={`/grammar/${u.id}`}>Theory</LinkButton>
+        <LinkButton size="sm" to={`/practice?mode=focus&units=${u.id}`}>Practise</LinkButton>
       </div>
     </div>
   );

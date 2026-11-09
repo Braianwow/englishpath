@@ -5,13 +5,14 @@ import ExampleHint from './ExampleHint';
 import { diffTokens, distance, matches, shuffle, tokensOf } from '../lib/grade';
 import { Button, cx } from './ui';
 import { speak } from '../lib/speech';
+import { getSettings } from '../store/progress';
 
 export interface Answered { ok: boolean; given: string; expected: string }
 
 const TYPE_LABEL: Record<string, string> = {
-  mc: 'Elegí la respuesta correcta', 'mc:tense': 'Elegí el tiempo verbal', 'mc:context': 'Elegí la palabra según el contexto',
-  'mc:tr-en-es': 'Elegí la traducción correcta', 'mc:dialog': 'Completá la conversación', gap: 'Completá el espacio', order: 'Ordená las palabras',
-  tr: 'Traducí al inglés', fix: 'Corregí la oración', spot: 'Tocá la palabra incorrecta', match: 'Relacioná cada par', build: 'Construí la oración',
+  mc: 'Choose the correct answer', 'mc:tense': 'Choose the tense', 'mc:context': 'Choose the word that fits the context',
+  'mc:tr-en-es': 'Choose the correct translation', 'mc:dialog': 'Complete the conversation', gap: 'Fill in the gap', order: 'Put the words in order',
+  tr: 'Translate into English', fix: 'Correct the sentence', spot: 'Tap the wrong word', match: 'Match the pairs', build: 'Build the sentence',
 };
 
 export function typeLabel(ex: Exercise) {
@@ -25,15 +26,15 @@ export function expectedText(ex: Exercise): string {
     case 'mc': return ex.opts[ex.a];
     case 'gap': return fillGaps(ex.q, ex.a[0]);
     case 'order': case 'tr': case 'fix': case 'build': return ex.a[0];
-    case 'spot': return ex.bad < 0 ? 'La oración es correcta.' : `${tokensOf(ex.q)[ex.bad]} → ${ex.ok}`;
+    case 'spot': return ex.bad < 0 ? 'The sentence is correct.' : `${tokensOf(ex.q)[ex.bad]} → ${ex.ok}`;
     case 'match': return ex.pairs.map(([a, b]) => `${a} → ${b}`).join(' · ');
   }
 }
 
 export function promptText(ex: Exercise): string {
   switch (ex.t) {
-    case 'order': return ex.es ?? 'Ordená las palabras';
-    case 'match': return ex.q ?? 'Relacioná los pares';
+    case 'order': return (getSettings().showSpanish && ex.es) || 'Put the words in order';
+    case 'match': return ex.q ?? 'Match the pairs';
     default: return ex.q;
   }
 }
@@ -72,7 +73,7 @@ export default function ExerciseView({ ex, mode, onDone, onChecked, seed, unit }
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-300">{typeLabel(ex)}</span>
         {ex.src === 'cuad' && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Cuadernillo {ex.ref}</span>}
-        {ex.src === 'set' && <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700 dark:bg-brand-500/15 dark:text-brand-200">Ejercicio {ex.ref}</span>}
+        {ex.src === 'set' && <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700 dark:bg-brand-500/15 dark:text-brand-200">Exercise {ex.ref}</span>}
       </div>
       {ex.ins && <div className="-mt-2 text-[15px] font-medium text-slate-700 dark:text-slate-200">{ex.ins}</div>}
       {unit && mode === 'practice' && <ExampleHint unit={unit} ex={ex} />}
@@ -185,14 +186,14 @@ function Gap({ ex, onCheck, locked }: { ex: Extract<Exercise, { t: 'gap' }>; onC
                 ref={(el) => { refs.current[i] = el; }} value={vals[i]} disabled={locked} autoComplete="off" autoCapitalize="off" spellCheck={false}
                 onChange={(e) => setVals((v) => v.map((x, j) => (j === i ? e.target.value : x)))}
                 className="mx-1 inline-block w-40 rounded-lg border-b-2 border-brand-400 bg-brand-50/60 px-2 py-0.5 text-center font-sans text-lg font-semibold text-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-400/40 sm:w-48 dark:bg-brand-500/10 dark:text-brand-100"
-                aria-label={`Espacio ${i + 1}`}
+                aria-label={`Gap ${i + 1}`}
               />
             )}
           </span>
         ))}
       </div>
-      {ex.hint && <div className="text-sm text-slate-500">Pista: {ex.hint}</div>}
-      {!locked && <Button type="submit" size="lg" disabled={vals.some((v) => !v.trim())} className="self-start">Comprobar</Button>}
+      {ex.hint && <div className="text-sm text-slate-500">Hint: {ex.hint}</div>}
+      {!locked && <Button type="submit" size="lg" disabled={vals.some((v) => !v.trim())} className="self-start">Check</Button>}
     </form>
   );
 }
@@ -213,13 +214,13 @@ function Order({ ex, onCheck, locked, seed }: { ex: Extract<Exercise, { t: 'orde
   };
   return (
     <>
-      <Prompt>{ex.es ? <span>“{ex.es}”</span> : 'Formá la oración'}</Prompt>
+      <Prompt>{ex.es && getSettings().showSpanish ? <span>“{ex.es}”</span> : 'Build the sentence'}</Prompt>
       <div className="min-h-[64px] rounded-2xl border-2 border-dashed border-slate-300 p-3 dark:border-slate-700">
         <div className="flex flex-wrap gap-2">
           {chosen.map((i) => (
             <button key={i} className="chip animate-pop" disabled={locked} onClick={() => setChosen((c) => c.filter((x) => x !== i))}>{tokens[i]}</button>
           ))}
-          {!chosen.length && <span className="px-1 py-2 text-sm text-slate-400">Tocá las palabras en orden…</span>}
+          {!chosen.length && <span className="px-1 py-2 text-sm text-slate-400">Tap the words in order…</span>}
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -229,8 +230,8 @@ function Order({ ex, onCheck, locked, seed }: { ex: Extract<Exercise, { t: 'orde
       </div>
       {!locked && (
         <div className="flex gap-2">
-          <Button size="lg" onClick={submit} disabled={chosen.length !== tokens.length}>Comprobar</Button>
-          <Button size="lg" variant="ghost" onClick={() => setChosen([])} disabled={!chosen.length}><RotateCcw size={16} /> Reiniciar</Button>
+          <Button size="lg" onClick={submit} disabled={chosen.length !== tokens.length}>Check</Button>
+          <Button size="lg" variant="ghost" onClick={() => setChosen([])} disabled={!chosen.length}><RotateCcw size={16} /> Reset</Button>
         </div>
       )}
     </>
@@ -239,7 +240,7 @@ function Order({ ex, onCheck, locked, seed }: { ex: Extract<Exercise, { t: 'orde
 
 function FreeText({ ex, onCheck, locked }: { ex: Extract<Exercise, { t: 'tr' | 'fix' | 'build' }>; onCheck: (a: Answered) => void; locked: boolean }) {
   const [val, setVal] = useState(ex.t === 'fix' ? ex.q : '');
-  const placeholder = ex.t === 'tr' ? 'Escribí la traducción en inglés…' : ex.t === 'fix' ? 'Escribí la oración corregida…' : 'Escribí la oración completa…';
+  const placeholder = ex.t === 'tr' ? 'Write the English translation…' : ex.t === 'fix' ? 'Write the corrected sentence…' : 'Write the complete sentence…';
   const submit = () => {
     if (locked || !val.trim()) return;
     onCheck({ ok: matches(val, ex.a), given: val.trim(), expected: ex.a[0] });
@@ -251,14 +252,14 @@ function FreeText({ ex, onCheck, locked }: { ex: Extract<Exercise, { t: 'tr' | '
         {ex.t === 'fix' && <span className="decoration-rose-400 decoration-wavy underline-offset-4 [text-decoration-line:underline]">{ex.q}</span>}
         {ex.t === 'build' && <span className="flex flex-wrap gap-2">{ex.q.split(' / ').map((w, i) => <span key={i} className="rounded-lg bg-slate-100 px-2 py-0.5 text-lg dark:bg-slate-800">{w}</span>)}</span>}
       </Prompt>
-      {ex.t === 'build' && <div className="-mt-2 text-sm text-slate-500">Usá todas las palabras y conjugá los verbos cuando haga falta.</div>}
+      {ex.t === 'build' && <div className="-mt-2 text-sm text-slate-500">Use all the words and change the verb forms where necessary.</div>}
       <form onSubmit={(e) => { e.preventDefault(); submit(); }} className="flex flex-col gap-3">
         <textarea
           value={val} onChange={(e) => setVal(e.target.value)} disabled={locked} rows={2} autoFocus spellCheck={false} autoCapitalize="off"
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } }}
           placeholder={placeholder} className="input resize-none text-lg"
         />
-        {!locked && <Button type="submit" size="lg" disabled={!val.trim()} className="self-start">Comprobar</Button>}
+        {!locked && <Button type="submit" size="lg" disabled={!val.trim()} className="self-start">Check</Button>}
       </form>
     </>
   );
@@ -270,7 +271,7 @@ function Spot({ ex, onCheck, locked }: { ex: Extract<Exercise, { t: 'spot' }>; o
   const choose = (i: number) => {
     if (locked) return;
     setPicked(i);
-    onCheck({ ok: i === ex.bad, given: i < 0 ? 'La oración es correcta' : toks[i], expected: expectedText(ex) });
+    onCheck({ ok: i === ex.bad, given: i < 0 ? 'The sentence is correct' : toks[i], expected: expectedText(ex) });
   };
   return (
     <>
@@ -291,7 +292,7 @@ function Spot({ ex, onCheck, locked }: { ex: Extract<Exercise, { t: 'spot' }>; o
         className={cx('self-start rounded-xl border-2 border-dashed px-4 py-2 text-sm font-semibold transition',
           locked && ex.bad < 0 ? 'border-emerald-500 text-emerald-700 dark:text-emerald-300' : locked && picked === -1 ? 'border-rose-500 text-rose-600' : 'border-slate-300 text-slate-600 hover:border-brand-400 hover:text-brand-700 dark:border-slate-600 dark:text-slate-300')}
       >
-        ✓ La oración es correcta
+        ✓ The sentence is correct
       </button>
     </>
   );
@@ -310,7 +311,7 @@ function Match({ ex, onCheck, locked, seed }: { ex: Extract<Exercise, { t: 'matc
       const nd = [...done, r];
       setDone(nd);
       setSel(null);
-      if (nd.length === ex.pairs.length) onCheck({ ok: errors === 0, given: errors === 0 ? 'Todos los pares correctos' : `${errors} intento(s) incorrecto(s)`, expected: expectedText(ex) });
+      if (nd.length === ex.pairs.length) onCheck({ ok: errors === 0, given: errors === 0 ? 'All pairs correct' : `${errors} wrong attempt(s)`, expected: expectedText(ex) });
     } else {
       setErrors((e) => e + 1);
       setFlash(r);
@@ -338,7 +339,7 @@ function Match({ ex, onCheck, locked, seed }: { ex: Extract<Exercise, { t: 'matc
           ))}
         </div>
       </div>
-      {!locked && <div className="text-sm text-slate-500">Elegí un elemento de la izquierda y luego su pareja de la derecha. Errores: {errors}</div>}
+      {!locked && <div className="text-sm text-slate-500">Choose an item on the left and then its partner on the right. Mistakes: {errors}</div>}
     </>
   );
 }
@@ -349,40 +350,40 @@ export function Feedback({ ex, result, children, compact }: { ex: Exercise; resu
   return (
     <div className={cx('rounded-2xl border-2 p-5 animate-fade-up', result.ok ? 'border-emerald-200 bg-emerald-50/70 dark:border-emerald-500/30 dark:bg-emerald-500/10' : 'border-rose-200 bg-rose-50/70 dark:border-rose-500/30 dark:bg-rose-500/10')}>
       <div className="flex items-center gap-2 text-lg font-bold">
-        {result.ok ? <><CheckCircle2 className="text-emerald-600" /> <span className="text-emerald-800 dark:text-emerald-200">¡Correcto!</span></>
-          : <><XCircle className="text-rose-600" /> <span className="text-rose-800 dark:text-rose-200">Incorrecto</span></>}
+        {result.ok ? <><CheckCircle2 className="text-emerald-600" /> <span className="text-emerald-800 dark:text-emerald-200">Correct!</span></>
+          : <><XCircle className="text-rose-600" /> <span className="text-rose-800 dark:text-rose-200">Wrong</span></>}
       </div>
       <div className="mt-3 space-y-3 text-[15px]">
         {!result.ok && (
           <>
-            <div><span className="font-semibold text-slate-900 dark:text-white">Tu respuesta: </span><span className="text-rose-700 line-through decoration-rose-400/60 dark:text-rose-300">{result.given || '—'}</span></div>
+            <div><span className="font-semibold text-slate-900 dark:text-white">Your answer: </span><span className="text-rose-700 line-through decoration-rose-400/60 dark:text-rose-300">{result.given || '—'}</span></div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-semibold text-slate-900 dark:text-white">Respuesta correcta: </span>
+              <span className="font-semibold text-slate-900 dark:text-white">Correct answer: </span>
               <span className="font-semibold text-emerald-700 dark:text-emerald-300">{expectedText(ex)}</span>
               {(ex.t !== 'match' && ex.t !== 'spot') && <SpeakBtn text={ex.t === 'gap' ? fillGaps(ex.q, ex.a[0]).replace(/[[\]]/g, '') : ex.t === 'mc' ? '' : result.expected} />}
             </div>
             {textual && ex.t !== 'gap' && result.given && (
               <div className="rounded-xl bg-white/70 p-3 dark:bg-slate-900/50">
-                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Comparación palabra por palabra</div>
+                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Word-by-word comparison</div>
                 <div className="flex flex-wrap gap-1">
                   {diffTokens(result.given, result.expected).map((t, i) => (
                     <span key={i} className={cx('rounded px-1', t.kind === 'missing' && 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200', t.kind === 'extra' && 'bg-rose-100 text-rose-800 line-through dark:bg-rose-500/20 dark:text-rose-200')}>{t.text}</span>
                   ))}
                 </div>
-                <div className="mt-1 text-xs text-slate-500"><span className="text-emerald-700 dark:text-emerald-300">verde</span> = falta en tu respuesta · <span className="text-rose-700 dark:text-rose-300">tachado</span> = sobra o está mal</div>
+                <div className="mt-1 text-xs text-slate-500"><span className="text-emerald-700 dark:text-emerald-300">green</span> = missing from your answer ·<span className="text-rose-700 dark:text-rose-300">crossed out</span> = extra or wrong</div>
               </div>
             )}
-            {nearMiss && <div className="text-sm text-amber-700 dark:text-amber-300">Estuviste muy cerca: revisá la ortografía o la forma exacta del verbo.</div>}
+            {nearMiss && <div className="text-sm text-amber-700 dark:text-amber-300">Very close: check the spelling or the exact form of the verb.</div>}
           </>
         )}
         {ex.why && (
           <div className="flex gap-2">
             <Lightbulb size={18} className="mt-0.5 shrink-0 text-amber-500" />
-            <div><span className="font-semibold text-slate-900 dark:text-white">{result.ok ? '¿Por qué? ' : 'Explicación: '}</span>{ex.why}</div>
+            <div><span className="font-semibold text-slate-900 dark:text-white">{result.ok ? 'Why? ' : 'Explanation: '}</span>{ex.why}</div>
           </div>
         )}
         {ex.more && !compact && (
-          <div className="rounded-xl bg-white/70 p-3 text-sm dark:bg-slate-900/50"><span className="font-semibold">Otro ejemplo: </span>{ex.more}</div>
+          <div className="rounded-xl bg-white/70 p-3 text-sm dark:bg-slate-900/50"><span className="font-semibold">Another example: </span>{ex.more}</div>
         )}
       </div>
       {children && <div className="mt-4">{children}</div>}
@@ -393,7 +394,7 @@ export function Feedback({ ex, result, children, compact }: { ex: Exercise; resu
 export function SpeakBtn({ text, className }: { text: string; className?: string }) {
   if (!text || typeof window === 'undefined' || !('speechSynthesis' in window)) return null;
   return (
-    <button type="button" onClick={(e) => { e.stopPropagation(); speak(text); }} className={cx('rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-200/70 hover:text-brand-600 dark:hover:bg-slate-700', className)} aria-label="Escuchar pronunciación" title="Escuchar">
+    <button type="button" onClick={(e) => { e.stopPropagation(); speak(text); }} className={cx('rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-200/70 hover:text-brand-600 dark:hover:bg-slate-700', className)} aria-label="Listen to the pronunciation" title="Escuchar">
       <Volume2 size={16} />
     </button>
   );

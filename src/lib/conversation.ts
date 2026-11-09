@@ -2,13 +2,13 @@ import type { Settings } from '../types';
 
 /** Conversation topics chosen by the learner. */
 export const TOPICS = [
-  { id: 'viajes', emoji: '✈️', label: 'Viajes', desc: 'Destinos, aeropuertos, anécdotas y planes.', brief: 'travel: trips, destinations, airports, travel stories, dream holidays, planning a trip' },
-  { id: 'informatica', emoji: '💻', label: 'Informática', desc: 'Tecnología, programación, apps, IA y gadgets.', brief: 'computers and tech: programming, apps, gadgets, the internet, artificial intelligence, gaming setups' },
-  { id: 'farandula', emoji: '🎬', label: 'Farándula', desc: 'Famosos, series, música, chismes y redes.', brief: 'showbiz and celebrity gossip: famous people, TV series, music, influencers, social media drama (talk in general terms; never make up specific scandals about real people)' },
-  { id: 'argentina', emoji: '🇦🇷', label: 'Argentina', desc: 'Comida, fútbol, costumbres, lugares y cultura.', brief: 'Argentina: food (asado, mate, empanadas), football, customs, places to visit, Argentine culture and how to explain it in English' },
-  { id: 'internacional', emoji: '🌍', label: 'Internacional', desc: 'Otros países, culturas y temas del mundo.', brief: 'international topics: other countries and cultures, global issues, living abroad, comparing countries' },
-  { id: 'decada', emoji: '📅', label: 'Esta década', desc: 'Cómo cambió el mundo en los años 2020.', brief: 'the 2020s: how life, work, technology and culture have changed during this decade (remote work, AI, social media, the pandemic years, new habits)' },
-  { id: 'ahora', emoji: '🔥', label: 'De ahora', desc: 'Lo que está pasando hoy: tendencias y tu vida.', brief: "what's happening right now: current trends, what the student is into lately, their week, recent news THEY bring up (you may not know the latest news, so ask them about it instead of inventing facts)" },
+  { id: 'viajes', emoji: '✈️', label: 'Travel', desc: 'Destinations, airports, stories and plans.', brief: 'travel: trips, destinations, airports, travel stories, dream holidays, planning a trip' },
+  { id: 'informatica', emoji: '💻', label: 'Tech', desc: 'Technology, programming, apps, AI and gadgets.', brief: 'computers and tech: programming, apps, gadgets, the internet, artificial intelligence, gaming setups' },
+  { id: 'farandula', emoji: '🎬', label: 'Showbiz', desc: 'Celebrities, series, music, gossip and social media.', brief: 'showbiz and celebrity gossip: famous people, TV series, music, influencers, social media drama (talk in general terms; never make up specific scandals about real people)' },
+  { id: 'argentina', emoji: '🇦🇷', label: 'Argentina', desc: 'Food, football, customs, places and culture.', brief: 'Argentina: food (asado, mate, empanadas), football, customs, places to visit, Argentine culture and how to explain it in English' },
+  { id: 'internacional', emoji: '🌍', label: 'International', desc: 'Other countries, cultures and world topics.', brief: 'international topics: other countries and cultures, global issues, living abroad, comparing countries' },
+  { id: 'decada', emoji: '📅', label: 'This decade', desc: 'How the world has changed in the 2020s.', brief: 'the 2020s: how life, work, technology and culture have changed during this decade (remote work, AI, social media, the pandemic years, new habits)' },
+  { id: 'ahora', emoji: '🔥', label: 'Right now', desc: "What's happening today: trends and your life.", brief: "what's happening right now: current trends, what the student is into lately, their week, recent news THEY bring up (you may not know the latest news, so ask them about it instead of inventing facts)" },
 ] as const;
 export type TopicId = (typeof TOPICS)[number]['id'];
 
@@ -29,11 +29,11 @@ Rules:
 - Stay on the topic, but follow the student's lead inside it.
 - If the student's last message has a grammar or vocabulary mistake, give ONE correction (the most useful). If it was fine, correction is null. Ignore small punctuation/capitalisation issues and speech-recognition glitches.
 - Reply ONLY with JSON, no other text:
-{"reply": "<what you say>", "translation": "<reply translated to Rioplatense Spanish>", "correction": null | {"said": "<the wrong part>", "better": "<corrected version>", "why": "<very short explanation in Spanish>"}}`;
+{"reply": "<what you say>", "translation": "<reply translated to Rioplatense Spanish>", "correction": null | {"said": "<the wrong part>", "better": "<corrected version>", "why": "<very short explanation in simple English>"}}`;
 
 function parseJson<T>(text: string): T {
   const start = text.indexOf('{'), end = text.lastIndexOf('}');
-  if (start < 0 || end <= start) throw new Error('La IA respondió en un formato inesperado.');
+  if (start < 0 || end <= start) throw new Error('The AI answered in an unexpected format.');
   return JSON.parse(text.slice(start, end + 1)) as T;
 }
 
@@ -49,7 +49,7 @@ async function call(settings: Settings, system: string, messages: { role: 'user'
     fallbacks: 'default',
     messages,
   });
-  if (res.stop_reason === 'refusal') throw new Error('La IA no pudo responder a eso. Probá decirlo de otra forma.');
+  if (res.stop_reason === 'refusal') throw new Error("The AI couldn't answer that. Try saying it another way.");
   return res.content.map((b) => (b.type === 'text' ? b.text : '')).join('');
 }
 
@@ -78,10 +78,10 @@ export async function finalReport(settings: Settings, topic: TopicId, turns: Tur
   const system = `You evaluate a Spanish-speaking student's spoken English (B1–B2) from a conversation transcript (topic: ${label}). The student's lines come from speech recognition, so ignore punctuation and obvious recognition glitches.
 Reply ONLY with JSON:
 {"score": <1-10 overall>, "fluency": <1-10>, "grammar": <1-10>, "vocabulary": <1-10>,
- "summary": "<2-3 sentences in Rioplatense Spanish: how they did>",
- "tip": "<one concrete tip in Spanish for next time>",
- "mistakes": [{"said": "...", "better": "...", "why": "<short, Spanish>"}],   // up to 6, only real mistakes the STUDENT made
- "words": [{"en": "...", "es": "...", "example": "<short English example sentence using it>"}]}   // up to 6 useful words or expressions from the conversation worth learning
+ "summary": "<2-3 sentences in simple English: how they did>",
+ "tip": "<one concrete tip in simple English for next time>",
+ "mistakes": [{"said": "...", "better": "...", "why": "<short, simple English>"}],   // up to 6, only real mistakes the STUDENT made
+ "words": [{"en": "...", "es": "<short meaning in simple English>", "example": "<short English example sentence using it>"}]}   // up to 6 useful words or expressions from the conversation worth learning
 Be fair and encouraging, but honest. If the student said very little, score accordingly.`;
   const text = await call(settings, system, [{ role: 'user', content: transcript }], 2000);
   const r = parseJson<Report>(text);

@@ -32,7 +32,7 @@ export default function ExamRunner({ items: given, title, kind, examId, onFinish
   const onFinish = (o: ExamOutcome) => { setFinished(true); clearSaved(saveKey); finish(o); };
   const onExit = exit && (() => { clearSaved(saveKey); exit(); });
   const seed = useMemo(() => Math.floor(Math.random() * 1e6), []);
-  if (!items.length) return <Card>No hay suficientes ejercicios para esta evaluación todavía.</Card>;
+  if (!items.length) return <Card>There aren't enough exercises for this test yet.</Card>;
   const cur = items[idx];
 
   const answer = (a: Answered) => {
@@ -58,7 +58,7 @@ export default function ExamRunner({ items: given, title, kind, examId, onFinish
       </div>
       <div className="flex items-center justify-between text-sm text-slate-500">
         <span className="font-medium">{title}</span>
-        <Badge tone="amber">Modo evaluación · sin pistas</Badge>
+        <Badge tone="amber">Test mode · no hints</Badge>
       </div>
       <Card className="p-6 sm:p-8">
         <ExerciseView key={`${cur.key}-${idx}`} ex={cur.ex} mode="exam" onDone={answer} seed={seed + idx} />
@@ -78,32 +78,32 @@ export function ExamReport({ outcome, passMark = PASS_MARK, onRetry, nextTo, nex
       <Card className="flex flex-col items-center gap-5 p-8 text-center sm:flex-row sm:text-left">
         <Ring value={result.score / 100} size={130} stroke={11} color={passed ? 'stroke-emerald-500' : 'stroke-rose-500'}>
           <div className="font-display text-3xl font-bold text-slate-900 dark:text-white">{result.score}%</div>
-          <div className="text-xs text-slate-500">Nota {grade}/10</div>
+          <div className="text-xs text-slate-500">Grade {grade}/10</div>
         </Ring>
         <div className="flex-1">
           <div className="flex items-center justify-center gap-2 sm:justify-start">
             {passed ? <CheckCircle2 className="text-emerald-500" /> : <AlertTriangle className="text-rose-500" />}
-            <span className="font-display text-2xl font-bold text-slate-900 dark:text-white">{passed ? 'Aprobado' : 'Todavía no aprobado'}</span>
+            <span className="font-display text-2xl font-bold text-slate-900 dark:text-white">{passed ? 'Passed' : 'Not passed yet'}</span>
           </div>
           <div className="mt-1 text-slate-500">{result.title}</div>
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-xl bg-slate-50 p-2 dark:bg-slate-800"><div className="text-lg font-bold text-slate-900 dark:text-white">{result.correct}</div><div className="text-xs text-slate-500">correctas</div></div>
-            <div className="rounded-xl bg-slate-50 p-2 dark:bg-slate-800"><div className="text-lg font-bold text-slate-900 dark:text-white">{result.total - result.correct}</div><div className="text-xs text-slate-500">incorrectas</div></div>
-            <div className="rounded-xl bg-slate-50 p-2 dark:bg-slate-800"><div className="text-lg font-bold text-slate-900 dark:text-white">{passMark}%</div><div className="text-xs text-slate-500">para aprobar</div></div>
+            <div className="rounded-xl bg-slate-50 p-2 dark:bg-slate-800"><div className="text-lg font-bold text-slate-900 dark:text-white">{result.correct}</div><div className="text-xs text-slate-500">correct</div></div>
+            <div className="rounded-xl bg-slate-50 p-2 dark:bg-slate-800"><div className="text-lg font-bold text-slate-900 dark:text-white">{result.total - result.correct}</div><div className="text-xs text-slate-500">wrong</div></div>
+            <div className="rounded-xl bg-slate-50 p-2 dark:bg-slate-800"><div className="text-lg font-bold text-slate-900 dark:text-white">{passMark}%</div><div className="text-xs text-slate-500">to pass</div></div>
           </div>
         </div>
       </Card>
 
       {weak.length > 0 && (
         <Card>
-          <div className="mb-2 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Target size={18} className="text-rose-500" /> Temas que necesitan refuerzo</div>
+          <div className="mb-2 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Target size={18} className="text-rose-500" /> Topics that need more work</div>
           <div className="flex flex-col gap-2">
             {weak.map((u) => (
               <div key={u.id} className="flex flex-col gap-2 rounded-xl bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between dark:bg-slate-800/60">
-                <div><span className="font-medium text-slate-900 dark:text-white">Unidad {u.n}: {u.title}</span><div className="text-sm text-slate-500">{u.es}</div></div>
+                <div><span className="font-medium text-slate-900 dark:text-white">Unit {u.n}: {u.title}</span></div>
                 <div className="flex gap-2">
-                  <LinkButton to={`/grammar/${u.id}`} size="sm" variant="secondary">Repasar teoría</LinkButton>
-                  <LinkButton to={`/practice?mode=focus&units=${u.id}`} size="sm">Practicar</LinkButton>
+                  <LinkButton to={`/grammar/${u.id}`} size="sm" variant="secondary">Review the theory</LinkButton>
+                  <LinkButton to={`/practice?mode=focus&units=${u.id}`} size="sm">Practise</LinkButton>
                 </div>
               </div>
             ))}
@@ -112,34 +112,34 @@ export function ExamReport({ outcome, passMark = PASS_MARK, onRetry, nextTo, nex
       )}
 
       <Card>
-        <div className="mb-1 font-semibold text-slate-900 dark:text-white">Recomendación</div>
+        <div className="mb-1 font-semibold text-slate-900 dark:text-white">Recommendation</div>
         <p className="text-slate-600 dark:text-slate-300">
-          {result.score >= 90 ? 'Dominás este contenido. Podés avanzar al siguiente tema; lo volveremos a repasar más adelante con menos frecuencia.'
-            : passed ? 'Buen resultado. Avanzá, pero repasá los errores de abajo: volverán a aparecer en tus sesiones de refuerzo.'
-            : 'Volvé a leer la explicación de los temas marcados, hacé una sesión de refuerzo y repetí la evaluación. Los ejercicios que fallaste quedaron guardados en tu banco de errores.'}
+          {result.score >= 90 ? 'You have mastered this. Move on to the next topic; we will review it again later, less often.'
+            : passed ? 'Good result. Move on, but review the mistakes below: they will come back in your review sessions.'
+            : 'Read the explanation of the marked topics again, do a review session and take the test again. The exercises you got wrong have been saved to your mistakes bank.'}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {nextTo && <LinkButton to={nextTo}>{nextLabel ?? 'Continuar'} <ArrowRight size={16} /></LinkButton>}
-          {onRetry && <Button variant="secondary" onClick={onRetry}>Repetir evaluación</Button>}
-          {wrong.length > 0 && <LinkButton variant="secondary" to="/practice?mode=mistakes">Corregir mis errores</LinkButton>}
+          {nextTo && <LinkButton to={nextTo}>{nextLabel ?? 'Continue'} <ArrowRight size={16} /></LinkButton>}
+          {onRetry && <Button variant="secondary" onClick={onRetry}>Retake test</Button>}
+          {wrong.length > 0 && <LinkButton variant="secondary" to="/practice?mode=mistakes">Fix my mistakes</LinkButton>}
         </div>
       </Card>
 
       {wrong.length > 0 && (
         <Card>
-          <div className="mb-3 font-semibold text-slate-900 dark:text-white">Respuestas incorrectas y explicación ({wrong.length})</div>
+          <div className="mb-3 font-semibold text-slate-900 dark:text-white">Wrong answers and explanations ({wrong.length})</div>
           <div className="flex flex-col gap-4">
             {wrong.map(({ item, ans }, i) => (
               <div key={i}>
-                <div className="mb-1 text-sm text-slate-500">{item.unitId && UNIT_BY_ID[item.unitId] ? `Unidad ${UNIT_BY_ID[item.unitId].n} · ${UNIT_BY_ID[item.unitId].es}` : ''}</div>
-                <div className="mb-2 font-medium text-slate-800 dark:text-slate-100">{'q' in item.ex ? item.ex.q : item.ex.t === 'order' ? `Ordenar: “${item.ex.es ?? ''}”` : ''}</div>
+                <div className="mb-1 text-sm text-slate-500">{item.unitId && UNIT_BY_ID[item.unitId] ? `Unit ${UNIT_BY_ID[item.unitId].n} · ${UNIT_BY_ID[item.unitId].title}` : ''}</div>
+                <div className="mb-2 font-medium text-slate-800 dark:text-slate-100">{'q' in item.ex ? item.ex.q : item.ex.t === 'order' ? `Put in order: “${item.ex.es ?? ''}”` : ''}</div>
                 <Feedback ex={item.ex} result={ans} compact />
               </div>
             ))}
           </div>
         </Card>
       )}
-      <div className="text-center"><Link to="/exams" className="text-sm font-medium text-brand-600 hover:underline">Ver todas las evaluaciones</Link></div>
+      <div className="text-center"><Link to="/exams" className="text-sm font-medium text-brand-600 hover:underline">See all tests</Link></div>
     </div>
   );
 }

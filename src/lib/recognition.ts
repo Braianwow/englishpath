@@ -19,7 +19,7 @@ export const recognitionSupported = () => typeof window !== 'undefined' && !!cto
 
 export function listen(opts: { onText: (t: string, final: boolean) => void; onEnd: () => void; onError: (msg: string) => void; continuous?: boolean }) {
   const C = ctor();
-  if (!C) { opts.onError('Tu navegador no permite reconocimiento de voz. Probá con Chrome o Edge.'); opts.onEnd(); return () => {}; }
+  if (!C) { opts.onError("Your browser doesn't support speech recognition. Try Chrome or Edge."); opts.onEnd(); return () => {}; }
   const r = new C();
   r.lang = 'en-GB';
   r.interimResults = true;
@@ -31,10 +31,10 @@ export function listen(opts: { onText: (t: string, final: boolean) => void; onEn
     opts.onText(text.trim(), final);
   };
   r.onerror = (e) => opts.onError(
-    e.error === 'not-allowed' ? 'No hay permiso para usar el micrófono. Habilitalo en el navegador.'
-      : e.error === 'no-speech' ? 'No se escuchó nada. Probá de nuevo, más cerca del micrófono.'
-      : e.error === 'network' ? 'El reconocimiento de voz necesita conexión a internet.'
-      : e.error === 'aborted' ? '' : `Error de reconocimiento: ${e.error}`,
+    e.error === 'not-allowed' ? 'No permission to use the microphone. Allow it in the browser.'
+      : e.error === 'no-speech' ? "Nothing was heard. Try again, closer to the microphone."
+      : e.error === 'network' ? 'Speech recognition needs an internet connection.'
+      : e.error === 'aborted' ? '' : `Recognition error: ${e.error}`,
   );
   r.onend = opts.onEnd;
   try { r.start(); } catch { opts.onEnd(); }

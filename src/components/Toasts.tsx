@@ -14,7 +14,7 @@ export default function Toasts() {
             <div className="font-semibold text-slate-900 dark:text-white">{t.title}</div>
             {t.body && <div className="text-sm text-slate-500 dark:text-slate-400">{t.body}</div>}
           </div>
-          <button onClick={() => dismiss(t.id)} className="text-slate-400 hover:text-slate-600" aria-label="Cerrar"><X size={16} /></button>
+          <button onClick={() => dismiss(t.id)} className="text-slate-400 hover:text-slate-600" aria-label="Close"><X size={16} /></button>
         </div>
       ))}
     </div>

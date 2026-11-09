@@ -32,22 +32,22 @@ function unitContext(u: GrammarUnit): string {
   return [
     `### English Grammar in Use — Unit ${u.n}: ${u.title}`,
     u.explain,
-    u.form ? `Estructura: ${u.form.map((r) => r.join(' | ')).join(' / ')}` : '',
-    `Usos: ${u.uses.join('; ')}`,
-    `Ejemplos: ${[...u.aff, ...u.neg, ...u.q].map((e) => e.en).join(' · ')}`,
-    `Errores frecuentes: ${u.errors.map(([w, r]) => `✗ ${w} → ✓ ${r}`).join(' · ')}`,
+    u.form ? `Form:${u.form.map((r) => r.join(' | ')).join(' / ')}` : '',
+    `Uses:${u.uses.join('; ')}`,
+    `Examples:${[...u.aff, ...u.neg, ...u.q].map((e) => e.en).join(' · ')}`,
+    `Common mistakes:${u.errors.map(([w, r]) => `✗ ${w} → ✓ ${r}`).join(' · ')}`,
   ].filter(Boolean).join('\n');
 }
 
-const SYSTEM = `Sos "English Assistant", un tutor de inglés para un hispanohablante de nivel B1–B2.
-Respondé en español (los ejemplos en inglés). Sé claro, breve y pedagógico.
-La plataforma se basa en tres materiales: "English Grammar in Use" (Raymond Murphy, 145 unidades), el "Objective First Workbook" (Cambridge) y un plan de estudio B1–B2.
-Cuando el mensaje incluya fragmentos del material, priorizalos. Separá SIEMPRE tu respuesta en dos partes con estos títulos exactos:
-**Según el material:** lo que se apoya en los fragmentos proporcionados (citá la unidad).
-**Explicación complementaria:** lo que agregás vos y no está en los fragmentos.
-Si no hay fragmentos relevantes, decilo en "Según el material" y respondé en la parte complementaria.
-Si el estudiante pide corregir una oración: mostrala corregida, marcá cada error y explicá la regla.
-Si pide practicar una conversación: hacé de interlocutor en inglés con turnos cortos y, después de cada respuesta del estudiante, agregá una línea "Corrección:" si cometió errores.`;
+const SYSTEM = `You are "English Assistant", an English tutor for a Spanish-speaking learner at B1–B2 level.
+Answer in clear, simple English (B1–B2 level). Be brief and helpful.
+The platform is based on three materials: "English Grammar in Use" (Raymond Murphy, 145 units), the "Objective First Workbook" (Cambridge) and a B1–B2 study plan.
+When the message includes extracts from the material, use them first. ALWAYS split your answer into two parts with these exact headings:
+**From the material:** what is supported by the extracts provided (mention the unit).
+**Extra explanation:** what you add that is not in the extracts.
+If there are no relevant extracts, say so under "From the material" and answer in the extra part.
+If the student asks you to correct a sentence: show it corrected, point out each mistake and explain the rule.
+If they want to practise a conversation: play the other person in English with short turns and, after each answer from the student, add a line "Correction:" if they made mistakes.`;
 
 /**
  * Optional Claude integration. Calls the Anthropic Messages API from the
@@ -59,11 +59,11 @@ export async function askClaude(history: ChatTurn[], settings: Settings): Promis
   const last = history[history.length - 1];
   const hits = searchContent(last.text, 3);
   const ctx = hits.units.length
-    ? `Fragmentos del material relacionados con la pregunta:\n\n${hits.units.map(unitContext).join('\n\n')}`
-    : 'No se encontraron fragmentos del material relacionados con esta pregunta.';
+    ? `Extracts from the material related to the question:\n\n${hits.units.map(unitContext).join('\n\n')}`
+    : 'No extracts from the material were found for this question.';
   const messages = history.map((t, i) => ({
     role: t.role,
-    content: i === history.length - 1 ? `${ctx}\n\n---\nPregunta del estudiante:\n${t.text}` : t.text,
+    content: i === history.length - 1 ? `${ctx}\n\n---\nStudent's question:\n${t.text}` : t.text,
   }));
   const response = await client.beta.messages.create({
     model: settings.aiModel || 'claude-opus-5-5',
@@ -74,15 +74,15 @@ export async function askClaude(history: ChatTurn[], settings: Settings): Promis
     fallbacks: 'default',
     messages,
   });
-  if (response.stop_reason === 'refusal') return 'El modelo no pudo responder a esta consulta. Probá reformularla.';
-  return response.content.map((b) => (b.type === 'text' ? b.text : '')).join('').trim() || '(Sin respuesta de texto)';
+  if (response.stop_reason === 'refusal') return "The model couldn't answer this. Try asking in a different way.";
+  return response.content.map((b) => (b.type === 'text' ? b.text : '')).join('').trim() || '(No text answer)';
 }
 
 export function describeError(e: unknown): string {
   const status = (e as { status?: number })?.status;
-  if (status === 401) return 'La clave de API no es válida. Revisala en Ajustes.';
-  if (status === 429) return 'Se alcanzó el límite de uso de la API. Esperá un momento y volvé a intentar.';
-  if (status && status >= 500) return 'El servicio de IA no está disponible en este momento. Intentá de nuevo más tarde.';
-  if (e instanceof TypeError) return 'No se pudo conectar con el servicio de IA (¿sin conexión a internet?).';
-  return `Error al consultar la IA: ${(e as Error)?.message ?? 'desconocido'}`;
+  if (status === 401) return 'The API key is not valid. Check it in Settings.';
+  if (status === 429) return 'The API usage limit was reached. Wait a moment and try again.';
+  if (status && status >= 500) return 'The AI service is not available right now. Try again later.';
+  if (e instanceof TypeError) return "Couldn't connect to the AI service (no internet connection?).";
+  return `AI error: ${(e as Error)?.message ?? 'unknown'}`;
 }

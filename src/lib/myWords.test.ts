@@ -7,7 +7,7 @@ describe('my words', () => {
     const r = parseWordLines('reliable = My car is reliable. = confiable\n\nborrow = Can I borrow it?\n  run out = We ran out of milk. = quedarse sin  ');
     expect(r).toEqual([
       { word: 'reliable', sentence: 'My car is reliable.', meaning: 'confiable' },
-      { error: expect.stringContaining('Línea 3'), line: 3 },
+      { error: expect.stringContaining('Line 3'), line: 3 },
       { word: 'run out', sentence: 'We ran out of milk.', meaning: 'quedarse sin' },
     ]);
   });

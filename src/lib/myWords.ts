@@ -16,7 +16,7 @@ export function parseWordLines(text: string): ParsedLine[] {
     if (!line) return;
     const parts = line.split('=').map((s) => s.trim());
     if (parts.length !== 3 || parts.some((s) => !s)) {
-      out.push({ error: `Línea ${i + 1}: tiene que ser "palabra = oración = significado"`, line: i + 1 });
+      out.push({ error: `Line ${i + 1}: it must be "word = sentence = meaning"`, line: i + 1 });
       return;
     }
     const [word, sentence, meaning] = parts;

@@ -31,10 +31,10 @@ function Row({ u, status }: { u: GrammarUnit; status: 'done' | 'started' | 'new'
       <span className="w-8 shrink-0 text-right text-sm tabular-nums text-slate-400">{u.n}</span>
       <span className="min-w-0 flex-1 text-[15px] text-slate-700 group-hover:text-brand-700 dark:text-slate-300 dark:group-hover:text-brand-300">
         <Title t={u.title} />
-        <span className="ml-2 text-xs text-slate-400">{u.es}</span>
+       
       </span>
-      {status === 'done' && <Check size={15} className="shrink-0 self-center text-emerald-500" aria-label="aprobada" />}
-      {status === 'started' && <span className="h-2 w-2 shrink-0 self-center rounded-full bg-brand-500" aria-label="en curso" />}
+      {status === 'done' && <Check size={15} className="shrink-0 self-center text-emerald-500" aria-label="passed" />}
+      {status === 'started' && <span className="h-2 w-2 shrink-0 self-center rounded-full bg-brand-500" aria-label="in progress" />}
     </Link>
   );
 }
@@ -58,18 +58,18 @@ export default function Grammar() {
   return (
     <div>
       <h1 className="font-display text-3xl font-bold text-brand-600 dark:text-brand-300">Contents</h1>
-      <p className="mt-1 text-slate-500">Gramática por temas. Tocá una unidad para ver su ficha y practicarla.</p>
+      <p className="mt-1 text-slate-500">Grammar by topic. Tap a unit to see its sheet and practise it.</p>
 
       <div className="relative mt-5">
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar un tema: since, passive, unless…" className="input pl-10" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search for a topic: since, passive, unless…" className="input pl-10" />
       </div>
 
       <div className="mt-6 rounded-3xl bg-white p-4 sm:p-6 dark:bg-slate-900">
-        {sections.length === 0 && <p className="py-6 text-center text-slate-500">No hay unidades con esa búsqueda.</p>}
+        {sections.length === 0 && <p className="py-6 text-center text-slate-500">No units match that search.</p>}
         {sections.map(({ m, units }, i) => (
           <section key={m.id} className={cx(i > 0 && 'mt-6')}>
-            <h2 className="mb-1 px-2 text-[15px] italic text-slate-500">{m.title} <span className="not-italic text-slate-400">· {m.es}</span></h2>
+            <h2 className="mb-1 px-2 text-[15px] italic text-slate-500">{m.title}</h2>
             <div className="flex flex-col">
               {units.map((u) => <Row key={u.id} u={u} status={status(u)} />)}
             </div>
@@ -89,8 +89,8 @@ export default function Grammar() {
         )}
       </div>
       <p className="mt-3 flex items-center gap-4 px-2 text-xs text-slate-400">
-        <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> aprobada</span>
-        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-brand-500" /> en curso</span>
+        <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> passed</span>
+        <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-brand-500" /> in progress</span>
       </p>
     </div>
   );

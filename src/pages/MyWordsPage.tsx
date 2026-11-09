@@ -6,7 +6,7 @@ export default function MyWordsPage() {
   return (
     <div>
       <SkillTabs active="vocabulary" />
-      <PageHeader title="Mis palabras" subtitle="Agregá tus propias palabras (palabra = oración = significado) y repasalas como tarjetas." />
+      <PageHeader title="My words" subtitle="Add your own words (word = sentence = meaning) and review them as flashcards." />
       <MyWords />
     </div>
   );

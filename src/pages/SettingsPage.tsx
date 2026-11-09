@@ -26,10 +26,10 @@ function VoiceSettings() {
 
   return (
     <Card>
-      <div className="mb-1 font-semibold text-slate-900 dark:text-white">Voz</div>
-      <p className="mb-3 text-sm text-slate-500">La voz que lee palabras, oraciones, dictados y el modelo de Speaking.</p>
+      <div className="mb-1 font-semibold text-slate-900 dark:text-white">Voice</div>
+      <p className="mb-3 text-sm text-slate-500">The voice that reads words, sentences, dictations and the Speaking model.</p>
       <div className="grid gap-2 sm:grid-cols-3">
-        {([['eleven', 'ElevenLabs 🔥', 'La más humana y expresiva. Necesita tu cuenta y clave de ElevenLabs (usa tus créditos).'], ['ai', 'Voz con IA gratis', 'Modelo Kokoro en tu navegador, sin cuenta ni clave. Al cargarse usa mucho la placa de video y la página puede trabarse unos segundos.'], ['system', 'Voz del sistema', 'Las voces que trae tu dispositivo. Robóticas, pero sin descarga.']] as const).map(([k, l, d]) => (
+        {([['eleven', 'ElevenLabs 🔥', 'The most human and expressive. Needs your ElevenLabs account and key (uses your credits).'], ['ai', 'Free AI voice', 'Kokoro model in your browser, no account or key. While loading it uses the graphics card heavily and the page may freeze for a few seconds.'], ['system', 'System voice', 'The voices on your device. Robotic, but nothing to download.']] as const).map(([k, l, d]) => (
           <button key={k} disabled={k === 'ai' && !aiSupported()} onClick={() => { updateSettings({ voiceEngine: k }); if (k === 'ai') loadAiVoice(); }}
             className={cx('rounded-xl border-2 p-3 text-left transition disabled:opacity-50', engine === k ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600')}>
             <div className="font-semibold text-slate-900 dark:text-white">{l}</div>
@@ -41,17 +41,17 @@ function VoiceSettings() {
       {engine === 'eleven' ? <ElevenPanel /> : engine === 'ai' ? (
         <>
           <div className="mt-4 rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800">
-            {ai.state === 'ready' && <span className="font-medium text-brand-700 dark:text-brand-400">✓ Voz con IA lista</span>}
-            {ai.state === 'idle' && <div className="flex flex-wrap items-center justify-between gap-2"><span>Hay que descargar el modelo una sola vez (330 MB si tu compu tiene GPU, que es más rápido; si no, 90 MB). Queda guardado en el navegador.</span><Button size="sm" onClick={loadAiVoice}><Download size={14} /> Descargar voz</Button></div>}
+            {ai.state === 'ready' && <span className="font-medium text-brand-700 dark:text-brand-400">✓ AI voice ready</span>}
+            {ai.state === 'idle' && <div className="flex flex-wrap items-center justify-between gap-2"><span>The model is downloaded only once (330 MB if your computer has a GPU, which is faster; otherwise 90 MB). It stays saved in the browser.</span><Button size="sm" onClick={loadAiVoice}><Download size={14} /> Download voice</Button></div>}
             {ai.state === 'loading' && (
               <div>
-                <div className="mb-1.5 flex justify-between"><span>Descargando la voz con IA…</span><span className="tabular-nums">{Math.round(ai.progress * 100)}%{ai.mb ? ` de ${ai.mb} MB` : ''}</span></div>
+                <div className="mb-1.5 flex justify-between"><span>Downloading the AI voice…</span><span className="tabular-nums">{Math.round(ai.progress * 100)}%{ai.mb ? ` of ${ai.mb} MB` : ''}</span></div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"><div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: `${ai.progress * 100}%` }} /></div>
               </div>
             )}
-            {ai.state === 'error' && <div className="flex flex-wrap items-center justify-between gap-2 text-rose-600 dark:text-rose-400"><span>No se pudo cargar la voz con IA ({ai.message}). Se usa la del sistema.</span><Button size="sm" variant="secondary" onClick={loadAiVoice}>Reintentar</Button></div>}
+            {ai.state === 'error' && <div className="flex flex-wrap items-center justify-between gap-2 text-rose-600 dark:text-rose-400"><span>No se pudo cargar la voz con IA ({ai.message}). Se usa la del sistema.</span><Button size="sm" variant="secondary" onClick={loadAiVoice}>Try again</Button></div>}
           </div>
-          <div className="mt-4 text-sm font-medium">Elegí la voz <span className="font-normal text-slate-500">(tocá una para escucharla)</span></div>
+          <div className="mt-4 text-sm font-medium">Choose a voice <span className="font-normal text-slate-500">(tap one to hear it)</span></div>
           <div className="mt-2 grid gap-2 sm:grid-cols-3">
             {AI_VOICES.map((v) => (
               <button key={v.id} onClick={() => pick(v.id)}
@@ -61,14 +61,14 @@ function VoiceSettings() {
               </button>
             ))}
           </div>
-          <label className="mt-4 block text-sm sm:w-1/2">Velocidad: <strong>{rate < 0.95 ? 'tranqui' : rate > 1.1 ? 'rápida' : 'normal'}</strong>
+          <label className="mt-4 block text-sm sm:w-1/2">Speed: <strong>{rate < 0.95 ? 'tranqui' : rate > 1.1 ? 'fast' : 'normal'}</strong>
             <input type="range" min={0.7} max={1.3} step={0.05} value={rate} onChange={(e) => updateSettings({ voiceRate: Number(e.target.value) })} className="mt-2 w-full accent-brand-500" />
           </label>
         </>
       ) : <SystemVoice />}
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button onClick={test}><Volume2 size={16} /> Probar voz</Button>
+        <Button onClick={test}><Volume2 size={16} /> Test voice</Button>
         <span className="text-xs italic text-slate-500">“{SAMPLES[sample]}”</span>
       </div>
     </Card>
@@ -85,7 +85,7 @@ function SystemVoice() {
     window.speechSynthesis.addEventListener('voiceschanged', load);
     return () => window.speechSynthesis.removeEventListener('voiceschanged', load);
   }, []);
-  if (!speechSupported()) return <p className="mt-3 text-sm text-slate-500">Tu navegador no puede leer en voz alta. Probá con Chrome o Edge.</p>;
+  if (!speechSupported()) return <p className="mt-3 text-sm text-slate-500">Your browser can't read aloud. Try Chrome or Edge.</p>;
   const style = s.voiceStyle ?? 'canchero';
   const preset = VOICE_STYLES[style];
   const pitch = s.voicePitch ?? preset.pitch;
@@ -104,15 +104,15 @@ function SystemVoice() {
       </div>
       <label className="mt-4 block text-sm">Voz
         <select value={s.voiceName ?? ''} onChange={(e) => updateSettings({ voiceName: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
-          <option value="">Automática{current ? ` (${current.name})` : ''}</option>
+          <option value="">Automatic{current ? ` (${current.name})` : ''}</option>
           {voices.map((v) => <option key={v.name} value={v.name}>{v.name} · {v.lang}</option>)}
         </select>
       </label>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <label className="text-sm">Tono: <strong>{pitch < 0.9 ? 'grave' : pitch > 1.1 ? 'agudo' : 'normal'}</strong>
+        <label className="text-sm">Pitch: <strong>{pitch < 0.9 ? 'grave' : pitch > 1.1 ? 'agudo' : 'normal'}</strong>
           <input type="range" min={0.5} max={1.5} step={0.05} value={pitch} onChange={(e) => updateSettings({ voicePitch: Number(e.target.value) })} className="mt-2 w-full accent-brand-500" />
         </label>
-        <label className="text-sm">Velocidad: <strong>{rate < 0.95 ? 'tranqui' : rate > 1.1 ? 'rápida' : 'normal'}</strong>
+        <label className="text-sm">Speed: <strong>{rate < 0.95 ? 'tranqui' : rate > 1.1 ? 'fast' : 'normal'}</strong>
           <input type="range" min={0.7} max={1.3} step={0.05} value={rate} onChange={(e) => updateSettings({ voiceRate: Number(e.target.value) })} className="mt-2 w-full accent-brand-500" />
         </label>
       </div>
@@ -129,76 +129,76 @@ export default function SettingsPage() {
     const blob = new Blob([exportProgress()], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `englishpath-progreso-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `englishpath-progress-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
   };
   const doImport = async (f: File) => {
-    try { importProgress(await f.text()); notify({ kind: 'info', title: 'Progreso importado' }); }
-    catch (e) { notify({ kind: 'info', title: 'No se pudo importar', body: (e as Error).message }); }
+    try { importProgress(await f.text()); notify({ kind: 'info', title: 'Progress imported' }); }
+    catch (e) { notify({ kind: 'info', title: 'Import failed', body: (e as Error).message }); }
   };
 
   return (
     <div className="flex max-w-3xl flex-col gap-5">
-      <PageHeader title="Ajustes" />
+      <PageHeader title="Settings" />
       <Card>
-        <div className="mb-3 font-semibold text-slate-900 dark:text-white">Apariencia</div>
+        <div className="mb-3 font-semibold text-slate-900 dark:text-white">Appearance</div>
         <div className="flex flex-wrap gap-2">
-          {([['light', 'Claro', Sun], ['dark', 'Oscuro', Moon], ['system', 'Sistema', Monitor]] as const).map(([t, l, Icon]) => (
+          {([['light', 'Light', Sun], ['dark', 'Dark', Moon], ['system', 'System', Monitor]] as const).map(([t, l, Icon]) => (
             <button key={t} onClick={(e) => setThemeAnimated(t, e)} className={cx('inline-flex items-center gap-2 rounded-xl border-2 px-4 py-2 text-sm font-medium', s.theme === t ? 'border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-200' : 'border-slate-200 dark:border-slate-700')}><Icon size={16} />{l}</button>
           ))}
         </div>
-        <label className="mt-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={s.showTranslations} onChange={(e) => updateSettings({ showTranslations: e.target.checked })} className="h-4 w-4" /> Mostrar traducciones al español en los ejemplos</label>
+        <label className="mt-4 flex items-center gap-2 text-sm"><input type="checkbox" checked={s.showSpanish} onChange={(e) => updateSettings({ showSpanish: e.target.checked })} className="h-4 w-4" /> Show Spanish translations in the examples</label>
       </Card>
 
       <VoiceSettings />
 
       <Card>
-        <div className="mb-3 font-semibold text-slate-900 dark:text-white">Objetivos diarios</div>
+        <div className="mb-3 font-semibold text-slate-900 dark:text-white">Daily goals</div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="text-sm">XP por día
+          <label className="text-sm">XP per day
             <select value={s.dailyXpGoal} onChange={(e) => updateSettings({ dailyXpGoal: Number(e.target.value) })} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
-              {[50, 100, 150, 250, 400].map((n) => <option key={n} value={n}>{n} XP {n === 50 ? '(suave)' : n === 100 ? '(normal)' : n === 150 ? '(serio)' : '(intenso)'}</option>)}
+              {[50, 100, 150, 250, 400].map((n) => <option key={n} value={n}>{n} XP {n === 50 ? '(light)' : n === 100 ? '(normal)' : n === 150 ? '(serious)' : '(intense)'}</option>)}
             </select>
           </label>
-          <label className="text-sm">Tarjetas de vocabulario por día
+          <label className="text-sm">Vocabulary cards per day
             <select value={s.dailyCardsGoal} onChange={(e) => updateSettings({ dailyCardsGoal: Number(e.target.value) })} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
               {[5, 10, 15, 20, 30, 50].map((n) => <option key={n} value={n}>{n}</option>)}
             </select>
           </label>
         </div>
-        <p className="mt-2 text-xs text-slate-500">El plan de estudio recomienda aprender entre 20 y 60 palabras nuevas por semana.</p>
+        <p className="mt-2 text-xs text-slate-500">The study plan recommends learning between 20 and 60 new words a week.</p>
       </Card>
 
       <Card>
-        <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><KeyRound size={18} /> English Assistant con IA (opcional)</div>
-        <p className="mb-3 text-sm text-slate-500">Sin clave, el asistente solo busca en el material. Con una clave de la API de Claude (console.anthropic.com), responde preguntas, corrige oraciones y practica conversaciones. La clave se guarda únicamente en este navegador y se envía solo a api.anthropic.com. El uso de la API tiene costo en tu cuenta de Anthropic.</p>
+        <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><KeyRound size={18} /> AI English Assistant (optional)</div>
+        <p className="mb-3 text-sm text-slate-500">Without a key, the assistant only searches the material. With a Claude API key (console.anthropic.com), it answers questions, corrects sentences and practises conversations. The key is stored only in this browser and sent only to api.anthropic.com. API use is charged to your Anthropic account.</p>
         <div className="flex flex-col gap-3">
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={s.aiProvider === 'anthropic'} onChange={(e) => updateSettings({ aiProvider: e.target.checked ? 'anthropic' : 'none' })} className="h-4 w-4" /> Activar IA</label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={s.aiProvider === 'anthropic'} onChange={(e) => updateSettings({ aiProvider: e.target.checked ? 'anthropic' : 'none' })} className="h-4 w-4" /> Turn on AI</label>
           <input type="password" autoComplete="off" value={key} onChange={(e) => setKey(e.target.value)} placeholder="sk-ant-…" className="input" disabled={s.aiProvider !== 'anthropic'} />
           <label className="text-sm">Modelo
             <select value={s.aiModel} onChange={(e) => updateSettings({ aiModel: e.target.value })} disabled={s.aiProvider !== 'anthropic'} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
-              <option value="claude-opus-5-5">Claude Opus 5.5 (recomendado)</option>
-              <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (más económico)</option>
-              <option value="claude-haiku-5-5">Claude Haiku 5.5 (el más económico)</option>
+              <option value="claude-opus-5-5">Claude Opus 5.5 (recommended)</option>
+              <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (cheaper)</option>
+              <option value="claude-haiku-5-5">Claude Haiku 5.5 (cheapest)</option>
             </select>
           </label>
           <div className="flex gap-2">
-            <Button disabled={s.aiProvider !== 'anthropic'} onClick={() => { updateSettings({ aiKey: key.trim() }); notify({ kind: 'info', title: 'Clave guardada' }); }}>Guardar clave</Button>
-            {s.aiKey && <Button variant="ghost" onClick={() => { setKey(''); updateSettings({ aiKey: '' }); }}>Borrar clave</Button>}
+            <Button disabled={s.aiProvider !== 'anthropic'} onClick={() => { updateSettings({ aiKey: key.trim() }); notify({ kind: 'info', title: 'Key saved' }); }}>Save key</Button>
+            {s.aiKey && <Button variant="ghost" onClick={() => { setKey(''); updateSettings({ aiKey: '' }); }}>Delete key</Button>}
           </div>
         </div>
       </Card>
 
       <Card>
-        <div className="mb-1 font-semibold text-slate-900 dark:text-white">Datos y progreso</div>
-        <p className="mb-3 text-sm text-slate-500">Tu progreso se guarda en este navegador (almacenamiento local). Exportalo para tener una copia o pasarlo a otro dispositivo.</p>
+        <div className="mb-1 font-semibold text-slate-900 dark:text-white">Data and progress</div>
+        <p className="mb-3 text-sm text-slate-500">Your progress is saved in this browser (local storage). Export it to keep a copy or move it to another device.</p>
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={doExport}><Download size={16} /> Exportar progreso</Button>
-          <Button variant="secondary" onClick={() => fileRef.current?.click()}><Upload size={16} /> Importar</Button>
+          <Button variant="secondary" onClick={doExport}><Download size={16} /> Export progress</Button>
+          <Button variant="secondary" onClick={() => fileRef.current?.click()}><Upload size={16} /> Import</Button>
           <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) doImport(f); e.target.value = ''; }} />
-          {!confirmReset ? <Button variant="ghost" onClick={() => setConfirmReset(true)}><RotateCcw size={16} /> Reiniciar progreso</Button>
-            : <><Button variant="danger" onClick={() => { resetProgress(); setConfirmReset(false); notify({ kind: 'info', title: 'Progreso reiniciado' }); }}>Sí, borrar todo</Button><Button variant="ghost" onClick={() => setConfirmReset(false)}>Cancelar</Button></>}
+          {!confirmReset ? <Button variant="ghost" onClick={() => setConfirmReset(true)}><RotateCcw size={16} /> Reset progress</Button>
+            : <><Button variant="danger" onClick={() => { resetProgress(); setConfirmReset(false); notify({ kind: 'info', title: 'Progress reset' }); }}>Yes, delete everything</Button><Button variant="ghost" onClick={() => setConfirmReset(false)}>Cancel</Button></>}
         </div>
       </Card>
     </div>

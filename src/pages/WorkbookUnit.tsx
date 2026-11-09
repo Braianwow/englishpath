@@ -23,16 +23,16 @@ export default function WorkbookUnit() {
   const s = wbStats(w.id, p);
   const readings = READINGS.filter((r) => r.ref === w.id);
 
-  if (practice) return <Session items={practice} title={`Gramática de Unit ${w.n}: ${w.title}`} onExit={() => setPractice(null)} finishLabel="Volver a la unidad" />;
+  if (practice) return <Session items={practice} title={`Unit ${w.n} grammar: ${w.title}`} onExit={() => setPractice(null)} finishLabel="Back to the unit" />;
 
   return (
     <div className="flex flex-col gap-5">
       <Link to="/workbook" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-600"><ChevronLeft size={16} /> Objective First</Link>
-      <PageHeader eyebrow={`Unit ${w.n} · ${w.topic}`} title={w.title} subtitle={!w.titleKnown ? 'El título de esta unidad no se pudo leer en el escaneo del PDF; se muestra su tema.' : undefined} actions={<SourceTag src="obj" />} />
+      <PageHeader eyebrow={`Unit ${w.n} · ${w.topic}`} title={w.title} subtitle={!w.titleKnown ? "This unit's title couldn't be read in the PDF scan, so its topic is shown." : undefined} actions={<SourceTag src="obj" />} />
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="flex flex-col gap-5 lg:col-span-2">
           <Card>
-            <div className="mb-2 font-semibold text-slate-900 dark:text-white">Qué se practica en esta unidad del workbook</div>
+            <div className="mb-2 font-semibold text-slate-900 dark:text-white">What this workbook unit practises</div>
             <div className="mb-3 flex flex-wrap gap-1.5">{w.skills.map((k) => <Badge key={k} tone="sky">{k}</Badge>)}</div>
             <ul className="list-disc space-y-1 pl-5 text-slate-600 dark:text-slate-300">{w.vocab.map((v, i) => <li key={i}>{v}</li>)}</ul>
             {w.tip && <div className="mt-3 flex gap-2 rounded-xl bg-amber-50 p-3 text-sm dark:bg-amber-500/10"><Lightbulb size={18} className="shrink-0 text-amber-500" />{w.tip}</div>}
@@ -41,8 +41,8 @@ export default function WorkbookUnit() {
           {w.grammar.length > 0 && (
             <Card>
               <div className="mb-3 flex items-center justify-between gap-2">
-                <div className="font-semibold text-slate-900 dark:text-white">Gramática de la unidad</div>
-                {s.units.length > 0 && <Button size="sm" onClick={() => setPractice(buildFocusPractice(s.units, p, 12))}><Dumbbell size={14} /> Practicar todo</Button>}
+                <div className="font-semibold text-slate-900 dark:text-white">Unit grammar</div>
+                {s.units.length > 0 && <Button size="sm" onClick={() => setPractice(buildFocusPractice(s.units, p, 12))}><Dumbbell size={14} /> Practise everything</Button>}
               </div>
               {w.grammar.map((g, i) => (
                 <div key={i} className="mb-3">
@@ -68,7 +68,7 @@ export default function WorkbookUnit() {
             <Card>
               <div className="mb-3 flex items-center justify-between gap-2">
                 <div className="font-semibold text-slate-900 dark:text-white">Vocabulario ({s.words.length})</div>
-                <LinkButton size="sm" variant="secondary" to="/vocabulary?tab=review">Repasar con tarjetas</LinkButton>
+                <LinkButton size="sm" variant="secondary" to="/vocabulary?tab=review">Review with flashcards</LinkButton>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {s.words.map((v) => (
@@ -85,14 +85,14 @@ export default function WorkbookUnit() {
         <div className="flex flex-col gap-4">
           {readings.map((r) => (
             <Card key={r.id}>
-              <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><BookOpen size={18} /> Lectura</div>
+              <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><BookOpen size={18} /> Reading</div>
               <div className="text-sm text-slate-600 dark:text-slate-300">{r.title}</div>
               <div className="mb-3 mt-1"><SourceTag src="extra" /></div>
-              <LinkButton size="sm" to={`/readings/${r.id}`}>Leer y responder</LinkButton>
+              <LinkButton size="sm" to={`/readings/${r.id}`}>Read and answer</LinkButton>
             </Card>
           ))}
           <Card className="text-sm text-slate-500">
-            El workbook es un PDF escaneado; su contenido se recuperó con reconocimiento de texto (OCR). Los textos y ejercicios originales del libro no se reproducen aquí: la plataforma usa su temario, su vocabulario y su gramática como base.
+            The workbook is a scanned PDF; its content was recovered with text recognition (OCR). The book's original texts and exercises are not reproduced here: the platform uses its topics, vocabulary and grammar as a base.
           </Card>
         </div>
       </div>

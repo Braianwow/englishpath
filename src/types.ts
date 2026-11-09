@@ -166,7 +166,7 @@ export interface Settings {
   theme: 'light' | 'dark' | 'system';
   dailyXpGoal: number;
   dailyCardsGoal: number;
-  showTranslations: boolean;
+  showSpanish: boolean;
   aiProvider: 'none' | 'anthropic';
   aiKey: string;
   aiModel: string;
