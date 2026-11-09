@@ -90,6 +90,32 @@ let token = 0;
 
 let scheduled: AudioBufferSourceNode[] = [];
 
+/**
+ * Browsers only allow sound after the user has touched the page. The first tap or key press
+ * anywhere unlocks the audio, so later replies (and the greeting after a reload) can play.
+ */
+export function unlockAudio() {
+  try {
+    ctx ??= new AudioContext();
+    if (ctx.state !== 'running') ctx.resume().catch(() => {});
+  } catch { /* no Web Audio */ }
+}
+if (typeof window !== 'undefined') {
+  const once = () => unlockAudio();
+  window.addEventListener('pointerdown', once, { passive: true });
+  window.addEventListener('keydown', once);
+}
+
+/** True when the page is allowed to play sound right now. */
+export async function audioAllowed(): Promise<boolean> {
+  try {
+    ctx ??= new AudioContext();
+    if (ctx.state === 'running') return true;
+    await Promise.race([ctx.resume(), new Promise((r) => setTimeout(r, 300))]);
+    return (ctx.state as string) === 'running';
+  } catch { return false; }
+}
+
 export function stopAi() {
   token++;
   for (const s of [...scheduled, ...(current ? [current] : [])]) { try { s.stop(); } catch { /* already stopped */ } }
@@ -109,41 +135,53 @@ function sentences(text: string): string[] {
   return out;
 }
 
+const withTimeout = <T,>(p: Promise<T>, ms: number) =>
+  Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+
 /**
  * Speaks with the AI voice. Long replies are generated sentence by sentence: the first sentence
  * starts playing as soon as it is ready while the next ones are generated in the background.
- * Resolves false if it could not (so the caller can fall back).
+ * A sentence that fails is skipped; `onEnd` is always called exactly once.
+ * Resolves false if nothing could be played (so the caller can fall back to another voice).
  */
 export async function speakAi(text: string, voice: string, speed: number, onEnd?: () => void): Promise<boolean> {
   stopAi();
   const my = token;
+  let ended = false;
+  const finish = () => { if (!ended && my === token) { ended = true; onEnd?.(); } };
   try {
-    ctx ??= new AudioContext();
-    if (ctx.state === 'suspended') await ctx.resume();
+    if (!(await audioAllowed())) return false; // sound blocked until the user taps: let the caller fall back
+    const c = ctx!;
     const parts = sentences(text);
-    const jobs = parts.map((p) => generate(p, voice, speed)); // queued in order in the worker
+    const jobs = parts.map((p) => withTimeout(generate(p, voice, speed), 20000)); // queued in order in the worker
     jobs.forEach((j) => j.catch(() => {}));
     let at = 0;
+    let lastSrc: AudioBufferSourceNode | null = null;
     for (let i = 0; i < jobs.length; i++) {
-      const { audio, sr } = await jobs[i];
+      let res: { audio: Float32Array; sr: number };
+      try { res = await jobs[i]; } catch { continue; } // skip a sentence that failed
       if (my !== token) return true; // something else started meanwhile
-      const buf = ctx.createBuffer(1, audio.length, sr);
-      buf.copyToChannel(new Float32Array(audio), 0);
-      const src = ctx.createBufferSource();
+      const buf = c.createBuffer(1, res.audio.length, res.sr);
+      buf.copyToChannel(new Float32Array(res.audio), 0);
+      const src = c.createBufferSource();
       src.buffer = buf;
-      src.connect(ctx.destination);
-      at = Math.max(at, ctx.currentTime + 0.02);
-      const last = i === jobs.length - 1;
+      src.connect(c.destination);
+      at = Math.max(at, c.currentTime + 0.02);
       src.onended = () => {
         scheduled = scheduled.filter((x) => x !== src);
         if (current === src) current = null;
-        if (last && my === token) onEnd?.();
+        if (src === lastSrc) finish();
       };
       current = src;
       scheduled.push(src);
       src.start(at);
       at += buf.duration + 0.12; // small natural pause between sentences
+      lastSrc = src;
     }
+    if (!lastSrc) return false; // nothing could be generated
+    // safety net: if the browser never fires "ended", don't leave the conversation waiting
+    const waitMs = Math.max(0, (at - c.currentTime) * 1000) + 1500;
+    setTimeout(finish, waitMs);
     return true;
   } catch {
     return false;

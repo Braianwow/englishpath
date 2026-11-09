@@ -8,7 +8,7 @@ import { localReport, localTurn } from '../lib/freeTutor';
 import { describeError } from '../lib/assistant';
 import { getSttEngine, listen, recognitionSupported } from '../lib/recognition';
 import { preloadLocalStt } from '../lib/localStt';
-import { aiSupported, loadAiVoice } from '../lib/neuralTts';
+import { aiSupported, loadAiVoice, unlockAudio } from '../lib/neuralTts';
 import { llmTurn, llmWanted, startLlm, stopLlm, useLlmStatus, webGpuAvailable } from '../lib/localLlm';
 import { speak, stopSpeaking } from '../lib/speech';
 import { Button, Card, cx } from '../components/ui';
@@ -94,7 +94,12 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
     if (s.voiceEngine === 'ai' && aiSupported()) loadAiVoice();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // browsers block sound until the user touches the page (e.g. right after a reload)
+  const [waitingTap, setWaitingTap] = useState<string | null>(null);
   const say = (text: string) => {
+    const ua = (navigator as unknown as { userActivation?: { hasBeenActive: boolean } }).userActivation;
+    if (ua && !ua.hasBeenActive) { setWaitingTap(text); return; }
+    setWaitingTap(null);
     setSpeaking(true);
     speak(text, 'en-US', 1, () => {
       setSpeaking(false);
@@ -213,6 +218,12 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
         {interim && <div className="self-end max-w-[85%] rounded-2xl rounded-tr-sm border-2 border-dashed border-brand-500/60 px-4 py-3 text-slate-500">{interim}…</div>}
         {sttStatus && <div className="self-end text-sm text-slate-500">🎙️ {sttStatus}</div>}
         {thinking && <div className="flex items-center gap-2 text-sm text-slate-500"><Loader2 size={16} className="animate-spin" /> Jake is thinking…</div>}
+        {waitingTap && (
+          <button onClick={() => { const t = waitingTap; unlockAudio(); say(t); }}
+            className="pressable self-start rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-sm hover:bg-brand-400">
+            🔊 Tap to hear Jake
+          </button>
+        )}
         {error && <div className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</div>}
         <div ref={endRef} />
       </div>

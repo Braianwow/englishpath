@@ -97,7 +97,14 @@ function speakSystem(text: string, lang: string, rate: number, onEnd?: () => voi
     if (voice) u.voice = voice;
     u.pitch = s.voicePitch ?? style.pitch;
     u.rate = Math.min(2, Math.max(0.4, rate * (s.voiceRate ?? style.rate)));
-    if (onEnd) { u.onend = onEnd; u.onerror = onEnd; }
-    synth.speak(u);
-  } catch { /* speech not available */ }
+    // onEnd exactly once, even if the browser never fires "end" (a known Chrome problem)
+    let done = false;
+    const finish = () => { if (!done) { done = true; clearTimeout(guard); onEnd?.(); } };
+    const words = text.split(/\s+/).length;
+    const guard = setTimeout(finish, 2500 + (words * 450) / Math.max(0.5, u.rate));
+    u.onend = finish;
+    u.onerror = finish;
+    // speaking right after cancel() sometimes drops the sentence in Chrome: wait a moment
+    setTimeout(() => { try { synth.speak(u); } catch { finish(); } }, 60);
+  } catch { onEnd?.(); /* speech not available */ }
 }
