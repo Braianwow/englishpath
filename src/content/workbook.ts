@@ -1,0 +1,48 @@
+/**
+ * Objective First Workbook (Cambridge English, with answers) — 24 thematic
+ * units. The PDF is a scanned book; its text was recovered with OCR. This file
+ * records, for each unit, the skills and language points the workbook practises
+ * and links each grammar point to the English Grammar in Use unit(s) that teach it.
+ * Titles are those printed in the workbook; unit 15's title could not be read
+ * from the scan, so it is described by its topic.
+ */
+export interface WorkbookUnit {
+  id: string;
+  n: number;
+  title: string;
+  titleKnown: boolean;
+  topic: string;
+  skills: string[];
+  grammar: { label: string; units: string[] }[];
+  vocab: string[]; // vocabulary focus as printed in the workbook
+  tip?: string;
+}
+
+export const WORKBOOK: WorkbookUnit[] = [
+  { id: 'wb1', n: 1, title: 'Fashion matters', titleKnown: true, topic: 'Moda y ropa', skills: ['Vocabulary (Spellcheck)', 'Phrasal verbs', 'Reading', 'Grammar'], grammar: [{ label: 'Comparison (comparativos, not as … as)', units: ['u105', 'u106', 'u107', 'u108'] }], vocab: ['Ortografía: consonantes dobles (Corpus spot)', 'Phrasal verbs de ropa: dress up, keep up with, pull on, put together, smarten up, stand out, get away with'], tip: 'Corpus spot: los candidatos a examen suelen equivocarse con las consonantes dobles (imagine, beautiful, brilliant, beginning, disappointed, happiness).' },
+  { id: 'wb2', n: 2, title: 'The virtual world', titleKnown: true, topic: 'Videojuegos y tecnología', skills: ['Listening', 'Reading', 'Grammar', 'Vocabulary'], grammar: [{ label: 'Review of present tenses', units: ['u1', 'u2', 'u3', 'u4'] }], vocab: ['Juegos: graphics, clone, adventure, opponent, version, weapons, solve, effects', 'Adjetivos: anti-social, messy, demanding, aggressive, sophisticated'] },
+  { id: 'wb3', n: 3, title: 'Going places', titleKnown: true, topic: 'Viajes', skills: ['Vocabulary (Travel quiz)', 'Phrasal verbs', 'Grammar'], grammar: [{ label: 'Obligation, necessity and permission', units: ['u31', 'u32'] }, { label: 'Prepositions of location', units: ['u123', 'u124', 'u125'] }], vocab: ['Viajes: cruise, tourists, ferry, yacht, harbour, cabin, travel agent, flight', 'Phrasal verbs informales vs. verbos formales: feel like, depart for, put up with, recover from'] },
+  { id: 'wb4', n: 4, title: 'Endangered', titleKnown: true, topic: 'Animales en peligro', skills: ['Reading (guessing unknown words)', 'Listening', 'Grammar', 'Vocabulary'], grammar: [{ label: 'as and like', units: ['u117'] }], vocab: ['Adjetivos compuestos: duty-free, cross-eyed, long-distance, absent-minded, hand-made, first-class, second-hand, self-catering, right-handed'] },
+  { id: 'wb5', n: 5, title: 'Mixed emotions', titleKnown: true, topic: 'Emociones y quejas', skills: ['Vocabulary (carta de queja)', 'Grammar', 'Reading'], grammar: [{ label: 'Review of past tenses', units: ['u5', 'u6', 'u15', 'u16'] }], vocab: ['Carta de queja: disaster, compensation, dreadful, refund, unhelpful, conditions'] },
+  { id: 'wb6', n: 6, title: 'What if?', titleKnown: true, topic: 'Fama, suerte y posibilidades', skills: ['Listening', 'Grammar', 'Vocabulary', 'Writing (orden de palabras)'], grammar: [{ label: 'Conditionals with if and unless', units: ['u38', 'u39', 'u40', 'u115'] }], vocab: ['Familias de palabras: talent, delight, irritated, rarely'] },
+  { id: 'wb7', n: 7, title: 'Life’s too short', titleKnown: true, topic: 'Deportes y aventura', skills: ['Reading', 'Grammar', 'Vocabulary', 'Writing (informe)'], grammar: [{ label: 'Gerunds and infinitives 1', units: ['u53', 'u54', 'u55', 'u60', 'u61', 'u64'] }], vocab: ['Deporte: win, nil, referee, court, club, lap, pitch, striker, coach'] },
+  { id: 'wb8', n: 8, title: 'Growing up', titleKnown: true, topic: 'Infancia y recuerdos', skills: ['Listening', 'Vocabulary', 'Grammar'], grammar: [{ label: 'used to and would', units: ['u18', 'u36'] }], vocab: ['Collocations verbo + sustantivo: do, taste, spend, keep, break a promise', 'Adverbio + adjetivo: highly praised, deeply disappointed, perfectly reasonable', 'Definiciones: feast, landmark, decent, sensible, hideous'] },
+  { id: 'wb9', n: 9, title: 'The hard sell', titleKnown: true, topic: 'Publicidad', skills: ['Reading', 'Grammar', 'Vocabulary'], grammar: [{ label: 'Speculation and deduction', units: ['u27', 'u28', 'u29'] }], vocab: ['Publicidad: jingle, slogan, budget, brand', 'Collocations con broad / deep / wide'] },
+  { id: 'wb10', n: 10, title: 'The final frontier', titleKnown: true, topic: 'El espacio y el futuro', skills: ['Vocabulary', 'Listening', 'Grammar', 'Writing'], grammar: [{ label: 'Review of future tenses', units: ['u19', 'u20', 'u21', 'u23', 'u24'] }], vocab: ['Expresiones con at: at first, at his best, at once, at least, at war, at last, at risk'] },
+  { id: 'wb11', n: 11, title: 'Like mother, like daughter', titleKnown: true, topic: 'Familia y personalidad', skills: ['Vocabulary (word formation)', 'Writing'], grammar: [], vocab: ['Formación de palabras: personality, appearance, likely, relationship, choice', 'Intensidad de adjetivos: nervous → terrified, pleased → overjoyed, surprised → speechless', 'Inglés americano vs. británico'] },
+  { id: 'wb12', n: 12, title: 'A great idea', titleKnown: true, topic: 'Inventos', skills: ['Reading', 'Grammar', 'Vocabulary', 'Listening'], grammar: [{ label: 'The passive', units: ['u42', 'u43', 'u44', 'u46'] }], vocab: ['Phrasal verbs con come y take: take after, take up, come round, take on, come across'] },
+  { id: 'wb13', n: 13, title: 'Education for life', titleKnown: true, topic: 'Educación', skills: ['Reading', 'Grammar', 'Vocabulary'], grammar: [{ label: 'Reporting', units: ['u47', 'u48'] }], vocab: ['Expresiones con make: make a good impression, make sense of, make use of, make a move', 'make vs. do'] },
+  { id: 'wb14', n: 14, title: 'Career moves', titleKnown: true, topic: 'Trabajo y carreras', skills: ['Vocabulary (word formation)', 'Writing', 'Grammar'], grammar: [{ label: 'all and the whole', units: ['u88', 'u90'] }], vocab: ['Formación de palabras: selection, specialise, massive, availability, imaginative, expansion'] },
+  { id: 'wb15', n: 15, title: 'Unidad 15 — medio ambiente y clima', titleKnown: false, topic: 'Medio ambiente', skills: ['Vocabulary', 'Writing (carta)', 'Grammar'], grammar: [{ label: 'some, any, no, every', units: ['u85', 'u86'] }, { label: 'Conectores: although, despite, besides, furthermore, as a result', units: ['u113'] }], vocab: ['Medio ambiente: recycled, litter, second-hand, drought, flood, flash, shower, pollutant, fossil fuels'] },
+  { id: 'wb16', n: 16, title: 'Eat to live', titleKnown: true, topic: 'Comida', skills: ['Reading', 'Listening', 'Grammar'], grammar: [{ label: 'The article', units: ['u71', 'u72', 'u73', 'u74', 'u75', 'u76'] }], vocab: [] },
+  { id: 'wb17', n: 17, title: 'Collectors and creators', titleKnown: true, topic: 'Hobbies y colecciones', skills: ['Vocabulary (word formation)', 'Grammar (open cloze)'], grammar: [{ label: 'Relative pronouns in the open cloze (whose, where, which)', units: ['u92', 'u94'] }], vocab: ['Formación de palabras: inclusion, endless, competition, analysis, energetic, collection', 'get hooked, kick off, good causes, be bound to'] },
+  { id: 'wb18', n: 18, title: 'What’s in a book?', titleKnown: true, topic: 'Libros y lectura', skills: ['Reading', 'Vocabulary', 'Grammar'], grammar: [{ label: 'enough, too, very, so, such', units: ['u102', 'u103'] }], vocab: ['Libros y escritura: novel, author, plot, chapter, hardback, paperback, publisher'] },
+  { id: 'wb19', n: 19, title: 'An apple a day …', titleKnown: true, topic: 'Salud y estado físico', skills: ['Reading', 'Vocabulary', 'Grammar', 'Writing', 'Listening'], grammar: [{ label: 'Consejos y sugerencias: it’s high time, had better, if I were you, suggest', units: ['u33', 'u34', 'u35', 'u39'] }], vocab: ['Formación de palabras: attendance, choice, fitness, disruptive, manageable, confident, effective, suitable'] },
+  { id: 'wb20', n: 20, title: 'No place to hide', titleKnown: true, topic: 'Delito y vigilancia', skills: ['Vocabulary (word formation)', 'Grammar', 'Writing', 'Reading'], grammar: [{ label: 'Gerunds or infinitives 2', units: ['u56', 'u57', 'u58'] }], vocab: ['Formación de palabras: popularity, burglary, relatively, conventional, equality, regardless'] },
+  { id: 'wb21', n: 21, title: 'Urban decay, suburban hell', titleKnown: true, topic: 'La ciudad', skills: ['Reading', 'Grammar', 'Vocabulary'], grammar: [{ label: 'Mixed conditionals', units: ['u38', 'u39', 'u40'] }], vocab: ['Formación de palabras: existence, location, successful, requirements, funding, regeneration'] },
+  { id: 'wb22', n: 22, title: 'A world of music', titleKnown: true, topic: 'Música', skills: ['Vocabulary', 'Writing', 'Listening'], grammar: [], vocab: ['Música: performance, conductor, rehearsal, compose, orchestra, stage, cello, key'] },
+  { id: 'wb23', n: 23, title: 'Unexpected events', titleKnown: true, topic: 'Clima y fenómenos naturales', skills: ['Vocabulary', 'Reading', 'Grammar'], grammar: [{ label: 'wish / If only', units: ['u39', 'u40', 'u41'] }], vocab: ['Clima: hurricane, snow, lightning, storm, raindrop, shower, thunder, forecast, flood'] },
+  { id: 'wb24', n: 24, title: 'Anything for a laugh', titleKnown: true, topic: 'Humor y entretenimiento', skills: ['Vocabulary (word formation)', 'Listening', 'Grammar'], grammar: [{ label: 'Key word transformations: put up with, would rather, insist on', units: ['u59', 'u62', 'u136'] }], vocab: ['Formación de palabras: comedian, substantial, entertainment, similar, viewer'] },
+];
+
+export const WB_BY_ID: Record<string, WorkbookUnit> = Object.fromEntries(WORKBOOK.map((w) => [w.id, w]));

@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body { @apply bg-slate-50 text-slate-700 antialiased dark:bg-slate-950 dark:text-slate-300; font-feature-settings: 'cv11', 'ss01'; }
+  :focus-visible { @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-950; }
+  input, textarea { @apply text-slate-900 dark:text-white; }
+}
+
+@layer components {
+  .input { @apply w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-slate-700 dark:bg-slate-900; }
+  .chip { @apply rounded-xl border-2 border-slate-200 bg-white px-3 py-2 text-base font-medium text-slate-800 shadow-sm hover:border-brand-300 hover:bg-brand-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-brand-500/50 dark:hover:bg-brand-500/10; }
+  .table-clean { @apply w-full border-separate border-spacing-0 overflow-hidden rounded-xl text-sm; }
+  .table-clean th { @apply bg-slate-100 px-3 py-2 text-left font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200; }
+  .table-clean td { @apply border-t border-slate-100 px-3 py-2 dark:border-slate-800; }
+}
+
+/* ── Press animation: every button and tappable link shrinks a bit and springs back ── */
+button, .pressable, a.chip {
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), background-color .2s, color .2s, border-color .2s, box-shadow .2s, opacity .2s;
+}
+button:not(:disabled):active, .pressable:active { transform: scale(.95); }
+
+/* Ripple created by src/lib/ripple.ts */
+.ripple-host { position: relative; overflow: hidden; isolation: isolate; }
+.ripple {
+  position: absolute; border-radius: 9999px; pointer-events: none; z-index: -1;
+  background: currentColor; opacity: .18; transform: scale(0);
+  animation: ripple .55s ease-out forwards;
+}
+@keyframes ripple { to { transform: scale(1); opacity: 0; } }
+
+/* ── Theme change ── */
+html.theme-fade, html.theme-fade *, html.theme-fade *::before, html.theme-fade *::after {
+  transition: background-color .45s ease, color .45s ease, border-color .45s ease, fill .45s ease, stroke .45s ease !important;
+}
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { z-index: 2; }
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+
+.flip { perspective: 1200px; }
+.flip-inner { transition: transform .5s cubic-bezier(.2,.7,.2,1); transform-style: preserve-3d; }
+.flip-inner.flipped { transform: rotateY(180deg); }
+.flip-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip-back { transform: rotateY(180deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
