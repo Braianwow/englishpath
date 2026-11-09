@@ -27,12 +27,15 @@ import { m14 } from './units/m14';
 import { m15 } from './units/m15';
 import { m16 } from './units/m16';
 
+/** In "tap the wrong word" items the sentence may be correct, so the story must not say there is a mistake. */
+const neutral = (s: string) => s.replace(/,? pero (se equivoca|lo dice mal|arma mal la pregunta|contesta mal|se equivoca al decirlo)/g, '');
+
 const SOURCES: UnitSrc[][] = [m01, m02, m03, m04, m05, m06, m07, m08, m09, m10, m11, m12, m13, m14, m15, m16];
 
 export const UNITS: GrammarUnit[] = SOURCES.flatMap((list, i) => list.map((u) => {
   const unit = buildUnit(u, MODULES[i].id);
   const story = UNIT_STORIES[u.n] ?? [];
-  return { ...unit, ex: unit.ex.map((e, j) => (story[j] ? { ...e, sit: story[j] } : e)), cuad: CUADERNILLO[u.n], sets: SETS[u.n] };
+  return { ...unit, ex: unit.ex.map((e, j) => (story[j] ? { ...e, sit: e.t === 'spot' ? neutral(story[j]) : story[j] } : e)), cuad: CUADERNILLO[u.n], sets: SETS[u.n] };
 }))
   .sort((a, b) => a.n - b.n);
 export const UNIT_BY_ID: Record<string, GrammarUnit> = Object.fromEntries(UNITS.map((u) => [u.id, u]));

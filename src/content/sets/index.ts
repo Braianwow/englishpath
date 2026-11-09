@@ -14,6 +14,13 @@ import { s05 } from './s05';
 import { s06 } from './s06';
 import { s07 } from './s07';
 import { SET_STORY } from '../stories/sets';
+import { SI1 } from '../stories/setItems1';
+import { SI2 } from '../stories/setItems2';
+import { SI3 } from '../stories/setItems3';
+import { SI4 } from '../stories/setItems4';
+
+/** Story line for each item of each set ('' when the item has its own situation). */
+export const SET_ITEM_STORY: Record<string, string[]> = { ...SI1, ...SI2, ...SI3, ...SI4 };
 
 export type RawSet = [string, string, string[]];
 
@@ -24,8 +31,8 @@ export const SETS: Record<number, ExerciseSet[]> = Object.fromEntries(
     ref, ins,
     ex: lines.map((l, i) => {
       const ex = parseExercise(l);
-      // the item's own situation if it has one; otherwise the story of the whole set
-      return { ...ex, sit: ex.sit ?? SET_STORY[ref], d: 1 as const, src: 'set' as const, ref: `${ref} ${String.fromCharCode(97 + i)}`, ins };
+      // the item's own situation if it has one; otherwise its story line; the set story only as a last resort
+      return { ...ex, sit: ex.sit ?? (SET_ITEM_STORY[ref]?.[i] || SET_STORY[ref]), d: 1 as const, src: 'set' as const, ref: `${ref} ${String.fromCharCode(97 + i)}`, ins };
     }),
   }))]),
 );

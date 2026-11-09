@@ -116,7 +116,7 @@ export const CUAD_SIT: Record<number, string> = {
   109: 'Sofi le cuenta a Jake cuándo y dónde se cruzó con Lucía.',
   110: 'Jake le habla a Sofi de su compañera de trabajo, que casi nunca llega a horario.',
   111: 'Sofi pasa por la parada a las 9 y ve a la misma señora que vio a las 8.',
-  112: 'En clase, la profesora hace una pregunta tan difícil que nadie la sabe.',
+  112: 'Sofi fue a un juego de preguntas en un bar con su clase y su profesora. Hubo una pregunta que no supo responder nadie del grupo. Sofi se lo cuenta a Jake:',
   113: 'Sofi y Jake estaban de vacaciones en Escocia y el clima era horrible.',
   114: 'Sofi sale sola de noche y Jake se queda tranquilo con una condición.',
   115: 'Tomi, el hermano de Sofi, le pide el auto prestado a su papá.',

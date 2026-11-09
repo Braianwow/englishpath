@@ -4,7 +4,8 @@ import { MODULES } from './modules';
 import { VOCAB } from './vocab';
 import { READINGS } from './readings';
 import { CUADERNILLO } from './cuadernillo';
-import { SETS } from './sets';
+import { SETS, SET_ITEM_STORY } from './sets';
+import { SET_STORY } from './stories/sets';
 import { tokensOf, matches } from '../lib/grade';
 
 const ctx = (u: { n: number }, i: number) => `U${u.n} ex#${i}`;
@@ -128,6 +129,19 @@ describe('stories', () => {
   it('every exercise in the practice pools has a story or situation', () => {
     const missing = UNITS.flatMap((u) => unitPool(u).filter((k) => !k.ex.sit).map((k) => k.key));
     expect(missing).toEqual([]);
+  });
+});
+
+describe('set item stories', () => {
+  it('every set has one story line per item, and every item without its own situation has one', () => {
+    const problems: string[] = [];
+    Object.values(SETS).forEach((sets) => sets.forEach((s) => {
+      const lines = SET_ITEM_STORY[s.ref];
+      if (!lines) { problems.push(`${s.ref}: sin historias`); return; }
+      if (lines.length !== s.ex.length) problems.push(`${s.ref}: ${lines.length} historias / ${s.ex.length} ítems`);
+      s.ex.forEach((e, i) => { if (!lines[i] && e.sit === SET_STORY[s.ref]) problems.push(`${s.ref} ${i}: usa la historia general`); });
+    }));
+    expect(problems).toEqual([]);
   });
 });
 
