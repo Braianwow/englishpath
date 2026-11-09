@@ -1,10 +1,10 @@
 import { useSyncExternalStore } from 'react';
 import type { Correction, TopicId, Turn } from './conversation';
 import { TOPICS } from './conversation';
-import { checkSentence } from './freeTutor';
+import { checkSentence, isSpanish, localTurn } from './freeTutor';
 
 /**
- * Free AI for the conversation with Jake: a small model (Qwen2.5-1.5B) running in the browser
+ * Free AI for the conversation with Jake: a small model (Qwen2.5-0.5B) running in the browser
  * with WebGPU (localLlm.worker.ts). Optional: the learner turns it on and it downloads once.
  */
 export type LlmStatus = { state: 'off' | 'loading' | 'ready' | 'error'; progress: number; mb: number; message?: string };
@@ -47,7 +47,7 @@ export function startLlm() {
   try { localStorage.setItem(ON_KEY, '1'); } catch { /* ignore */ }
   if (status.state === 'loading' || status.state === 'ready') return;
   setStatus({ state: 'loading', progress: 0, message: undefined });
-  getWorker().postMessage({ type: 'load' });
+  getWorker().postMessage({ type: 'load', model: MODEL, dtype: DTYPE });
 }
 
 export function stopLlm() {
@@ -56,42 +56,43 @@ export function stopLlm() {
   setStatus({ state: 'off', progress: 0 });
 }
 
+// Tested in the browser: Qwen2.5-0.5B in "q4" answers sensibly in 1–3 s on a graphics card.
+// The 1.5B model ran out of memory, and the "q4f16" format produced nonsense on some graphics cards.
+const MODEL = 'onnx-community/Qwen2.5-0.5B-Instruct';
+const DTYPE = 'q4';
+
 function chat(messages: { role: 'system' | 'user' | 'assistant'; content: string }[], maxTokens: number): Promise<string> {
   const id = nextId++;
   return new Promise((resolve, reject) => {
     pending.set(id, (r) => (r.error ? reject(new Error(r.error)) : resolve(r.text)));
-    getWorker().postMessage({ type: 'chat', id, messages, maxTokens });
+    getWorker().postMessage({ type: 'chat', id, messages, maxTokens, model: MODEL, dtype: DTYPE });
   });
 }
 
-const persona = (brief: string) => `You are Jake, a friendly, playful and confident English conversation partner (casual modern English, never rude) talking with a B1 student. Topic: ${brief}.
-The student's last message may contain grammar mistakes. Answer in this exact format and nothing else:
-CORRECTION: <the student's last message rewritten with correct grammar, or NONE if it is already correct>
-REPLY: <1-2 short, natural sentences reacting to what the student said, then ONE question that keeps the conversation going on the topic>`;
+// The model only writes Jake's reply; corrections come from the rules (small models correct badly).
+const persona = (brief: string) => `You are Jake, a friendly, playful English conversation partner chatting with a B1 student about ${brief}. Reply in 1-2 short, casual sentences that react to what the student just said, then ask the student ONE question about the topic. If the student asks you something, answer it briefly first. Always write in English. Only write your reply.`;
 
-/** Similar enough to be a correction (not a rewrite of a different sentence). */
-function closeEnough(a: string, b: string) {
-  const A = a.toLowerCase().match(/[a-z']+/g) ?? [], B = b.toLowerCase().match(/[a-z']+/g) ?? [];
-  if (!A.length || !B.length) return false;
-  const setB = new Set(B);
-  const shared = A.filter((w) => setB.has(w)).length;
-  return shared / Math.max(A.length, B.length) >= 0.6 && A.join(' ') !== B.join(' ');
+/** The reply text, without labels, quotes or extra lines; at most three sentences. */
+export function parseReply(raw: string): string {
+  const text = raw.replace(/^\s*(REPLY|Jake)\s*:\s*/i, '').replace(/CORRECTION:[^\n]*\n?/gi, '').split(/\n\s*\n/)[0];
+  const clean = text.replace(/\s+/g, ' ').replace(/^["“]|["”]$/g, '').trim();
+  const sentences = clean.match(/[^.!?]+[.!?]+["”']?|[^.!?]+$/g) ?? [clean];
+  return sentences.slice(0, 3).map((x) => x.trim()).join(' ');
 }
 
-/** Jake's next line using the in-browser model. Rule-based corrections are kept, they are reliable. */
+/** Jake's next line using the in-browser model, with the rule-based correction of the learner's line. */
 export async function llmTurn(topic: TopicId, turns: Turn[]): Promise<{ reply: string; correction: Correction | null }> {
+  const script = localTurn(topic, turns);
+  const last = [...turns].reverse().find((x) => x.role === 'me')?.text ?? '';
+  // Spanish or nothing to answer yet: the script handles it (it keeps the chat going in English)
+  if (!last || isSpanish(last)) return script;
   const t = TOPICS.find((x) => x.id === topic)!;
   const history = turns.slice(-8).map((x) => (x.role === 'tutor'
-    ? { role: 'assistant' as const, content: `REPLY: ${x.text}` }
+    ? { role: 'assistant' as const, content: x.text.replace(/^(Quick tip|Small thing|Just so you know):[^.]*\.\s*/, '') }
     : { role: 'user' as const, content: x.text }));
-  if (!history.length || history[0].role === 'assistant') history.unshift({ role: 'user', content: '(The student joins the chat.)' });
-  const raw = await chat([{ role: 'system', content: persona(t.brief) }, ...history], 110);
-  const reply = (raw.match(/REPLY:\s*([\s\S]+)/i)?.[1] ?? raw.replace(/CORRECTION:.*$/im, '')).replace(/\s+/g, ' ').trim();
-  const last = [...turns].reverse().find((x) => x.role === 'me')?.text ?? '';
-  let correction = last ? checkSentence(last) : null;
-  if (!correction && last) {
-    const fixed = raw.match(/CORRECTION:\s*(.+)/i)?.[1]?.trim().replace(/^["“]|["”]$/g, '') ?? '';
-    if (fixed && !/^none\.?$/i.test(fixed) && closeEnough(last, fixed)) correction = { said: last, better: fixed, why: 'A more correct way to say it.' };
-  }
-  return { reply: reply || 'Tell me more!', correction };
+  const reply = parseReply(await chat([{ role: 'system', content: persona(t.brief) }, ...history], 70));
+  if (reply.split(' ').length < 3 || isSpanish(reply)) return script;
+  const correction = script.correction ?? checkSentence(last);
+  const tip = correction ? `Quick tip: we say “${correction.better}”. ` : '';
+  return { reply: tip + reply, correction };
 }

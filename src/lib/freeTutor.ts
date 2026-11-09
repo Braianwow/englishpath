@@ -266,7 +266,14 @@ const JAKE: Record<TopicId, string[]> = {
   ahora: ["Busy, but good. Lots of work, lots of coffee.", "I've been studying Portuguese, actually.", "I'm really into a podcast about weird history.", 'A video of a cat falling into a pool. Classic.', "I'm going to see some friends and watch the match.", 'Not much — I try not to read too much news.', 'Waking up early every day. Terrible.', 'To run 5 kilometres without stopping.'],
 };
 
-const GREETING = /^(hi|hello|hey|good (morning|afternoon|evening))\b|how are you|how('s| is) it going|what'?s up/i;
+/** The message is (mostly) in Spanish. */
+export function isSpanish(text: string): boolean {
+  const es = (text.match(SPANISH) ?? []).length;
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return es >= 2 || (es >= 1 && words <= 3) || /[¿¡ñ]/.test(text);
+}
+
+const GREETING =/^(hi|hello|hey|good (morning|afternoon|evening))\b|how are you|how('s| is) it going|what'?s up/i;
 const ASK_BACK = /\b(and you|what about you|how about you|you\?|do you|have you|are you|what'?s yours)\b/i;
 const DONT_KNOW = /\b(i don'?t know|no idea|not sure|i can'?t remember|nothing)\b/i;
 
@@ -299,8 +306,7 @@ export function localTurn(topic: TopicId, turns: Turn[]): { reply: string; corre
     : prevWasFollowUp || words.length >= 14 || seed % 2 === 1 ? moveOn : followUp(answer, expect, seed));
 
   // Spanish: a short reminder to use English, then carry on
-  const es = (text.match(SPANISH) ?? []).length;
-  if (es >= 2 || (es >= 1 && words.length <= 3)) {
+  if (isSpanish(text)) {
     return { reply: `${pick(['English, please! 😉', 'Hey, in English! 😏', 'Nice try — English only! 😉'], seed)} ${question}`, correction: null };
   }
 

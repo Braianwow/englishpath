@@ -1,23 +1,23 @@
 /// <reference lib="webworker" />
 /**
- * A small language model (Qwen2.5-1.5B-Instruct, Apache-2.0) running in the browser with WebGPU,
- * so Jake can follow a free conversation without any API key. Downloaded once (~1.2 GB) and cached.
+ * A small language model (Qwen2.5-0.5B-Instruct, Apache-2.0) running in the browser with WebGPU,
+ * so Jake can follow a free conversation without any API key. Downloaded once (~800 MB) and cached.
  */
 import { pipeline, type TextGenerationPipeline } from '@huggingface/transformers';
 
 type Msg = { role: 'system' | 'user' | 'assistant'; content: string };
-type In = { type: 'load' } | { type: 'chat'; id: number; messages: Msg[]; maxTokens: number };
+type In = { type: 'load'; model?: string; dtype?: string } | { type: 'chat'; id: number; messages: Msg[]; maxTokens: number; model?: string; dtype?: string };
 
-const MODEL = 'onnx-community/Qwen2.5-1.5B-Instruct';
+const DEFAULT_MODEL = 'onnx-community/Qwen2.5-0.5B-Instruct';
 let gen: Promise<TextGenerationPipeline> | null = null;
 
-function load() {
+function load(model = DEFAULT_MODEL, dtype = 'q4') {
   if (!gen) {
     const files: Record<string, { loaded: number; total: number }> = {};
     gen = (async () => {
-      const p = (await pipeline('text-generation', MODEL, {
+      const p = (await pipeline('text-generation', model, {
         device: 'webgpu',
-        dtype: 'q4f16',
+        dtype: dtype as 'q4f16',
         progress_callback: (e: { status: string; file?: string; loaded?: number; total?: number }) => {
           if (e.status === 'progress' && e.file && e.total) {
             files[e.file] = { loaded: e.loaded ?? 0, total: e.total };
@@ -39,9 +39,9 @@ function load() {
 
 self.onmessage = async (ev: MessageEvent<In>) => {
   const msg = ev.data;
-  if (msg.type === 'load') { load().catch(() => {}); return; }
+  if (msg.type === 'load') { load(msg.model, msg.dtype).catch(() => {}); return; }
   try {
-    const p = await load();
+    const p = await load(msg.model, msg.dtype);
     const out = await p(msg.messages as never, { max_new_tokens: msg.maxTokens, do_sample: false, repetition_penalty: 1.1 } as never) as unknown as { generated_text: Msg[] }[];
     const conv = out[0]?.generated_text;
     const text = Array.isArray(conv) ? conv[conv.length - 1]?.content ?? '' : String(conv ?? '');

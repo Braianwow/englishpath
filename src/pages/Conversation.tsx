@@ -306,7 +306,7 @@ function FreeAiCard() {
         {llm.state === 'ready' && <Button size="sm" variant="ghost" onClick={stopLlm}>Turn off</Button>}
         {(llm.state === 'off' || llm.state === 'error') && gpu && <Button size="sm" onClick={startLlm}>Turn on free AI</Button>}
       </div>
-      {llm.state === 'off' && gpu && <p className="mt-2 text-xs text-slate-500">Downloads a 1.2 GB model once (it stays saved in the browser). Works best on computers with a graphics card. Optional: a Claude API key in <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Settings</Link> gives the smartest Jake.</p>}
+      {llm.state === 'off' && gpu && <p className="mt-2 text-xs text-slate-500">Downloads an 800 MB model once (it stays saved in the browser). Works best on computers with a graphics card. Optional: a Claude API key in <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Settings</Link> gives the smartest Jake.</p>}
       {gpu === false && llm.state !== 'ready' && <p className="mt-2 text-xs text-slate-500">This browser can't run the free AI (it needs WebGPU: an up-to-date Chrome or Edge on a computer with a graphics card). You can still use the free mode, or add a Claude API key in <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Settings</Link>.</p>}
       {llm.state === 'loading' && (
         <div className="mt-3">
