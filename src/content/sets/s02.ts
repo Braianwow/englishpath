@@ -26,19 +26,19 @@ export const s02: Record<number, RawSet[]> = {
       "_ Sorry about all the boxes in the hall. We ___ (just/move) into our new flat. = 've just moved ; have just moved >> Acaba de pasar.",
     ]],
     ['7.4', 'Leé la situación y escribí una oración con just, already o yet.', [
-      "b the film / just / start = The film has just started ; The film's just started >> just + present perfect. @@ Llegás al cine un minuto tarde. La película empezó hace un minuto.",
-      "b Ben / already / call = Ben has already called ; Ben's already called >> already. @@ Esperabas que Ben llamara a la tarde, pero ya llamó a la mañana.",
-      "b Sara / reply / yet? = Has Sara replied yet >> Pregunta con yet al final. @@ Le mandaste un mail a Sara ayer y querés saber si contestó. Le preguntás a su amiga.",
-      "b I / not / finish / the report / yet = I haven't finished the report yet ; I have not finished the report yet >> Negativa con yet al final. @@ Tu jefe te pide el informe, pero todavía te faltan dos páginas.",
+      "b the film / just / start = The film has just started ; The film's just started >> just + present perfect. @@ You get to the cinema a minute late. The film started a minute ago.",
+      "b Ben / already / call = Ben has already called ; Ben's already called >> already. @@ You expected Ben to call in the afternoon, but he called in the morning.",
+      "b Sara / reply / yet? = Has Sara replied yet >> Pregunta con yet al final. @@ You sent Sara an email yesterday and you want to know if she has answered. You ask her friend.",
+      "b I / not / finish / the report / yet = I haven't finished the report yet ; I have not finished the report yet >> Negativa con yet al final. @@ Your boss asks you for the report, but you still have two pages to write.",
     ]],
   ],
   8: [
     ['8.1', 'Le preguntás a alguien por sus experiencias. Escribí preguntas con ever.', [
-      "b ride / a horse = Have you ever ridden a horse >> Have you ever + participio. @@ Tu amiga te cuenta que se va de vacaciones a una estancia en el campo.",
-      "b be / to Australia = Have you ever been to Australia >> been to = estuviste en. @@ Tu compañero tiene una remera con un canguro.",
-      "b eat / sushi = Have you ever eaten sushi >> eat → eaten. @@ Querés invitar a un amigo a un restaurante japonés.",
-      "b lose / your passport = Have you ever lost your passport >> lose → lost. @@ Hablan de los peores momentos de sus viajes.",
-      "b run / a marathon = Have you ever run a marathon >> run → run. @@ Tu tía sale a correr todas las mañanas desde hace años.",
+      "b ride / a horse = Have you ever ridden a horse >> Have you ever + participio. @@ Your friend tells you she's going on holiday to a ranch in the country.",
+      "b be / to Australia = Have you ever been to Australia >> been to = estuviste en. @@ Your classmate is wearing a T-shirt with a kangaroo on it.",
+      "b eat / sushi = Have you ever eaten sushi >> eat → eaten. @@ You want to take a friend to a Japanese restaurant.",
+      "b lose / your passport = Have you ever lost your passport >> lose → lost. @@ You're talking about the worst moments of your trips.",
+      "b run / a marathon = Have you ever run a marathon >> run → run. @@ Your aunt has gone running every morning for years.",
     ]],
     ['8.2', 'Completá las respuestas de B. Algunas son afirmativas y otras negativas.', [
       "_ A: What's the new Mexican restaurant like? B: I don't know. I ___ (be) there. = haven't been ; have not been ; 've never been ; have never been >> Negativa: no fui nunca.",
@@ -64,10 +64,10 @@ export const s02: Record<number, RawSet[]> = {
       "_ Your little brother's hands and T-shirt are covered in paint. What ___ you ___ (do)? = have / been doing >> Pregunta por la actividad.",
     ]],
     ['9.2', 'Escribí una pregunta con How long have/has … been -ing?', [
-      "b how long / it / rain = How long has it been raining >> How long + has been + -ing. @@ Llegás a casa de un amigo y afuera sigue lloviendo muy fuerte.",
-      "b how long / Tom / learn / the guitar = How long has Tom been learning the guitar >> 3.ª persona: has. @@ Tom ya toca canciones enteras con la guitarra.",
-      "b how long / you / wait = How long have you been waiting >> have been + -ing. @@ Te encontrás con una señora en la parada del colectivo y se la ve cansada.",
-      "b how long / they / travel = How long have they been travelling ; How long have they been traveling >> Plural: have. @@ Tus amigos subieron fotos de Asia y siguen viajando.",
+      "b how long / it / rain = How long has it been raining >> How long + has been + -ing. @@ You arrive at a friend's house and it's still raining very hard outside.",
+      "b how long / Tom / learn / the guitar = How long has Tom been learning the guitar >> 3.ª persona: has. @@ Tom can already play whole songs on the guitar.",
+      "b how long / you / wait = How long have you been waiting >> have been + -ing. @@ You meet a woman at the bus stop and she looks tired.",
+      "b how long / they / travel = How long have they been travelling ; How long have they been traveling >> Plural: have. @@ Your friends have posted photos from Asia and they're still travelling.",
     ]],
     ['9.3', 'Leé la situación y completá con el present perfect continuous.', [
       "_ I started waiting for my friend at 7 o'clock. It's 8 now and she still isn't here. I ___ (wait) for an hour. = 've been waiting ; have been waiting >> for + período.",
@@ -92,10 +92,10 @@ export const s02: Record<number, RawSet[]> = {
       "_ Thanks for the book you lent me. I ___ (read) it, but I ___ (not/finish) it yet — I'm on page 200. = 've been reading / haven't finished ; have been reading / have not finished >> Actividad vs. resultado.",
     ]],
     ['10.2', 'Hacé preguntas con las palabras dadas. Usá have done o have been doing.', [
-      "b what / you / do? = What have you been doing >> Actividad reciente. @@ Tu amigo te abre la puerta con las manos negras de grasa.",
-      "b how many pages / you / read? = How many pages have you read >> Cantidad → simple. @@ Una amiga está leyendo una novela de 800 páginas.",
-      "b how long / you / play / tennis? = How long have you been playing tennis ; How long have you played tennis >> Duración. @@ Un amigo juega muy bien al tenis y entrena todas las semanas.",
-      "b how many coins / you / collect? = How many coins have you collected >> Cantidad → simple. @@ Tu primo colecciona monedas de distintos países.",
+      "b what / you / do? = What have you been doing >> Actividad reciente. @@ Your friend opens the door with his hands black with oil.",
+      "b how many pages / you / read? = How many pages have you read >> Cantidad → simple. @@ A friend is reading an 800-page novel.",
+      "b how long / you / play / tennis? = How long have you been playing tennis ; How long have you played tennis >> Duración. @@ A friend plays tennis very well and trains every week.",
+      "b how many coins / you / collect? = How many coins have you collected >> Cantidad → simple. @@ Your cousin collects coins from different countries.",
     ]],
     ['10.3', 'Leé la situación y poné el verbo en present perfect simple o continuo. Ojo con los verbos de estado.', [
       "_ Paula and I met in first grade and we're still friends. I ___ (know) her since we were at school. = 've known ; have known >> know → simple.",
@@ -114,10 +114,10 @@ export const s02: Record<number, RawSet[]> = {
       "? 'Is it still raining?' 'Yes, it started at 8 this morning. It ___ all day.' | rains | *'s been raining | is raining >> Duración hasta ahora.",
     ]],
     ['11.2', 'Leé la situación y escribí una pregunta con how long.', [
-      "b how long / she / work / there? = How long has she worked there ; How long has she been working there >> Duración hasta ahora. @@ Ruth trabaja en un museo y lo conoce de memoria.",
-      "b how long / you / have / the dog? = How long have you had the dog >> have (posesión) → simple. @@ Tu amiga tiene un perro grande que ya parece viejito.",
-      "b how long / they / be / there? = How long have they been there >> be → have been. @@ Dos amigos tuyos están de vacaciones en Perú.",
-      "b how long / you / know / her? = How long have you known her >> know → simple. @@ Tu amigo conoce a una cantante famosa y te muestra fotos con ella.",
+      "b how long / she / work / there? = How long has she worked there ; How long has she been working there >> Duración hasta ahora. @@ Ruth works in a museum and knows it by heart.",
+      "b how long / you / have / the dog? = How long have you had the dog >> have (posesión) → simple. @@ Your friend has a big dog that looks quite old now.",
+      "b how long / they / be / there? = How long have they been there >> be → have been. @@ Two friends of yours are on holiday in Peru.",
+      "b how long / you / know / her? = How long have you known her >> know → simple. @@ Your friend knows a famous singer and shows you photos with her.",
     ]],
     ['11.3', 'Completá la respuesta de B con haven’t … for … o It’s … since …', [
       "_ A: Do you see Mark often? B: Not really. He moved to Mendoza and I ___ (not/see) him for months. = haven't seen ; have not seen >> haven't + for.",
@@ -173,17 +173,17 @@ export const s02: Record<number, RawSet[]> = {
   ],
   14: [
     ['14.1', 'Leé la situación y corregí la oración.', [
-      "f I've seen Ana yesterday. = I saw Ana yesterday >> yesterday → past simple. @@ Le contás a un amigo que te cruzaste con Ana en el supermercado ayer.",
-      "f When have you arrived? = When did you arrive >> When → past simple. @@ Tu prima llegó de España hace unos días y querés saber qué día llegó.",
-      "f I didn't see Ana this week. I wonder where she is. = I haven't seen Ana this week. I wonder where she is ; I have not seen Ana this week. I wonder where she is >> this week no terminó → present perfect. @@ Es jueves y Ana, tu compañera, no vino a clase en toda la semana.",
-      "f We've been to the cinema last Friday. = We went to the cinema last Friday >> last Friday → past simple. @@ Le contás a tu abuela qué hicieron el viernes pasado.",
+      "f I've seen Ana yesterday. = I saw Ana yesterday >> yesterday → past simple. @@ You tell a friend that you ran into Ana at the supermarket yesterday.",
+      "f When have you arrived? = When did you arrive >> When → past simple. @@ Your cousin arrived from Spain a few days ago and you want to know which day.",
+      "f I didn't see Ana this week. I wonder where she is. = I haven't seen Ana this week. I wonder where she is ; I have not seen Ana this week. I wonder where she is >> this week no terminó → present perfect. @@ It's Thursday and Ana, your classmate, hasn't come to class all week.",
+      "f We've been to the cinema last Friday. = We went to the cinema last Friday >> last Friday → past simple. @@ You tell your grandma what you did last Friday.",
     ]],
     ['14.2', 'Formá oraciones con las palabras dadas. Usá present perfect o past simple.', [
-      "b it / not / rain / this week = It hasn't rained this week ; It has not rained this week >> Período no terminado. @@ Es jueves y el jardín está seco: no cayó ni una gota desde el lunes.",
-      "b the weather / be / cold / last week = The weather was cold last week >> Período terminado. @@ Ahora hace calor, pero la semana pasada tuviste que usar campera.",
-      "b I / not / eat / anything / today = I haven't eaten anything today ; I have not eaten anything today >> today no terminó. @@ Son las 5 de la tarde y estuviste en reuniones todo el día.",
-      "b Lisa / start / her new job / in May = Lisa started her new job in May >> in May = terminado. @@ Es noviembre y Lisa ya está cómoda en su trabajo nuevo.",
-      "b we / be / to Rome / three times = We've been to Rome three times ; We have been to Rome three times >> Experiencia, número de veces. @@ A tus padres les encanta Italia y siempre vuelven a Roma.",
+      "b it / not / rain / this week = It hasn't rained this week ; It has not rained this week >> Período no terminado. @@ It's Thursday and the garden is dry: there hasn't been a drop of rain since Monday.",
+      "b the weather / be / cold / last week = The weather was cold last week >> Período terminado. @@ It's hot now, but last week you had to wear a jacket.",
+      "b I / not / eat / anything / today = I haven't eaten anything today ; I have not eaten anything today >> today no terminó. @@ It's 5 p.m. and you've been in meetings all day.",
+      "b Lisa / start / her new job / in May = Lisa started her new job in May >> in May = terminado. @@ It's November and Lisa feels comfortable in her new job now.",
+      "b we / be / to Rome / three times = We've been to Rome three times ; We have been to Rome three times >> Experiencia, número de veces. @@ Your parents love Italy and they always go back to Rome.",
     ]],
     ['14.3', 'Leé la situación y poné el verbo en present perfect o past simple.', [
       "_ I don't live in Madrid any more. I ___ (live) there for two years. Then I moved to Lisbon. = lived >> Ya no vive ahí.",
@@ -195,10 +195,10 @@ export const s02: Record<number, RawSet[]> = {
   ],
   15: [
     ['15.1', 'Leé la situación y escribí una oración con el past perfect.', [
-      "b Sam / already / go / home = Sam had already gone home >> Anterior a tu llegada. @@ Llegaste a la fiesta a medianoche y buscaste a Sam, pero no estaba.",
-      "b I / already / see / it = I had already seen it ; I'd already seen it >> Ya la habías visto antes. @@ Fuiste al cine con amigos, pero te aburriste: sabías todo lo que iba a pasar.",
-      "b a lot of new buildings / be / built = A lot of new buildings had been built >> Past perfect pasivo. @@ Volviste a tu ciudad después de diez años y casi no la reconociste.",
-      "b I / never / meet / her / before = I had never met her before ; I'd never met her before >> never … before. @@ En la reunión, una mujer te saludó con un beso, pero no la conocías.",
+      "b Sam / already / go / home = Sam had already gone home >> Anterior a tu llegada. @@ You got to the party at midnight and looked for Sam, but he wasn't there.",
+      "b I / already / see / it = I had already seen it ; I'd already seen it >> Ya la habías visto antes. @@ You went to the cinema with friends, but you were bored: you knew everything that was going to happen.",
+      "b a lot of new buildings / be / built = A lot of new buildings had been built >> Past perfect pasivo. @@ You went back to your town after ten years and you hardly recognised it.",
+      "b I / never / meet / her / before = I had never met her before ; I'd never met her before >> never … before. @@ At the meeting, a woman greeted you with a kiss, but you didn't know her.",
     ]],
     ['15.2', 'Leé la situación y poné el verbo en past perfect (I had done) o past simple (I did).', [
       "_ I ran to the station but it was too late. When I got there, the train ___ (leave). I'd missed it. = had left ; 'd left >> Ya se había ido.",
@@ -210,10 +210,10 @@ export const s02: Record<number, RawSet[]> = {
   ],
   16: [
     ['16.1', 'Leé la situación y formá una oración con had been -ing.', [
-      "b it / rain = It had been raining ; It'd been raining >> Explica lo que se veía. @@ Cuando saliste a la mañana, el suelo estaba mojado y había charcos.",
-      "b he / work / all day = He had been working all day ; He'd been working all day >> Actividad anterior. @@ Max llegó a casa a la noche y se quedó dormido en el sillón.",
-      "b she / cry = She had been crying ; She'd been crying >> Explica el resultado. @@ Cuando abriste la puerta, tu hermana tenía los ojos rojos.",
-      "b we / play / tennis = We had been playing tennis ; We'd been playing tennis >> Actividad anterior. @@ Entraron al bar transpirados y con las raquetas en la mano.",
+      "b it / rain = It had been raining ; It'd been raining >> Explica lo que se veía. @@ When you went out in the morning, the ground was wet and there were puddles.",
+      "b he / work / all day = He had been working all day ; He'd been working all day >> Actividad anterior. @@ Max got home at night and fell asleep on the sofa.",
+      "b she / cry = She had been crying ; She'd been crying >> Explica el resultado. @@ When you opened the door, your sister's eyes were red.",
+      "b we / play / tennis = We had been playing tennis ; We'd been playing tennis >> Actividad anterior. @@ They came into the bar sweaty, with rackets in their hands.",
     ]],
     ['16.2', 'Leé la situación y completá con had been -ing.', [
       "_ We got lost in the mountains. We ___ (walk) for two hours when we finally found a café. = had been walking ; 'd been walking >> Duración hasta un momento pasado.",
@@ -230,7 +230,7 @@ export const s02: Record<number, RawSet[]> = {
   ],
   17: [
     ['17.1', 'Uní cada pregunta con su respuesta.', [
-      "m Have you got a pen? = Yes, here you are. ; Did you have a good time? = Yes, it was great. ; Do you have any brothers? = No, I'm an only child. ; Are you having lunch? = Yes, call me later. >> have = posesión / acción. @@ Cuatro conversaciones cortas durante un día de oficina.",
+      "m Have you got a pen? = Yes, here you are. ; Did you have a good time? = Yes, it was great. ; Do you have any brothers? = No, I'm an only child. ; Are you having lunch? = Yes, call me later. >> have = posesión / acción. @@ Four short conversations during a day at the office.",
     ]],
     ['17.2', 'Leé la situación y completá con have, have got o had en la forma correcta.', [
       "_ I can't come out tonight. My boss gave me three reports to finish, so I ___ (have) a lot of work. = have ; 've got ; have got >> Posesión: have / have got.",
@@ -268,10 +268,10 @@ export const s02: Record<number, RawSet[]> = {
       "? Now my sister eats salad every day, but as a child she didn't ___ like vegetables. | used to | *use to | uses to >> Negativa: didn't use to.",
     ]],
     ['18.3', 'Compará cómo era Clara hace diez años y cómo es ahora. Escribí oraciones con used to.', [
-      "b Clara / be / a student = Clara used to be a student >> used to + be. @@ Clara: «Hace diez años era estudiante. Ahora soy enfermera».",
-      "b Clara / live / with her parents = Clara used to live with her parents >> used to + verbo. @@ Clara: «Hace diez años vivía con mis padres. Ahora vivo sola».",
-      "b Clara / not / drink / coffee = Clara didn't use to drink coffee ; Clara did not use to drink coffee >> didn't use to. @@ Clara: «Hace diez años no tomaba café. Ahora tomo un montón».",
-      "b Clara / play / the piano = Clara used to play the piano >> used to + verbo. @@ Clara: «Hace diez años tocaba el piano. Ahora ya no toco».",
+      "b Clara / be / a student = Clara used to be a student >> used to + be. @@ Clara: 'Ten years ago I was a student. Now I'm a nurse.'",
+      "b Clara / live / with her parents = Clara used to live with her parents >> used to + verbo. @@ Clara: 'Ten years ago I lived with my parents. Now I live alone.'",
+      "b Clara / not / drink / coffee = Clara didn't use to drink coffee ; Clara did not use to drink coffee >> didn't use to. @@ Clara: 'Ten years ago I didn't drink coffee. Now I drink a lot.'",
+      "b Clara / play / the piano = Clara used to play the piano >> used to + verbo. @@ Clara: 'Ten years ago I played the piano. Now I don't play any more.'",
     ]],
   ],
 };

@@ -13,15 +13,15 @@ export const s01: Record<number, RawSet[]> = {
       "_ I ___ (read) a great book at the moment — I'm on chapter ten. I can lend it to you when I finish it. = am reading ; 'm reading >> En el medio de la acción, aunque no justo ahora.",
     ]],
     ['1.2', 'Cada oración de la izquierda sigue con una de la derecha. Uní las que van juntas.', [
-      "m Please be quiet. = I'm trying to concentrate. ; I need a coat. = It's getting cold. ; Turn the TV off. = Nobody is watching it. ; You can't use the bathroom now. = Sam is having a shower. >> Todas describen algo que pasa ahora o alrededor de ahora. @@ Estás en casa con tu familia un domingo a la tarde y cada uno hace algo distinto.",
-      "m Kate is learning Japanese. = She's moving to Tokyo next year. ; Prices are going up. = Everything is getting more expensive. ; Can you call back later? = We're having dinner. ; Let's go to the park. = It isn't raining any more. >> Situaciones en curso o temporales. @@ Mensajes y comentarios que te llegan durante la semana.",
+      "m Please be quiet. = I'm trying to concentrate. ; I need a coat. = It's getting cold. ; Turn the TV off. = Nobody is watching it. ; You can't use the bathroom now. = Sam is having a shower. >> Todas describen algo que pasa ahora o alrededor de ahora. @@ It's Sunday afternoon and you're at home with your family. Everybody is doing something different.",
+      "m Kate is learning Japanese. = She's moving to Tokyo next year. ; Prices are going up. = Everything is getting more expensive. ; Can you call back later? = We're having dinner. ; Let's go to the park. = It isn't raining any more. >> Situaciones en curso o temporales. @@ Messages and comments you get during the week.",
     ]],
     ['1.3', 'Escribí preguntas con el present continuous usando las palabras dadas.', [
-      "b what / you / do / now = What are you doing now >> Wh- + are + sujeto + -ing. @@ Llamás a tu amigo y se escucha mucho ruido de fondo.",
-      "b why / Anna / cry = Why is Anna crying >> 3.ª persona: is. @@ Ves a tu compañera Anna sentada sola con lágrimas en los ojos.",
-      "b you / enjoy / the party = Are you enjoying the party >> Pregunta sí/no: Are + sujeto + -ing. @@ Estás en una fiesta y ves a una amiga que llegó hace una hora.",
-      "b where / your parents / stay = Where are your parents staying >> Plural: are. @@ Tus amigos te cuentan que los padres de ellos están de visita en Buenos Aires por una semana.",
-      "b the shop / still / sell / that phone = Is the shop still selling that phone >> still va después del sujeto. @@ Viste un celular en oferta hace un mes y querés saber si todavía lo tienen.",
+      "b what / you / do / now = What are you doing now >> Wh- + are + sujeto + -ing. @@ You call your friend and you can hear a lot of noise in the background.",
+      "b why / Anna / cry = Why is Anna crying >> 3.ª persona: is. @@ You see your classmate Anna sitting alone with tears in her eyes.",
+      "b you / enjoy / the party = Are you enjoying the party >> Pregunta sí/no: Are + sujeto + -ing. @@ You're at a party and you see a friend who arrived an hour ago.",
+      "b where / your parents / stay = Where are your parents staying >> Plural: are. @@ Your friends tell you that their parents are visiting Buenos Aires for a week.",
+      "b the shop / still / sell / that phone = Is the shop still selling that phone >> still va después del sujeto. @@ You saw a phone on offer a month ago and you want to know if the shop still has it.",
     ]],
     ['1.4', 'Leé la situación y poné el verbo en present continuous, afirmativo (I am doing) o negativo (I am not doing).', [
       "_ 'Can you help me with the project on Monday?' 'Sure, I ___ (not/work) this week. I'm on holiday at home.' = 'm not working ; am not working >> Negativo: estoy de vacaciones.",
@@ -58,11 +58,11 @@ export const s01: Record<number, RawSet[]> = {
       "_ My friends love horror stories, but I ___ (believe) in ghosts. I think they're just stories. = don't believe ; do not believe >> Negativo: no creo.",
     ]],
     ['2.4', 'Le hacés preguntas a Marco sobre su vida. Escribí las preguntas.', [
-      "b where / you / live = Where do you live >> Wh- + do + sujeto + verbo. @@ Conocés a Marco, un chico italiano, en un curso de inglés y querés saber de él.",
-      "b what / you / do (= trabajo) = What do you do >> What do you do? = ¿a qué te dedicás? @@ Querés saber en qué trabaja Marco.",
-      "b how often / you / go / to the gym = How often do you go to the gym >> How often + do. @@ Marco está muy en forma y te da curiosidad.",
-      "b your sister / work / in a hospital = Does your sister work in a hospital >> 3.ª persona: Does. @@ Marco te dice que su hermana es enfermera.",
-      "b what time / your classes / start = What time do your classes start >> Plural: do. @@ Marco estudia de noche y querés saber el horario.",
+      "b where / you / live = Where do you live >> Wh- + do + sujeto + verbo. @@ You meet Marco, an Italian guy, on an English course, and you want to know about him.",
+      "b what / you / do (= trabajo) = What do you do >> What do you do? = ¿a qué te dedicás? @@ You want to know what Marco does for a living.",
+      "b how often / you / go / to the gym = How often do you go to the gym >> How often + do. @@ Marco is very fit and you're curious.",
+      "b your sister / work / in a hospital = Does your sister work in a hospital >> 3.ª persona: Does. @@ Marco tells you that his sister is a nurse.",
+      "b what time / your classes / start = What time do your classes start >> Plural: do. @@ Marco studies at night and you want to know the times.",
     ]],
     ['2.5', 'Completá con: I apologise, I insist, I promise, I suggest. Son verbos que hacen la acción al decirlos.', [
       "? It's 11 p.m., we've been studying for six hours and you're both tired. '___ we stop now and continue tomorrow.' | *I suggest | I'm suggesting | I suggests >> Sugerencia: I suggest (present simple).",
@@ -95,10 +95,10 @@ export const s01: Record<number, RawSet[]> = {
       "_ I sold my flat last month. I ___ (stay) with friends until I find a new one. = 'm staying ; am staying >> Situación temporal.",
     ]],
     ['3.4', 'Completá la respuesta de B con always + -ing (algo que pasa demasiado seguido).', [
-      "b A: I've lost my keys again. B: You / always / lose / things = You're always losing things ; You are always losing things >> always + continuous = queja. @@ Es la tercera vez esta semana que tu amigo no encuentra las llaves.",
-      "b A: Tim forgot my birthday. B: He / always / forget / things = He's always forgetting things ; He is always forgetting things >> Queja: always + -ing. @@ Tim también se olvidó de tu cumpleaños el año pasado y de devolverte la plata.",
-      "b A: The printer isn't working again. B: It / always / break down = It's always breaking down ; It is always breaking down >> always + -ing. @@ En la oficina, la impresora se rompe casi todos los días.",
-      "b A: Lucy is complaining about her job again. B: She / always / complain = She's always complaining ; She is always complaining >> always + -ing. @@ Lucy se queja de su trabajo en cada reunión de amigos.",
+      "b A: I've lost my keys again. B: You / always / lose / things = You're always losing things ; You are always losing things >> always + continuous = queja. @@ It's the third time this week that your friend can't find his keys.",
+      "b A: Tim forgot my birthday. B: He / always / forget / things = He's always forgetting things ; He is always forgetting things >> Queja: always + -ing. @@ Last year Tim forgot your birthday too, and he forgot to give you your money back.",
+      "b A: The printer isn't working again. B: It / always / break down = It's always breaking down ; It is always breaking down >> always + -ing. @@ At the office, the printer breaks down almost every day.",
+      "b A: Lucy is complaining about her job again. B: She / always / complain = She's always complaining ; She is always complaining >> always + -ing. @@ Lucy complains about her job every time you meet up with friends.",
     ]],
   ],
   4: [
@@ -111,11 +111,11 @@ export const s01: Record<number, RawSet[]> = {
       "_ It's the first day of class. What ___ you ___ (think) of the new teacher? Do you like her? = do / think >> think = opinión → simple.",
     ]],
     ['4.2', 'Usá las palabras dadas para formar oraciones.', [
-      "b I / not / remember / her name = I don't remember her name ; I do not remember her name >> remember → simple. @@ Ves a una chica que conociste en una fiesta hace años y no te sale el nombre.",
-      "b this soup / taste / delicious = This soup tastes delicious >> taste (sabor) → simple. @@ Tu abuela te preparó una sopa y la probás.",
-      "b what / you / think about? = What are you thinking about >> Acción mental en curso. @@ Tu amigo mira por la ventana hace diez minutos sin hablar.",
-      "b I / not / believe / you = I don't believe you ; I do not believe you >> believe → simple. @@ Tu hermano dice que vio a Messi en el supermercado del barrio.",
-      "b she / have / a bath / at the moment = She's having a bath at the moment ; She is having a bath at the moment >> have a bath = acción. @@ Llaman a tu hermana por teléfono y ella está en la bañera.",
+      "b I / not / remember / her name = I don't remember her name ; I do not remember her name >> remember → simple. @@ You see a girl you met at a party years ago and you can't remember her name.",
+      "b this soup / taste / delicious = This soup tastes delicious >> taste (sabor) → simple. @@ Your grandma has made you some soup and you taste it.",
+      "b what / you / think about? = What are you thinking about >> Acción mental en curso. @@ Your friend has been looking out of the window for ten minutes without saying a word.",
+      "b I / not / believe / you = I don't believe you ; I do not believe you >> believe → simple. @@ Your brother says he saw Messi at the local supermarket.",
+      "b she / have / a bath / at the moment = She's having a bath at the moment ; She is having a bath at the moment >> have a bath = acción. @@ Someone calls your sister on the phone and she's in the bath.",
     ]],
     ['4.3', 'Leé la situación. ¿El verbo marcado está bien? Tocá el incorrecto o indicá que está todo bien.', [
       "s Your friend always wears a lucky shirt for exams. Do you [believing] in luck? = believe >> believe es de estado: Do you believe…?",
@@ -149,11 +149,11 @@ export const s01: Record<number, RawSet[]> = {
       "_ They didn't need their old car any more, so they ___ (sell) it for $2,000. = sold >> sell → sold.",
     ]],
     ['5.3', 'Le preguntás a Sofía sobre su viaje a Italia. Escribí las preguntas.', [
-      "b where / you / go = Where did you go >> Wh- + did + sujeto + verbo base. @@ Sofía volvió ayer de un viaje de diez días por Italia.",
-      "b how / you / travel = How did you travel >> did + verbo base. @@ Querés saber si fue en tren, en auto o en avión entre las ciudades.",
-      "b how long / you / stay = How long did you stay >> did + verbo base. @@ Sofía te cuenta que pasó por Roma.",
-      "b the weather / be / good = Was the weather good >> be → Was …? @@ En las fotos de Sofía casi no hay sol.",
-      "b what / you / buy = What did you buy >> did + verbo base. @@ Sofía volvió con dos valijas llenas.",
+      "b where / you / go = Where did you go >> Wh- + did + sujeto + verbo base. @@ Sofía came back yesterday from a ten-day trip around Italy.",
+      "b how / you / travel = How did you travel >> did + verbo base. @@ You want to know if she travelled between the cities by train, by car or by plane.",
+      "b how long / you / stay = How long did you stay >> did + verbo base. @@ Sofía tells you she went through Rome.",
+      "b the weather / be / good = Was the weather good >> be → Was …? @@ There's hardly any sun in Sofía's photos.",
+      "b what / you / buy = What did you buy >> did + verbo base. @@ Sofía came back with two full suitcases.",
     ]],
     ['5.4', 'Leé la situación y poné el verbo en past simple, afirmativo o negativo.', [
       "_ It was very hot in the room last night, so I ___ (open) the window. = opened >> Afirmativo.",
@@ -173,7 +173,7 @@ export const s01: Record<number, RawSet[]> = {
       "_ The police asked the man about the robbery. 'What ___ you ___ (do) at midnight?' = were / doing >> Pregunta: were + sujeto + -ing.",
     ]],
     ['6.2', 'Uní cada comienzo con su final.', [
-      "m I was cooking dinner = when the lights went out. ; We were driving to the airport = when we got a flat tyre. ; She was reading in bed = when she fell asleep. ; They were playing tennis = when it started to rain. >> Acción larga (continuo) + interrupción (simple). @@ Cuatro personas cuentan qué les pasó ayer: algo que estaban haciendo y algo que lo interrumpió.",
+      "m I was cooking dinner = when the lights went out. ; We were driving to the airport = when we got a flat tyre. ; She was reading in bed = when she fell asleep. ; They were playing tennis = when it started to rain. >> Acción larga (continuo) + interrupción (simple). @@ Four people tell you what happened to them yesterday: something they were doing and something that interrupted it.",
     ]],
     ['6.3', 'Leé la situación y poné el verbo en past continuous o past simple.', [
       "_ I ___ (see) Tom in town yesterday and waved at him, but he ___ (not/see) me. = saw / didn't see ; saw / did not see >> Acciones cortas y completas.",

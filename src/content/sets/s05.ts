@@ -33,10 +33,10 @@ export const s05: Record<number, RawSet[]> = {
   ],
   55: [
     ['55.1', 'Leé la situación y escribí la oración con verbo + objeto + to.', [
-      "b Ana / ask / me / help her = Ana asked me to help her >> ask + objeto + to. @@ Ana te dijo: «Please help me».",
-      "b She / tell / me / not touch it = She told me not to touch it >> tell + objeto + not to. @@ La guía del museo te dijo: «Don't touch it».",
-      "b The doctor / advise / me / rest = The doctor advised me to rest >> advise + objeto + to. @@ El médico te dijo: «You should rest».",
-      "b He / remind / me / call Mum = He reminded me to call Mum ; He reminded me to call my mum >> remind + objeto + to. @@ Tu hermano te dijo: «Remember to call Mum».",
+      "b Ana / ask / me / help her = Ana asked me to help her >> ask + objeto + to. @@ Ana said to you: 'Please help me.'",
+      "b She / tell / me / not touch it = She told me not to touch it >> tell + objeto + not to. @@ The museum guide said to you: 'Don't touch it.'",
+      "b The doctor / advise / me / rest = The doctor advised me to rest >> advise + objeto + to. @@ The doctor said to you: 'You should rest.'",
+      "b He / remind / me / call Mum = He reminded me to call Mum ; He reminded me to call my mum >> remind + objeto + to. @@ Your brother said to you: 'Remember to call Mum.'",
     ]],
     ['55.2', 'Leé la situación y elegí la forma correcta (con make y let va el verbo sin to).', [
       "? I'm 17 and it's summer, so my parents let me ___ out late on Saturdays. | to stay | *stay | staying >> let + objeto + verbo base.",
@@ -148,10 +148,10 @@ export const s05: Record<number, RawSet[]> = {
   ],
   68: [
     ['68.1', 'Uní las ideas en una sola oración con una cláusula -ing.', [
-      "b Kate was in the kitchen / she was making coffee = Kate was in the kitchen making coffee >> -ing = al mismo tiempo. @@ Contás qué estaba haciendo Kate cuando llegaste.",
-      "b Feeling / I was tired / I went to bed early = Feeling tired, I went to bed early >> -ing = causa. @@ Explicás por qué te acostaste temprano. Empezá con Feeling.",
-      "b Having / she finished her work / she went home = Having finished her work, she went home >> having + participio = antes. @@ Contás qué hizo tu jefa ayer a la tarde. Empezá con Having.",
-      "b He hurt his knee / he was playing football = He hurt his knee playing football >> -ing = mientras. @@ Explicás cómo se lastimó la rodilla tu hermano.",
+      "b Kate was in the kitchen / she was making coffee = Kate was in the kitchen making coffee >> -ing = al mismo tiempo. @@ You say what Kate was doing when you arrived.",
+      "b Feeling / I was tired / I went to bed early = Feeling tired, I went to bed early >> -ing = causa. @@ You explain why you went to bed early. Start with Feeling.",
+      "b Having / she finished her work / she went home = Having finished her work, she went home >> having + participio = antes. @@ You say what your boss did yesterday afternoon. Start with Having.",
+      "b He hurt his knee / he was playing football = He hurt his knee playing football >> -ing = mientras. @@ You explain how your brother hurt his knee.",
     ]],
   ],
   69: [

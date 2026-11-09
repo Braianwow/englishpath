@@ -5,10 +5,10 @@ import type { RawSet } from './index';
 export const s03: Record<number, RawSet[]> = {
   19: [
     ['19.1', 'Le preguntás a Iván por sus planes de vacaciones. Escribí preguntas con el present continuous.', [
-      "b where / you / go = Where are you going >> Plan organizado: present continuous. @@ Iván te cuenta que ya sacó los pasajes para sus vacaciones de julio.",
-      "b how long / you / stay = How long are you staying >> Plan organizado. @@ Iván ya reservó el hotel en Cusco.",
-      "b when / you / leave = When are you leaving >> Plan organizado. @@ Querés saber qué día sale Iván para despedirlo.",
-      "b you / travel / alone = Are you travelling alone ; Are you traveling alone >> Pregunta sí/no. @@ Iván no mencionó a nadie más en el viaje.",
+      "b where / you / go = Where are you going >> Plan organizado: present continuous. @@ Iván tells you he has already bought the tickets for his holiday in July.",
+      "b how long / you / stay = How long are you staying >> Plan organizado. @@ Iván has already booked the hotel in Cusco.",
+      "b when / you / leave = When are you leaving >> Plan organizado. @@ You want to know what day Iván is leaving so you can say goodbye.",
+      "b you / travel / alone = Are you travelling alone ; Are you traveling alone >> Pregunta sí/no. @@ Iván didn't mention anybody else on the trip.",
     ]],
     ['19.2', 'Leé la situación y completá con el present continuous (planes) o el present simple (horarios).', [
       "_ Don't be late tomorrow. According to the timetable, the train ___ (leave) at 7.45. = leaves >> Horario fijo.",
@@ -25,10 +25,10 @@ export const s03: Record<number, RawSet[]> = {
   ],
   20: [
     ['20.1', 'Escribí preguntas con going to.', [
-      "b what / you / wear / to the wedding = What are you going to wear to the wedding >> Intención. @@ Tu amiga está invitada al casamiento de su prima el sábado.",
-      "b where / you / put / that painting = Where are you going to put that painting >> Intención. @@ Tu hermano llega a casa con un cuadro enorme.",
-      "b who / you / invite / to the party = Who are you going to invite to the party >> Intención. @@ Tu amigo va a festejar su cumpleaños en su casa.",
-      "b you / buy / a new laptop = Are you going to buy a new laptop >> Pregunta sí/no. @@ Tu amigo se queja todos los días de que su compu es lentísima.",
+      "b what / you / wear / to the wedding = What are you going to wear to the wedding >> Intención. @@ Your friend is invited to her cousin's wedding on Saturday.",
+      "b where / you / put / that painting = Where are you going to put that painting >> Intención. @@ Your brother comes home with a huge painting.",
+      "b who / you / invite / to the party = Who are you going to invite to the party >> Intención. @@ Your friend is going to celebrate his birthday at home.",
+      "b you / buy / a new laptop = Are you going to buy a new laptop >> Pregunta sí/no. @@ Your friend complains every day that his computer is really slow.",
     ]],
     ['20.2', 'Leé la situación y completá con I’m going to … o I’m not going to … .', [
       "_ I thought about it for months and now I'm sure. ___ (study) medicine at university. = I'm going to study ; I am going to study >> Decisión tomada.",
@@ -37,10 +37,10 @@ export const s03: Record<number, RawSet[]> = {
       "_ I haven't eaten since breakfast and there's bread and cheese in the fridge. ___ (make) a sandwich. = I'm going to make ; I am going to make >> Intención.",
     ]],
     ['20.3', '¿Qué va a pasar? Usá going to con las palabras dadas (predicción con evidencia).', [
-      "b it / rain = It's going to rain ; It is going to rain >> Evidencia presente. @@ El cielo está negro y se escuchan truenos.",
-      "b it / fall = It's going to fall ; It is going to fall >> Evidencia presente. @@ El vaso está justo en el borde de la mesa y el perro mueve la cola al lado.",
-      "b he / crash = He's going to crash ; He is going to crash >> Evidencia presente. @@ Ben maneja muy rápido, mirando el celular, y se acerca una curva.",
-      "b I / be / sick = I'm going to be sick ; I am going to be sick >> Evidencia presente. @@ En el barco te sentís pálido y mareado.",
+      "b it / rain = It's going to rain ; It is going to rain >> Evidencia presente. @@ The sky is black and you can hear thunder.",
+      "b it / fall = It's going to fall ; It is going to fall >> Evidencia presente. @@ The glass is right on the edge of the table and the dog is wagging its tail next to it.",
+      "b he / crash = He's going to crash ; He is going to crash >> Evidencia presente. @@ Ben is driving very fast, looking at his phone, and there's a bend coming.",
+      "b I / be / sick = I'm going to be sick ; I am going to be sick >> Evidencia presente. @@ On the boat you feel pale and sick.",
     ]],
     ['20.4', 'Leé la situación y completá con was/were going to (plan que no se cumplió).', [
       "_ We had our bags ready. We ___ (fly) to Rome, but the flight was cancelled because of the storm. = were going to fly >> Plan pasado no cumplido.",
@@ -57,10 +57,10 @@ export const s03: Record<number, RawSet[]> = {
       "_ The waiter asks: 'Do you want tea or coffee?' 'Mmm… ___ (have) tea, please.' = I'll have ; I will have >> Decisión en el momento.",
     ]],
     ['21.2', 'Escribí oraciones con I think I’ll … o I don’t think I’ll … .', [
-      "b go to bed early = I think I'll go to bed early ; I think I will go to bed early >> Decisión: I think I'll… @@ Estás muy cansado después de un día largo de trabajo.",
-      "b go out tonight = I don't think I'll go out tonight ; I don't think I will go out tonight >> I don't think I'll… @@ Llueve muchísimo y no tenés ganas de salir.",
-      "b buy it = I think I'll buy it ; I think I will buy it >> Decisión. @@ Te probás un vestido lindo y está en oferta.",
-      "b watch it = I don't think I'll watch it ; I don't think I will watch it >> Negativa natural. @@ Viste el tráiler de una película y parece aburrida.",
+      "b go to bed early = I think I'll go to bed early ; I think I will go to bed early >> Decisión: I think I'll… @@ You're very tired after a long day at work.",
+      "b go out tonight = I don't think I'll go out tonight ; I don't think I will go out tonight >> I don't think I'll… @@ It's pouring with rain and you don't feel like going out.",
+      "b buy it = I think I'll buy it ; I think I will buy it >> Decisión. @@ You try on a nice dress and it's on sale.",
+      "b watch it = I don't think I'll watch it ; I don't think I will watch it >> Negativa natural. @@ You saw the trailer for a film and it looks boring.",
     ]],
     ['21.3', 'Leé la situación y elegí la opción correcta.', [
       "? 'Did you call Sam to say happy birthday?' 'Oh no, I forgot! I ___ him now.' | 'm calling | *'ll call | call >> Decisión ahora.",
@@ -68,10 +68,10 @@ export const s03: Record<number, RawSet[]> = {
       "? An old lady is carrying two heavy bags up the stairs. 'Let me take one. I ___ you.' | 'm helping | *'ll help | help >> Ofrecimiento.",
     ]],
     ['21.4', '¿Qué decís? Usá Shall I …? o Shall we …?', [
-      "b carry / your bag = Shall I carry your bag >> Ofrecimiento. @@ Tu amiga tiene una valija pesada y van subiendo una escalera.",
-      "b go / out for dinner = Shall we go out for dinner >> Sugerencia. @@ No hay nada en la heladera y no tienen ganas de cocinar.",
-      "b turn on / the heating = Shall I turn on the heating ; Shall I turn the heating on >> Ofrecimiento. @@ Tus invitados tienen frío y se ponen las camperas.",
-      "b where / meet = Where shall we meet >> Pregunta con shall we. @@ Quedaste en ir al cine con un amigo, pero no saben dónde encontrarse.",
+      "b carry / your bag = Shall I carry your bag >> Ofrecimiento. @@ Your friend has a heavy suitcase and you're going up some stairs.",
+      "b go / out for dinner = Shall we go out for dinner >> Sugerencia. @@ There's nothing in the fridge and you don't feel like cooking.",
+      "b turn on / the heating = Shall I turn on the heating ; Shall I turn the heating on >> Ofrecimiento. @@ Your guests are cold and they're putting their jackets on.",
+      "b where / meet = Where shall we meet >> Pregunta con shall we. @@ You've arranged to go to the cinema with a friend, but you don't know where to meet.",
     ]],
   ],
   22: [
@@ -82,10 +82,10 @@ export const s03: Record<number, RawSet[]> = {
       "_ Your friend tells you she's pregnant but doesn't want people to know yet. 'I ___ tell anyone. I promise.' = won't ; will not >> Promesa negativa.",
     ]],
     ['22.2', 'Escribí preguntas con Do you think … will …?', [
-      "b it / rain / tomorrow = Do you think it will rain tomorrow >> Do you think + will. @@ Mañana tienen un asado al aire libre y el cielo está nublado.",
-      "b the exam / be / difficult = Do you think the exam will be difficult >> Pregunta de opinión. @@ Tu compañero ya rindió con esa profesora el año pasado.",
-      "b Ana / like / her present = Do you think Ana will like her present >> Predicción. @@ Le compraste a Ana un libro, pero no estás seguro de que le guste.",
-      "b people / live / on Mars = Do you think people will live on Mars >> Predicción. @@ Están viendo un documental sobre viajes espaciales.",
+      "b it / rain / tomorrow = Do you think it will rain tomorrow >> Do you think + will. @@ You're having an outdoor barbecue tomorrow and the sky is cloudy.",
+      "b the exam / be / difficult = Do you think the exam will be difficult >> Pregunta de opinión. @@ Your classmate took an exam with that teacher last year.",
+      "b Ana / like / her present = Do you think Ana will like her present >> Predicción. @@ You bought Ana a book, but you're not sure she'll like it.",
+      "b people / live / on Mars = Do you think people will live on Mars >> Predicción. @@ You're watching a documentary about space travel.",
     ]],
     ['22.3', 'Leé la situación y elegí la opción que suena mejor.', [
       "? The sky is clear and blue. I ___ it will rain today. | think not | *don't think | not think >> I don't think + will.",
@@ -102,7 +102,7 @@ export const s03: Record<number, RawSet[]> = {
       "_ I never use my car and parking is so expensive. I've decided. I ___ (sell) it. = 'm going to sell ; am going to sell >> Decisión previa.",
     ]],
     ['23.2', 'Uní cada situación con la respuesta adecuada.', [
-      "m 'I've got a headache.' = 'I'll get you an aspirin.' ; 'Why have you got a ladder?' = 'I'm going to paint the ceiling.' ; 'Look at those clouds!' = 'It's going to rain.' ; 'Shall we eat out?' = 'Good idea. I'll book a table.' >> will = decisión ahora; going to = intención o evidencia. @@ Conversaciones en casa un sábado a la tarde.",
+      "m 'I've got a headache.' = 'I'll get you an aspirin.' ; 'Why have you got a ladder?' = 'I'm going to paint the ceiling.' ; 'Look at those clouds!' = 'It's going to rain.' ; 'Shall we eat out?' = 'Good idea. I'll book a table.' >> will = decisión ahora; going to = intención o evidencia. @@ Conversations at home on a Saturday afternoon.",
     ]],
   ],
   24: [
@@ -150,9 +150,9 @@ export const s03: Record<number, RawSet[]> = {
   ],
   27: [
     ['27.1', 'Usá could para hacer sugerencias.', [
-      "b we / go / to the cinema = We could go to the cinema >> Sugerencia: could. @@ Tu amigo pregunta: «¿Adónde vamos esta noche?». Hay una película nueva que quieren ver.",
-      "b you / give / her a book = You could give her a book >> Sugerencia. @@ Tu amigo pregunta qué regalarle a Lisa, que lee muchísimo.",
-      "b we / take / a taxi = We could take a taxi >> Sugerencia. @@ Llueve, ya no hay colectivos y tienen que llegar a la fiesta.",
+      "b we / go / to the cinema = We could go to the cinema >> Sugerencia: could. @@ Your friend asks: 'Where shall we go tonight?' There's a new film you both want to see.",
+      "b you / give / her a book = You could give her a book >> Sugerencia. @@ Your friend asks what to give Lisa, who reads a lot.",
+      "b we / take / a taxi = We could take a taxi >> Sugerencia. @@ It's raining, there are no more buses and you have to get to the party.",
     ]],
     ['27.2', 'Leé la situación y completá con could have + participio.', [
       "_ Why did you walk home in the rain? I was at home with the car. I ___ (give) you a lift. = could have given >> Posibilidad no aprovechada.",
@@ -226,10 +226,10 @@ export const s03: Record<number, RawSet[]> = {
   ],
   33: [
     ['33.1', 'Dá un consejo con should o shouldn’t.', [
-      "b you / see / a doctor = You should see a doctor >> Consejo. @@ Tu amigo tose hace dos semanas y no mejora.",
-      "b you / eat / so many sweets = You shouldn't eat so many sweets ; You should not eat so many sweets >> Consejo negativo. @@ Tu hermano come caramelos todo el día y le duelen las muelas.",
-      "b you / go to bed / earlier = You should go to bed earlier >> Consejo. @@ Tu compañera se duerme en clase porque mira series hasta las 3.",
-      "b you / drive / so fast = You shouldn't drive so fast ; You should not drive so fast >> Consejo negativo. @@ Tu amigo maneja a 150 en la ruta y ya tuvo dos multas.",
+      "b you / see / a doctor = You should see a doctor >> Consejo. @@ Your friend has been coughing for two weeks and isn't getting better.",
+      "b you / eat / so many sweets = You shouldn't eat so many sweets ; You should not eat so many sweets >> Consejo negativo. @@ Your brother eats sweets all day and his teeth hurt.",
+      "b you / go to bed / earlier = You should go to bed earlier >> Consejo. @@ Your classmate falls asleep in class because she watches series until 3 a.m.",
+      "b you / drive / so fast = You shouldn't drive so fast ; You should not drive so fast >> Consejo negativo. @@ Your friend drives at 150 on the motorway and has already had two fines.",
     ]],
     ['33.2', 'Leé la situación y completá con should have / shouldn’t have + participio.', [
       "_ Your friend stayed at home on Saturday. 'The party was great — everyone was asking for you. You ___ (come).' = should have come >> Debiste venir.",
@@ -284,10 +284,10 @@ export const s03: Record<number, RawSet[]> = {
       "? You're cooking on Saturday and want your new friend to come. | *Would you like to come to dinner? | Do you like coming to dinner? | Will you like come to dinner? >> Invitar: Would you like to…?",
     ]],
     ['37.2', 'Escribí el pedido o el ofrecimiento con las palabras dadas.', [
-      "b could / you / help / me = Could you help me >> Pedido cortés. @@ Estás perdido en el aeropuerto y le hablás a un empleado.",
-      "b can / I / have / some water = Can I have some water >> Pedir algo. @@ Estás en un bar después de correr y tenés mucha sed.",
-      "b do you mind / if / I / open / the window = Do you mind if I open the window >> Pedir permiso. @@ En el tren hace mucho calor y hay otra persona en el asiento de al lado.",
-      "b would / you / like / some cake = Would you like some cake >> Ofrecer. @@ Hiciste una torta de chocolate y llega una visita.",
+      "b could / you / help / me = Could you help me >> Pedido cortés. @@ You're lost at the airport and you speak to a member of staff.",
+      "b can / I / have / some water = Can I have some water >> Pedir algo. @@ You're in a bar after a run and you're very thirsty.",
+      "b do you mind / if / I / open / the window = Do you mind if I open the window >> Pedir permiso. @@ It's very hot on the train and there's someone in the seat next to you.",
+      "b would / you / like / some cake = Would you like some cake >> Ofrecer. @@ You've made a chocolate cake and a visitor arrives.",
     ]],
   ],
 };

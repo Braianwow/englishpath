@@ -100,9 +100,9 @@ export const s06: Record<number, RawSet[]> = {
   ],
   93: [
     ['93.1', 'Uní las dos oraciones en una. Omití el relativo cuando sea posible.', [
-      "b The book / I bought / is very interesting = The book I bought is very interesting ; The book that I bought is very interesting ; The book which I bought is very interesting >> Relativo-objeto: se puede omitir. @@ «I bought a book. It's very interesting.» Empezá con The book…",
-      "b The man / who helped me / was very kind = The man who helped me was very kind ; The man that helped me was very kind >> Relativo-sujeto: obligatorio. @@ «A man helped me when I fell. He was very kind.» Empezá con The man…",
-      "b Who is the girl / you were talking to = Who is the girl you were talking to ; Who is the girl that you were talking to >> Preposición al final. @@ «You were talking to a girl at the party. Who is she?» Empezá con Who is the girl…",
+      "b The book / I bought / is very interesting = The book I bought is very interesting ; The book that I bought is very interesting ; The book which I bought is very interesting >> Relativo-objeto: se puede omitir. @@ 'I bought a book. It's very interesting.' Start with The book…",
+      "b The man / who helped me / was very kind = The man who helped me was very kind ; The man that helped me was very kind >> Relativo-sujeto: obligatorio. @@ 'A man helped me when I fell. He was very kind.' Start with The man…",
+      "b Who is the girl / you were talking to = Who is the girl you were talking to ; Who is the girl that you were talking to >> Preposición al final. @@ 'You were talking to a girl at the party. Who is she?' Start with Who is the girl…",
     ]],
   ],
   94: [
@@ -226,18 +226,18 @@ export const s06: Record<number, RawSet[]> = {
   ],
   109: [
     ['109.1', 'Ordená las palabras (verbo + objeto juntos; lugar antes que tiempo).', [
-      "o I like Italian food very much. >> Verbo + objeto juntos. @@ Le contás a un amigo qué comida te gusta.",
-      "o We arrived at the hotel late. >> Lugar → tiempo. @@ Contás cómo fue el primer día del viaje.",
-      "o She speaks English very well. >> Verbo + objeto + adverbio. @@ Hablás de tu compañera que vivió en Londres.",
-      "o I'm going to Paris on Monday. >> Lugar → tiempo. @@ Contás tus planes de la semana.",
+      "o I like Italian food very much. >> Verbo + objeto juntos. @@ You tell a friend what food you like.",
+      "o We arrived at the hotel late. >> Lugar → tiempo. @@ You say what the first day of the trip was like.",
+      "o She speaks English very well. >> Verbo + objeto + adverbio. @@ You talk about your classmate who lived in London.",
+      "o I'm going to Paris on Monday. >> Lugar → tiempo. @@ You talk about your plans for the week.",
     ]],
   ],
   110: [
     ['110.1', 'Ordená las palabras (always, often, also, probably… en el medio).', [
-      "o I always walk to work. >> Antes del verbo principal. @@ Contás cómo vas al trabajo todos los días.",
-      "o She is often late. >> Después de be. @@ Hablás de una compañera que llega tarde muchas veces.",
-      "o I have never been to Japan. >> Después del primer auxiliar. @@ Te preguntan si conocés Japón.",
-      "o He probably won't come. >> probably antes de won't. @@ Tu amigo está enfermo y hoy hay fiesta.",
+      "o I always walk to work. >> Antes del verbo principal. @@ You say how you get to work every day.",
+      "o She is often late. >> Después de be. @@ You talk about a colleague who is often late.",
+      "o I have never been to Japan. >> Después del primer auxiliar. @@ Someone asks you if you've been to Japan.",
+      "o He probably won't come. >> probably antes de won't. @@ Your friend is ill and there's a party today.",
     ]],
   ],
   111: [
