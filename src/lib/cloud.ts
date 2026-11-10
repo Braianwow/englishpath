@@ -20,6 +20,9 @@ const set = (p: Partial<CloudState>) => { st = { ...st, ...p }; listeners.forEac
 export const getCloud = () => st;
 export const useCloud = () => useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l); }, getCloud);
 
+/** The published sites (Vercel and Cloudflare) are only for signed-in learners. */
+export const accountsRequired = typeof location !== 'undefined' && /(.vercel.app|.pages.dev)$/.test(location.hostname);
+
 const OWNER_KEY = 'ep.cloudUser'; // whose progress is in this browser
 const owner = () => { try { return localStorage.getItem(OWNER_KEY); } catch { return null; } };
 const setOwner = (e: string | null) => { try { if (e) localStorage.setItem(OWNER_KEY, e); else localStorage.removeItem(OWNER_KEY); } catch { /* ignore */ } };

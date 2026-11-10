@@ -25,10 +25,18 @@ import Speaking from './pages/Speaking';
 import Conversation from './pages/Conversation';
 import Writing from './pages/Writing';
 import AccountPage from './pages/AccountPage';
-import { initCloud } from './lib/cloud';
+import Landing from './pages/Landing';
+import { accountsRequired, initCloud, useCloud } from './lib/cloud';
+import { LibraryBig } from 'lucide-react';
+
+// The GitHub Pages copy has no accounts: send visitors to the main site.
+if (typeof location !== 'undefined' && location.hostname.endsWith('github.io')) {
+  location.replace(`https://englishpath-murex.vercel.app/${location.hash}`);
+}
 import { applyTheme, getSettings } from './store/progress';
 
 export default function App() {
+  const cloud = useCloud();
   useEffect(() => {
     applyTheme(getSettings().theme);
     initCloud();
@@ -37,6 +45,12 @@ export default function App() {
     mq.addEventListener?.('change', fn);
     return () => mq.removeEventListener?.('change', fn);
   }, []);
+
+  // Not signed in: only the landing page (what EnglishPath is + sign in / create account).
+  if (accountsRequired && !cloud.email) {
+    if (!cloud.checked) return <div className="flex min-h-screen items-center justify-center"><LibraryBig size={40} className="animate-pulse text-brand-500" /></div>;
+    return <HashRouter><Landing /></HashRouter>;
+  }
 
   return (
     <HashRouter>
