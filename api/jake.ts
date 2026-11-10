@@ -7,9 +7,11 @@
  * GET  /api/jake          → { ok: true } when a key is configured
  * POST /api/jake          → { kind: 'turn' | 'report', topic, turns: [{ role, text }] } → { text }
  */
-import { TOPICS, callGemini, persona, reportSystem, toMessages, transcript, type Turn } from '../src/lib/jake.js';
+import { TOPICS, callGemini, persona, reportSystem, toMessages, transcript, type Turn } from '../src/lib/jake';
 
-// Node.js runtime (Vercel's default): process.env holds the project's environment variables.
+export const config = { runtime: 'edge' };
+
+// Vercel provides the project's environment variables as process.env.
 declare const process: { env: Record<string, string | undefined> };
 
 /** The key, also accepting common variants of the name in case it was saved slightly differently. */
@@ -89,7 +91,3 @@ export default async function handler(req: Request): Promise<Response> {
 }
 
 
-// Web-standard handlers for Vercel's Node.js runtime
-export const GET = handler;
-export const POST = handler;
-export const OPTIONS = handler;
