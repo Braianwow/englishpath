@@ -72,7 +72,8 @@ function speakLocal(clean: string, lang: string, rate: number, onEnd: (() => voi
     if (st !== 'error' && aiVoiceCached()) {
       loadAiVoice();
       if (!warned) { warned = true; notify({ kind: 'info', title: 'Getting the AI voice ready…', body: 'It takes a few seconds when the app opens. Reading it in a moment.' }); }
-      whenAiReady().then((ok) => (ok ? run() : speakSystem(clean, lang, rate, onEnd)));
+      // never wait forever: if the AI voice isn't ready in a few seconds, use the system voice this time
+      whenAiReady(6000).then((ok) => (ok ? run() : speakSystem(clean, lang, rate, onEnd)));
       return;
     }
     if (st !== 'error') {

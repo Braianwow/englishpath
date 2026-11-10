@@ -49,13 +49,14 @@ const CACHED_KEY = 'ep.aiVoiceCached';
 /** True once the model was downloaded on this browser (later loads come from the cache, in seconds). */
 export const aiVoiceCached = () => { try { return localStorage.getItem(CACHED_KEY) === '1'; } catch { return false; } };
 
-/** Resolves when the model finishes loading (true) or fails (false). */
-export function whenAiReady(): Promise<boolean> {
+/** Resolves when the model finishes loading (true), fails, or takes longer than `maxMs` (false). */
+export function whenAiReady(maxMs = 0): Promise<boolean> {
   if (status.state === 'ready') return Promise.resolve(true);
   if (status.state === 'error') return Promise.resolve(false);
   return new Promise((resolve) => {
     const l = () => { if (status.state === 'ready' || status.state === 'error') { listeners.delete(l); resolve(status.state === 'ready'); } };
     listeners.add(l);
+    if (maxMs > 0) setTimeout(() => { listeners.delete(l); resolve(status.state === 'ready'); }, maxMs);
   });
 }
 
@@ -153,7 +154,7 @@ export async function speakAi(text: string, voice: string, speed: number, onEnd?
     if (!(await audioAllowed())) return false; // sound blocked until the user taps: let the caller fall back
     const c = ctx!;
     const parts = sentences(text);
-    const jobs = parts.map((p) => withTimeout(generate(p, voice, speed), 20000)); // queued in order in the worker
+    const jobs = parts.map((p, i) => withTimeout(generate(p, voice, speed), 10000 + i * 4000)); // queued in order in the worker
     jobs.forEach((j) => j.catch(() => {}));
     let at = 0;
     let lastSrc: AudioBufferSourceNode | null = null;

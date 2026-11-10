@@ -318,6 +318,18 @@ export function localTurn(topic: TopicId, turns: Turn[]): { reply: string; corre
   const correction = checkSentence(text) ?? tenseCheck(text, expect);
   const tip = correction ? `${pick(['Quick tip:', 'Small thing:', 'Just so you know:'], seed)} we say “${correction.better}”. ` : '';
 
+  // questions about Jake himself
+  const about: [RegExp, string][] = [
+    [/what are you doing|what('re| are) you up to/i, 'Right now? Chatting with you, obviously 😏'],
+    [/who are you|what('s| is) your name/i, "I'm Jake, your English buddy."],
+    [/where are you from|where do you live/i, "I'm from London, but I'd move to Buenos Aires for the food."],
+    [/how old are you/i, 'Old enough to know the present perfect 😏'],
+    [/are you (a )?(bot|robot|real|human|ai)/i, "I'm an AI, but a pretty cool one."],
+    [/do you like me|are you single/i, 'Haha, nice try 😏'],
+  ];
+  const aboutJake = about.find(([re]) => re.test(text))?.[1];
+  if (aboutJake) return { reply: `${tip}${aboutJake} ${prevWasFollowUp ? question : `Anyway — ${question.charAt(0).toLowerCase()}${question.slice(1)}`}`, correction };
+
   // greetings and small talk
   if (GREETING.test(text) && words.length <= 8) {
     return { reply: `${tip}${pick(["I'm great, thanks for asking!", "Pretty good, thanks! You?", "All good here!"], seed)} ${question}`, correction };

@@ -96,15 +96,25 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
 
   // browsers block sound until the user touches the page (e.g. right after a reload)
   const [waitingTap, setWaitingTap] = useState<string | null>(null);
+  const sayId = useRef(0);
   const say = (text: string) => {
     const ua = (navigator as unknown as { userActivation?: { hasBeenActive: boolean } }).userActivation;
     if (ua && !ua.hasBeenActive) { setWaitingTap(text); return; }
     setWaitingTap(null);
     setSpeaking(true);
-    speak(text, 'en-US', 1, () => {
+    const my = ++sayId.current;
+    let done = false;
+    let guard: ReturnType<typeof setTimeout> | undefined;
+    const end = () => {
+      if (done || my !== sayId.current) return;
+      done = true;
+      clearTimeout(guard);
       setSpeaking(false);
       if (handsFreeRef.current && !report) startListening();
-    });
+    };
+    // safety net: whatever happens with the voice, the conversation never stays stuck on "speaking"
+    guard = setTimeout(end, 15000 + text.split(/\s+/).length * 600);
+    speak(text, 'en-US', 1, end);
   };
 
   const ask = async (history: Turn[]) => {
@@ -191,6 +201,7 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
         <Button variant="secondary" size="sm" onClick={finish} disabled={busy}>{ending ? <Loader2 size={14} className="animate-spin" /> : <Star size={14} />} Finish and see my grade</Button>
       </div>
 
+      {!ai && llm.state !== 'ready' && <FreeAiCard />}
       <div className="flex min-h-[50vh] flex-col gap-3 pb-40">
         {turns.map((x, i) => x.role === 'tutor' ? (
           <div key={i} className="flex items-start gap-2.5">
