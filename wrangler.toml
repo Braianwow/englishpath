@@ -6,4 +6,4 @@ compatibility_date = "2026-10-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "englishpath"
-database_id = "00000000-0000-0000-0000-000000000000" # replaced by the real id after `wrangler d1 create englishpath`
+database_id = "569b6503-9d1f-4746-8071-bfbbd332baf7"
