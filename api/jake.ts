@@ -6,8 +6,10 @@
  *
  * GET  /api/jake          → { ok: true } when a key is configured
  * POST /api/jake          → { kind: 'turn' | 'report', topic, turns: [{ role, text }] } → { text }
+ *                         → { kind: 'tts', text, voice } → { audio, rate }
+ *                         → { kind: 'live', topic, voice, alt } → { token, model } (one-use pass for a real-time voice chat)
  */
-import { TOPICS, callGemini, persona, reportSystem, toMessages, transcript, type Turn } from '../src/lib/jake';
+import { TOPICS, callGemini, livePersona, persona, reportSystem, toMessages, transcript, type Turn } from '../src/lib/jake';
 
 export const config = { runtime: 'edge' };
 
@@ -58,6 +60,36 @@ const JAKE_VOICES = ['Algieba', 'Enceladus', 'Umbriel', 'Algenib', 'Fenrir', 'Or
 const TTS_MODELS = ['gemini-3.8-flash-tts', 'gemini-2.5-flash-preview-tts', 'gemini-3.1-flash-tts-preview'];
 
 /** Reads `text` in Jake's tone; returns 16-bit PCM audio as base64 plus its sample rate. */
+// Real-time voice models (best first). The browser asks for the next one if a model can't connect.
+const LIVE_MODELS = ['gemini-3.8-live', 'gemini-2.5-flash-native-audio-latest', 'gemini-3.1-flash-live-preview'];
+
+/**
+ * A one-use pass for a Gemini Live voice chat. Everything (model, Jake's instructions, voice) is locked
+ * inside the pass, so it can only be used to talk to Jake, and the real key never leaves the server.
+ */
+async function livePass(key: string, brief: string, voice: string, model: string): Promise<string> {
+  const now = Date.now();
+  const res = await fetch('https://generativelanguage.googleapis.com/v1alpha/auth_tokens', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+    body: JSON.stringify({
+      uses: 1,
+      expireTime: new Date(now + 30 * 60000).toISOString(), // the chat can last up to 30 min
+      newSessionExpireTime: new Date(now + 2 * 60000).toISOString(), // must connect within 2 min
+      bidiGenerateContentSetup: {
+        model: `models/${model}`,
+        generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } },
+        systemInstruction: { parts: [{ text: livePersona(brief) }] },
+        inputAudioTranscription: {},
+        outputAudioTranscription: {},
+      },
+    }),
+  });
+  const j = await res.json().catch(() => ({})) as { name?: string; error?: { message?: string } };
+  if (!res.ok || !j.name) throw new Error(j.error?.message ?? String(res.status));
+  return j.name;
+}
+
 async function geminiSpeech(key: string, text: string, voice: string): Promise<{ audio: string; rate: number; model: string }> {
   // short style cue in Google's documented "Say …:" form, so only the text after the colon is spoken
   const prompt = `Say in a smooth, flirty, confident way: ${text}`;
@@ -93,12 +125,6 @@ export default async function handler(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
   const key = geminiKey();
   if (req.method === 'GET') {
-    // TEMPORARY diagnosis: names of the real-time (Live) models this key can use
-    if (key && new URL(req.url).searchParams.has('live')) {
-      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=300', { headers: { 'x-goog-api-key': key } });
-      const j = await r.json().catch(() => ({})) as { models?: { name: string; supportedGenerationMethods?: string[] }[] };
-      return json({ live: (j.models ?? []).filter((m) => m.supportedGenerationMethods?.some((x) => /bidi/i.test(x))).map((m) => m.name.replace('models/', '')) }, 200, headers);
-    }
     return json({ ok: !!key }, 200, headers);
   }
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, headers);
@@ -107,7 +133,7 @@ export default async function handler(req: Request): Promise<Response> {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   if (limited(ip)) return json({ error: "You're talking a lot! Take a short break and try again in a minute." }, 429, headers);
 
-  let body: { kind?: string; topic?: string; turns?: { role?: string; text?: string }[]; text?: string; voice?: string };
+  let body: { kind?: string; topic?: string; turns?: { role?: string; text?: string }[]; text?: string; voice?: string; alt?: number };
   try { body = await req.json(); } catch { return json({ error: 'Bad request' }, 400, headers); }
 
   // Jake's voice: Google's speech model reads a short line with one of Jake's voices
@@ -120,6 +146,18 @@ export default async function handler(req: Request): Promise<Response> {
       return json(audio, 200, headers);
     } catch (e) {
       return json({ error: 'Voice not available right now.', detail: ((e as Error).message || '').slice(0, 300) }, 502, headers);
+    }
+  }
+
+  if (body.kind === 'live') {
+    const topic = TOPICS.find((t) => t.id === body.topic);
+    const voice = JAKE_VOICES.includes(body.voice ?? '') ? body.voice! : JAKE_VOICES[0];
+    const model = LIVE_MODELS[Math.max(0, Math.min(LIVE_MODELS.length - 1, Number(body.alt) || 0))];
+    if (!topic) return json({ error: 'Bad request' }, 400, headers);
+    try {
+      return json({ token: await livePass(key, topic.brief, voice, model), model, more: LIVE_MODELS.indexOf(model) < LIVE_MODELS.length - 1 }, 200, headers);
+    } catch (e) {
+      return json({ error: 'Live voice is not available right now.', detail: ((e as Error).message || '').slice(0, 300) }, 502, headers);
     }
   }
 

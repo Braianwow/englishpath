@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, Sparkles, Languages, Loader2, Mic, MicOff, Send, Square, Star, Volume2 } from 'lucide-react';
+import { ChevronLeft, Sparkles, Languages, Loader2, Mic, MicOff, Phone, PhoneOff, Send, Square, Star, Volume2 } from 'lucide-react';
 import { addMyWords, recordSkill, setLast, useSettings } from '../store/progress';
 import { notify } from '../store/toast';
 import { TOPICS, conversationAi, finalReport, nextTurn, serverAvailable, type Report, type TopicId, type Turn } from '../lib/conversation';
-import { localReport, localTurn } from '../lib/freeTutor';
+import { checkSentence, localReport, localTurn } from '../lib/freeTutor';
+import { startLive, type LiveChat, type LiveState } from '../lib/jakeLive';
 import { describeError } from '../lib/assistant';
 import { getSttEngine, listen, recognitionSupported } from '../lib/recognition';
 import { preloadLocalStt } from '../lib/localStt';
@@ -28,6 +29,10 @@ export default function Conversation() {
   // keep loading the free AI in the background if it was turned on before
   useEffect(() => { if (!hasAi && llmWanted()) startLlm(); }, [hasAi]);
 
+  const [live, setLiveMode] = useState(liveWanted());
+  const toggleLive = (v: boolean) => { setLiveMode(v); try { localStorage.setItem(LIVE_KEY, v ? '1' : '0'); } catch { /* ignore */ } };
+  const canLive = aiKind === 'server' && liveSupported();
+  if (topic && canLive && live) return <LiveSession topic={topic} onExit={() => setTopic(null)} onTyping={() => toggleLive(false)} />;
   if (topic) return <Session topic={topic} ai={hasAi} viaServer={aiKind === 'server'} onExit={() => setTopic(null)} />;
 
   return (
@@ -48,6 +53,17 @@ export default function Conversation() {
           </Card>
         )
         : <FreeAiCard />}
+      {canLive && (
+        <Card className="mb-5 flex flex-wrap items-center gap-3 p-4">
+          <Phone size={20} className="text-brand-500" />
+          <div className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300">
+            <strong className="text-slate-900 dark:text-white">Real-time voice call.</strong> Talk to Jake like on the phone: he hears you and answers out loud in about a second. Turn it off to chat by turns (you can also type).
+          </div>
+          <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+            <input type="checkbox" checked={live} onChange={(e) => toggleLive(e.target.checked)} className="h-4 w-4 accent-brand-500" /> On
+          </label>
+        </Card>
+      )}
       {aiKind === 'server' && <JakeVoicePicker />}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {TOPICS.map((t) => (
@@ -383,5 +399,137 @@ function JakeVoicePicker() {
       </div>
       {failed && <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">The Google voice isn't available right now (it may have reached its free daily limit). Jake will use the device voice meanwhile.</p>}
     </Card>
+  );
+}
+
+const LIVE_KEY = 'ep.jakeLive';
+const liveWanted = () => { try { return localStorage.getItem(LIVE_KEY) !== '0'; } catch { return true; } };
+const liveSupported = () => typeof AudioWorkletNode !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof WebSocket !== 'undefined';
+
+/** A real-time voice call with Jake (Gemini Live): no buttons to press between turns. */
+function LiveSession({ topic, onExit, onTyping }: { topic: TopicId; onExit: () => void; onTyping: () => void }) {
+  const s = useSettings();
+  const t = TOPICS.find((x) => x.id === topic)!;
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [partial, setPartial] = useState<{ me: string; jake: string }>({ me: '', jake: '' });
+  const [state, setState] = useState<LiveState | 'idle'>('idle');
+  const [muted, setMuted] = useState(false);
+  const [error, setError] = useState('');
+  const [report, setReport] = useState<Report | null>(null);
+  const [ending, setEnding] = useState(false);
+  const chat = useRef<LiveChat | null>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+  const turnsRef = useRef(turns);
+  turnsRef.current = turns;
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [turns, partial]);
+  useEffect(() => { setLast({ kind: 'speaking', id: topic, title: `Conversation: ${t.label}`, path: '/conversation' }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => chat.current?.stop(), []);
+
+  const start = async () => {
+    unlockAudio(); stopSpeaking(); setError(''); setMuted(false);
+    try {
+      chat.current = await startLive(topic, getJakeVoice() ?? JAKE_VOICES[0].id, {
+        state: setState,
+        partial: (me, jake) => setPartial({ me, jake }),
+        turn: (me, jake) => setTurns((prev) => [
+          ...prev,
+          ...(me ? [{ role: 'me' as const, text: me, correction: checkSentence(me) }] : []),
+          ...(jake ? [{ role: 'tutor' as const, text: jake }] : []),
+        ]),
+        error: setError,
+      });
+    } catch (e) {
+      setError((e as Error).message);
+      setState('idle');
+    }
+  };
+  const hangUp = () => { chat.current?.stop(); chat.current = null; };
+
+  const finish = async () => {
+    hangUp();
+    const all = turnsRef.current;
+    if (!all.some((x) => x.role === 'me')) { onExit(); return; }
+    setEnding(true); setError('');
+    try {
+      const r = await finalReport(s, topic, all, true);
+      setReport(r);
+      recordSkill('speaking', `Conversation: ${t.label}`, r.score, 10, 15 + all.filter((x) => x.role === 'me').length * 3);
+    } catch (e) {
+      setError(describeError(e) || (e as Error).message);
+    } finally { setEnding(false); }
+  };
+
+  if (report) return <ReportView report={report} topicLabel={t.label} onAgain={onExit} />;
+
+  const on = state === 'listening' || state === 'speaking' || state === 'connecting';
+  return (
+    <div className="mx-auto flex max-w-2xl flex-col">
+      <div className="mb-4 flex items-center gap-3">
+        <button onClick={() => { hangUp(); onExit(); }} className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Exit"><ChevronLeft size={20} /></button>
+        <div className="min-w-0 flex-1">
+          <div className="font-display text-lg font-bold text-slate-900 dark:text-white">{t.emoji} {t.label} <span className="font-normal text-slate-500">with Jake</span> <span className="ml-1 rounded-full bg-rose-500/15 px-2 py-0.5 align-middle text-[11px] font-semibold text-rose-600 dark:text-rose-300">LIVE</span></div>
+          <button onClick={() => { hangUp(); onTyping(); }} className="text-xs text-slate-500 hover:underline">Prefer to chat by turns or type? Switch mode</button>
+        </div>
+        <Button variant="secondary" size="sm" onClick={finish} disabled={ending}>{ending ? <Loader2 size={14} className="animate-spin" /> : <Star size={14} />} Finish and see my grade</Button>
+      </div>
+
+      <div className="flex min-h-[50vh] flex-col gap-3 pb-44">
+        {state === 'idle' && !turns.length && (
+          <Card className="flex flex-col items-center gap-2 p-6 text-center">
+            <div className="text-5xl">😏</div>
+            <div className="font-semibold text-slate-900 dark:text-white">Call Jake</div>
+            <p className="text-sm text-slate-500">Just talk — he answers when you stop. Headphones work best. Your browser will ask for the microphone.</p>
+          </Card>
+        )}
+        {turns.map((x, i) => x.role === 'tutor' ? (
+          <div key={i} className="flex items-start gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-500 text-lg">😏</div>
+            <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-slate-800 shadow-sm dark:bg-slate-900 dark:text-slate-100">{x.text}</div>
+          </div>
+        ) : (
+          <div key={i} className="flex flex-col items-end">
+            <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-brand-500 px-4 py-3 text-slate-950">{x.text}</div>
+            {x.correction && (
+              <div className="mt-1.5 max-w-[85%] rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm dark:border-amber-500/30 dark:bg-amber-500/10">
+                <div><span className="text-rose-600 line-through dark:text-rose-400">{x.correction.said}</span> → <span className="font-semibold text-emerald-700 dark:text-emerald-400">{x.correction.better}</span></div>
+                <div className="text-xs text-slate-600 dark:text-slate-300">{x.correction.why}</div>
+              </div>
+            )}
+          </div>
+        ))}
+        {partial.me && <div className="self-end max-w-[85%] rounded-2xl rounded-tr-sm border-2 border-dashed border-brand-500/60 px-4 py-3 text-slate-500">{partial.me}…</div>}
+        {partial.jake && (
+          <div className="flex items-start gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-500 text-lg">😏</div>
+            <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white/70 px-4 py-3 text-slate-600 shadow-sm dark:bg-slate-900/70 dark:text-slate-300">{partial.jake}…</div>
+          </div>
+        )}
+        {error && <div className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}{!on && <> · <button onClick={() => { hangUp(); onTyping(); }} className="font-semibold underline">Chat by turns instead</button></>}</div>}
+        <div ref={endRef} />
+      </div>
+
+      <div className="fixed inset-x-0 bottom-16 z-20 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur lg:bottom-0 dark:border-slate-800 dark:bg-slate-950/95">
+        <div className="mx-auto flex max-w-2xl items-center gap-3">
+          {on ? (
+            <button onClick={hangUp} aria-label="Hang up" className="pressable flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg shadow-rose-500/30"><PhoneOff size={22} /></button>
+          ) : (
+            <button onClick={start} disabled={ending} aria-label="Call Jake" className="pressable flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 disabled:opacity-50"><Phone size={22} /></button>
+          )}
+          <div className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300">
+            {state === 'connecting' && <span className="inline-flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Calling Jake…</span>}
+            {state === 'listening' && (muted ? 'Microphone muted' : <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-500" /> Your turn — just talk</span>)}
+            {state === 'speaking' && <span className="inline-flex items-center gap-2"><Volume2 size={14} className="text-brand-500" /> Jake is talking…</span>}
+            {(state === 'idle' || state === 'closed') && (turns.length ? 'Call ended. Call again or finish to see your grade.' : 'Tap the green button to call Jake.')}
+          </div>
+          {on && (
+            <button onClick={() => { const m = !muted; setMuted(m); chat.current?.setMuted(m); }} aria-label={muted ? 'Unmute' : 'Mute'}
+              className={cx('pressable flex h-11 w-11 shrink-0 items-center justify-center rounded-full border', muted ? 'border-rose-400 bg-rose-50 text-rose-600 dark:bg-rose-500/10' : 'border-slate-300 text-slate-600 dark:border-slate-700 dark:text-slate-300')}>
+              {muted ? <MicOff size={18} /> : <Mic size={18} />}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
