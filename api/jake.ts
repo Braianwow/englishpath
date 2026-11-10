@@ -53,6 +53,40 @@ function limited(ip: string): boolean {
   return h.m > PER_MINUTE || h.d > PER_DAY;
 }
 
+/** Google's prebuilt male voices that fit Jake (smooth, breathy, easy-going, gravelly…). */
+const JAKE_VOICES = ['Algieba', 'Enceladus', 'Umbriel', 'Algenib', 'Fenrir', 'Orus', 'Charon', 'Puck', 'Achird', 'Zubenelgenubi'];
+const TTS_MODELS = ['gemini-3.8-flash-tts', 'gemini-2.5-flash-preview-tts', 'gemini-3.1-flash-tts-preview'];
+
+/** Reads `text` in Jake's tone; returns 16-bit PCM audio as base64 plus its sample rate. */
+async function geminiSpeech(key: string, text: string, voice: string): Promise<{ audio: string; rate: number; model: string }> {
+  const prompt = `Say this like a smooth, confident, flirty young guy — relaxed, a little cocky, warm and charming, with a playful smile in his voice. Natural pace, not too slow: ${text}`;
+  let lastErr = '';
+  for (const model of TTS_MODELS) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 12000);
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST', signal: ctrl.signal,
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } },
+        }),
+      });
+      const j = await res.json().catch(() => ({})) as { candidates?: { content?: { parts?: { inlineData?: { data?: string; mimeType?: string } }[] } }[]; error?: { message?: string } };
+      const part = j.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data)?.inlineData;
+      if (res.ok && part?.data) {
+        const rate = Number(/rate=(\d+)/.exec(part.mimeType ?? '')?.[1] ?? 24000);
+        return { audio: part.data, rate, model };
+      }
+      lastErr = `${model}: ${j.error?.message ?? res.status}`;
+    } catch {
+      lastErr = `${model}: took too long`;
+    } finally { clearTimeout(timer); }
+  }
+  throw new Error(lastErr);
+}
+
 export default async function handler(req: Request): Promise<Response> {
   const headers = cors(req.headers.get('origin'));
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
@@ -64,8 +98,22 @@ export default async function handler(req: Request): Promise<Response> {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   if (limited(ip)) return json({ error: "You're talking a lot! Take a short break and try again in a minute." }, 429, headers);
 
-  let body: { kind?: string; topic?: string; turns?: { role?: string; text?: string }[] };
+  let body: { kind?: string; topic?: string; turns?: { role?: string; text?: string }[]; text?: string; voice?: string };
   try { body = await req.json(); } catch { return json({ error: 'Bad request' }, 400, headers); }
+
+  // Jake's voice: Google's speech model reads a short line with one of Jake's voices
+  if (body.kind === 'tts') {
+    const text = typeof body.text === 'string' ? body.text.trim().slice(0, 400) : '';
+    const voice = JAKE_VOICES.includes(body.voice ?? '') ? body.voice! : JAKE_VOICES[0];
+    if (!text) return json({ error: 'Bad request' }, 400, headers);
+    try {
+      const audio = await geminiSpeech(key, text, voice);
+      return json(audio, 200, headers);
+    } catch (e) {
+      return json({ error: 'Voice not available right now.', detail: ((e as Error).message || '').slice(0, 300) }, 502, headers);
+    }
+  }
+
   const topic = TOPICS.find((t) => t.id === body.topic);
   if (!topic || (body.kind !== 'turn' && body.kind !== 'report') || !Array.isArray(body.turns)) return json({ error: 'Bad request' }, 400, headers);
   // only the last part of the conversation, with short lines
