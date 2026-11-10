@@ -69,6 +69,21 @@ export default async function handler(req: Request): Promise<Response> {
       const models = (j.models ?? []).filter((m) => m.supportedGenerationMethods?.includes('generateContent')).map((m) => m.name.replace('models/', ''));
       return json({ ok: true, models }, 200, headers);
     }
+    // diagnosis: how long one model takes to answer a short Jake turn (?bench=<model>)
+    const bench = new URL(req.url).searchParams.get('bench');
+    if (key && bench && /^gemini-[\w.-]+$/.test(bench)) {
+      const t0 = Date.now();
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 20000);
+      try {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${bench}:generateContent`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, signal: ctrl.signal,
+          body: JSON.stringify({ systemInstruction: { parts: [{ text: persona(TOPICS[0].brief) }] }, contents: [{ role: 'user', parts: [{ text: 'I go to Brazil last summer with my friends' }] }], generationConfig: { maxOutputTokens: 400, responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'low' } } }),
+        });
+        const j = await r.json().catch(() => ({})) as { candidates?: { content?: { parts?: { text?: string }[] } }[]; error?: { message?: string } };
+        return json({ model: bench, status: r.status, ms: Date.now() - t0, text: j.candidates?.[0]?.content?.parts?.[0]?.text?.slice(0, 200), error: j.error?.message?.slice(0, 120) }, 200, headers);
+      } catch { return json({ model: bench, ms: Date.now() - t0, error: 'timeout' }, 200, headers); } finally { clearTimeout(timer); }
+    }
     return json({ ok: !!key, ...(names ? { names } : {}) }, 200, headers);
   }
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, headers);
