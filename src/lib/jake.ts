@@ -60,7 +60,8 @@ export const transcript = (turns: Turn[]) => turns.map((t) => `${t.role === 'tut
 
 // Google retires models often: the first one is the one Google recommends today, the rest are fallbacks.
 // When one is busy (503) or out of free quota (429), the next one usually isn't: lite models are rarely busy.
-const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.1-flash-lite'];
+// Measured: flash-lite answers in ~1 s with good replies, while the big flash models are often busy (503).
+const GEMINI_MODELS = ['gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash'];
 
 /** Google Gemini (free tier) through its REST API; the key goes in a header, never in the URL. */
 export async function callGemini(key: string, system: string, messages: Msg[], maxTokens: number, json = true): Promise<string> {
@@ -87,7 +88,7 @@ export async function callGemini(key: string, system: string, messages: Msg[], m
       if (left < 2000) throw new Error(`${lastErr || 'Gemini took too long to answer.'} [${attempts.join(' | ')}]`);
       const t0 = Date.now();
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), Math.min(9000, left));
+      const timer = setTimeout(() => ctrl.abort(), Math.min(6000, left));
       let res: Response;
       try {
         res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
