@@ -59,7 +59,8 @@ export function toMessages(turns: Turn[]): Msg[] {
 export const transcript = (turns: Turn[]) => turns.map((t) => `${t.role === 'tutor' ? 'Tutor' : 'Student'}: ${t.text}`).join('\n');
 
 // Google retires models often: the first one is the one Google recommends today, the rest are fallbacks.
-const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3-flash', 'gemini-2.5-flash'];
+// When one is busy (503) or out of free quota (429), the next one usually isn't: lite models are rarely busy.
+const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.1-flash-lite'];
 
 /** Google Gemini (free tier) through its REST API; the key goes in a header, never in the URL. */
 export async function callGemini(key: string, system: string, messages: Msg[], maxTokens: number, json = true): Promise<string> {
@@ -68,7 +69,7 @@ export async function callGemini(key: string, system: string, messages: Msg[], m
   const attempts: string[] = [];
   const started = Date.now();
   // As little "thinking" as possible so Jake answers fast: Gemini 3 uses thinkingLevel, 2.5 uses thinkingBudget.
-  const thinkingOptions: (Record<string, unknown> | null)[] = [{ thinkingLevel: 'minimal' }, { thinkingLevel: 'low' }, { thinkingBudget: 0 }, null];
+  const thinkingOptions: (Record<string, unknown> | null)[] = [{ thinkingLevel: 'low' }, { thinkingBudget: 0 }, null];
   for (const model of GEMINI_MODELS) {
     for (let t = 0; t < thinkingOptions.length; t++) {
       const thinking = thinkingOptions[t];
@@ -86,7 +87,7 @@ export async function callGemini(key: string, system: string, messages: Msg[], m
       if (left < 2000) throw new Error(`${lastErr || 'Gemini took too long to answer.'} [${attempts.join(' | ')}]`);
       const t0 = Date.now();
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), Math.min(15000, left));
+      const timer = setTimeout(() => ctrl.abort(), Math.min(9000, left));
       let res: Response;
       try {
         res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
@@ -110,7 +111,7 @@ export async function callGemini(key: string, system: string, messages: Msg[], m
       attempts[attempts.length - 1] += ` (${(err.error?.message ?? '').slice(0, 80)})`;
       if (res.status === 400 && /api key|API_KEY/i.test(lastErr)) throw new Error('The Gemini key is not valid. Check it in Settings.');
       if (res.status === 403) throw new Error('The Gemini key is not valid or the API is not enabled. Check it in Settings.');
-      if (res.status === 429) throw new Error('Gemini free limit reached for now. Wait a minute and try again.');
+      if (res.status === 429) { lastErr = 'Gemini free limit reached for now. Wait a minute and try again.'; break; } // try the next model
       if (res.status === 400 && thinking) continue; // this model doesn't accept this thinking setting: try the next one
       break; // 404 (model not available) or other error: try the next model
     }
