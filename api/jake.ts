@@ -59,7 +59,8 @@ const TTS_MODELS = ['gemini-3.8-flash-tts', 'gemini-2.5-flash-preview-tts', 'gem
 
 /** Reads `text` in Jake's tone; returns 16-bit PCM audio as base64 plus its sample rate. */
 async function geminiSpeech(key: string, text: string, voice: string): Promise<{ audio: string; rate: number; model: string }> {
-  const prompt = `Say this like a smooth, confident, flirty young guy — relaxed, a little cocky, warm and charming, with a playful smile in his voice. Natural pace, not too slow: ${text}`;
+  // short style cue in Google's documented "Say …:" form, so only the text after the colon is spoken
+  const prompt = `Say in a smooth, flirty, confident way: ${text}`;
   let lastErr = '';
   for (const model of TTS_MODELS) {
     const ctrl = new AbortController();
