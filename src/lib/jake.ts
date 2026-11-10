@@ -58,7 +58,8 @@ export function toMessages(turns: Turn[]): Msg[] {
 
 export const transcript = (turns: Turn[]) => turns.map((t) => `${t.role === 'tutor' ? 'Tutor' : 'Student'}: ${t.text}`).join('\n');
 
-const GEMINI_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+// Google retires models often: the first one is the one Google recommends today, the rest are fallbacks.
+const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3-flash', 'gemini-2.5-flash'];
 
 /** Google Gemini (free tier) through its REST API; the key goes in a header, never in the URL. */
 export async function callGemini(key: string, system: string, messages: Msg[], maxTokens: number, json = true): Promise<string> {
@@ -86,7 +87,7 @@ export async function callGemini(key: string, system: string, messages: Msg[], m
         break;
       }
       const err = await res.json().catch(() => ({})) as { error?: { message?: string; status?: string } };
-      lastErr = err.error?.message ?? `Gemini error ${res.status}`;
+      lastErr = `${model}: ${err.error?.message ?? `Gemini error ${res.status}`}`;
       if (res.status === 400 && /api key|API_KEY/i.test(lastErr)) throw new Error('The Gemini key is not valid. Check it in Settings.');
       if (res.status === 403) throw new Error('The Gemini key is not valid or the API is not enabled. Check it in Settings.');
       if (res.status === 429) throw new Error('Gemini free limit reached for now. Wait a minute and try again.');
