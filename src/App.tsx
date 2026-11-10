@@ -24,11 +24,14 @@ import Listening from './pages/Listening';
 import Speaking from './pages/Speaking';
 import Conversation from './pages/Conversation';
 import Writing from './pages/Writing';
+import AccountPage from './pages/AccountPage';
+import { initCloud } from './lib/cloud';
 import { applyTheme, getSettings } from './store/progress';
 
 export default function App() {
   useEffect(() => {
     applyTheme(getSettings().theme);
+    initCloud();
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const fn = () => applyTheme(getSettings().theme);
     mq.addEventListener?.('change', fn);
@@ -63,6 +66,7 @@ export default function App() {
           <Route path="/plan" element={<StudyPlan />} />
           <Route path="/reference" element={<Reference />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

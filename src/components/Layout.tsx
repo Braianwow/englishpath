@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { cx } from './ui';
 import { useProgress, useSettings } from '../store/progress';
+import { useCloud } from '../lib/cloud';
+import { CircleUserRound, LogIn } from 'lucide-react';
 import { streak } from '../lib/gamification';
 import { toggleThemeAnimated } from '../lib/theme';
 import Toasts from './Toasts';
@@ -61,6 +63,22 @@ export function ThemeSwitch() {
         {dark ? <Moon size={14} className="text-brand-400" /> : <Sun size={14} className="text-amber-500" />}
       </span>
     </button>
+  );
+}
+
+/** "Sign in" or the account icon (only on the site that has accounts). */
+function AccountButton() {
+  const c = useCloud();
+  if (!c.available) return null;
+  return c.email ? (
+    <NavLink to="/account" title={`Signed in as ${c.email}`} aria-label="Your account"
+      className="pressable flex h-9 w-9 items-center justify-center rounded-xl text-brand-600 hover:bg-slate-100 dark:text-brand-300 dark:hover:bg-slate-800">
+      <CircleUserRound size={20} />
+    </NavLink>
+  ) : (
+    <NavLink to="/account" className="pressable inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+      <LogIn size={16} /> <span className="hidden sm:inline">Sign in</span>
+    </NavLink>
   );
 }
 
@@ -147,6 +165,7 @@ export default function Layout() {
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <StreakPill />
+            <AccountButton />
             <div className="hidden lg:block"><MoreMenu active={inMore} /></div>
             <ThemeSwitch />
           </div>

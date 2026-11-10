@@ -265,3 +265,23 @@ export function importProgress(json: string) {
   repository.saveProgress(state);
   emit();
 }
+
+// ───────── cloud sync (accounts) ─────────
+/** Listen to any change of progress or settings. */
+export const onStoreChange = subscribe;
+
+/** What is saved to the learner's account: progress and settings, never API keys. */
+export function cloudSnapshot() {
+  return { progress: state, settings: { ...settings, aiKey: '', geminiKey: '', elevenKey: '' } };
+}
+
+/** Replaces this browser's progress with the account's (keeping this browser's own API keys). */
+export function applyCloudSnapshot(data: { progress?: ProgressState; settings?: Partial<Settings> } | null) {
+  const keys = { aiKey: settings.aiKey, geminiKey: settings.geminiKey, elevenKey: settings.elevenKey };
+  state = { ...emptyProgress(), ...(data?.progress ?? {}) };
+  settings = { ...DEFAULT_SETTINGS, ...(data?.settings ?? {}), ...keys };
+  repository.saveProgress(state);
+  repository.saveSettings(settings);
+  applyTheme(settings.theme);
+  emit();
+}

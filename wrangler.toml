@@ -1,0 +1,9 @@
+# Cloudflare Pages: the built site (dist) plus the account API in /functions, with a D1 database.
+name = "englishpath"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "englishpath"
+database_id = "00000000-0000-0000-0000-000000000000" # replaced by the real id after `wrangler d1 create englishpath`

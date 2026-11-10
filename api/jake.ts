@@ -23,7 +23,7 @@ function geminiKey(): string | undefined {
   return (name ? env[name] : undefined)?.trim() || undefined;
 }
 
-const ALLOWED_ORIGINS = [/^https:\/\/englishpath[\w-]*\.vercel\.app$/, /^https:\/\/braianwow\.github\.io$/, /^http:\/\/localhost(:\d+)?$/];
+const ALLOWED_ORIGINS = [/^https:\/\/englishpath[\w-]*\.vercel\.app$/, /^https:\/\/([\w-]+\.)?englishpath[\w-]*\.pages\.dev$/,/^https:\/\/braianwow\.github\.io$/, /^http:\/\/localhost(:\d+)?$/];
 
 // Generous per-visitor limits (in memory, per server instance): far above normal daily practice.
 const PER_MINUTE = 30;
