@@ -18,7 +18,7 @@ export const conversationAi = (s: Settings, serverOk = false): 'claude' | 'gemin
   s.aiProvider === 'anthropic' && s.aiKey ? 'claude' : s.geminiKey ? 'gemini' : serverOk ? 'server' : null;
 
 /** The shared server: same origin on Vercel; from GitHub Pages, the Vercel deployment. */
-const SERVER = typeof location !== 'undefined' && location.hostname.endsWith('github.io')
+export const SERVER = typeof location !== 'undefined' && location.hostname.endsWith('github.io')
   ? 'https://englishpath-murex.vercel.app/api/jake' : '/api/jake';
 
 let serverCheck: Promise<boolean> | null = null;

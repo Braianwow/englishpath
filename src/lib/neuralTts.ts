@@ -95,6 +95,12 @@ let scheduled: AudioBufferSourceNode[] = [];
  * Browsers only allow sound after the user has touched the page. The first tap or key press
  * anywhere unlocks the audio, so later replies (and the greeting after a reload) can play.
  */
+/** The shared audio context (created on first use). */
+export function sharedAudioContext(): AudioContext {
+  ctx ??= new AudioContext();
+  return ctx;
+}
+
 export function unlockAudio() {
   try {
     ctx ??= new AudioContext();

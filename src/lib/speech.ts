@@ -1,6 +1,7 @@
 import { getSettings } from '../store/progress';
 import { notify } from '../store/toast';
 import { speakEleven, stopEleven } from './elevenlabs';
+import { stopJake } from './jakeVoice';
 import { DEFAULT_AI_VOICE, aiSupported, aiVoiceCached, getAiStatus, loadAiVoice, speakAi, stopAi, whenAiReady } from './neuralTts';
 
 /**
@@ -10,7 +11,7 @@ import { DEFAULT_AI_VOICE, aiSupported, aiVoiceCached, getAiStatus, loadAiVoice,
  */
 export const speechSupported = () => typeof window !== 'undefined' && 'speechSynthesis' in window;
 
-export function stopSpeaking() { stopAi(); stopEleven(); try { window.speechSynthesis.cancel(); } catch { /* ignore */ } }
+export function stopSpeaking() { stopAi(); stopEleven(); stopJake(); try { window.speechSynthesis.cancel(); } catch { /* ignore */ } }
 
 let warned = false;
 

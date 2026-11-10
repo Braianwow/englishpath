@@ -9,6 +9,7 @@ import { describeError } from '../lib/assistant';
 import { getSttEngine, listen, recognitionSupported } from '../lib/recognition';
 import { preloadLocalStt } from '../lib/localStt';
 import { aiSupported, loadAiVoice, unlockAudio } from '../lib/neuralTts';
+import { JAKE_VOICES, getJakeVoice, setJakeVoice, speakJake, stopJake } from '../lib/jakeVoice';
 import { llmTurn, llmWanted, startLlm, stopLlm, useLlmStatus, webGpuAvailable } from '../lib/localLlm';
 import { speak, stopSpeaking } from '../lib/speech';
 import { Button, Card, cx } from '../components/ui';
@@ -47,6 +48,7 @@ export default function Conversation() {
           </Card>
         )
         : <FreeAiCard />}
+      {aiKind === 'server' && <JakeVoicePicker />}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {TOPICS.map((t) => (
           <button key={t.id} onClick={() => setTopic(t.id)}
@@ -117,9 +119,12 @@ function Session({ topic, ai, viaServer = false, onExit: exit }: { topic: TopicI
       if (handsFreeRef.current && !report) startListening();
     };
     // safety net: whatever happens with the voice, the conversation never stays stuck on "speaking"
-    guard = setTimeout(end, 15000 + text.split(/\s+/).length * 600);
+    guard = setTimeout(end, (viaServer ? 25000 : 15000) + text.split(/\s+/).length * 600);
     // Jake's own voice: Fenrir, deep and laid-back (the "bad boy" voice), a little slower
-    speak(text, 'en-US', 0.94, end, 'am_fenrir');
+    const fallback = () => speak(text, 'en-US', 0.94, end, 'am_fenrir');
+    const jv = viaServer ? getJakeVoice() : null;
+    if (jv) speakJake(text, jv, end).then((ok) => { if (!ok && my === sayId.current) fallback(); });
+    else fallback();
   };
 
   const ask = async (history: Turn[]) => {
@@ -342,6 +347,41 @@ function FreeAiCard() {
         </div>
       )}
       {llm.state === 'error' && <p className="mt-2 text-xs text-rose-600">The free AI couldn't start: {llm.message}</p>}
+    </Card>
+  );
+}
+
+/** Choose Jake's human voice (Google's speech model) and hear a sample. */
+function JakeVoicePicker() {
+  const [voice, setVoice] = useState<string | null>(getJakeVoice());
+  const [playing, setPlaying] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  const pick = (v: string | null) => { setJakeVoice(v); setVoice(v); };
+  const hear = async (v: string) => {
+    unlockAudio(); stopJake(); setFailed(false);
+    pick(v); setPlaying(v);
+    const ok = await speakJake("Hey trouble, you came back. I knew you would. So, what are we talking about today?", v, () => setPlaying(null));
+    if (!ok) { setPlaying(null); setFailed(true); }
+  };
+  return (
+    <Card className="mb-5 p-4">
+      <div className="mb-1 font-semibold text-slate-900 dark:text-white">Jake's voice</div>
+      <p className="mb-3 text-sm text-slate-500">A human voice from Google, read in a smooth, flirty, confident tone. Tap one to hear it — the one you hear last is the one Jake uses. It takes a few seconds to start.</p>
+      <div className="flex flex-wrap gap-2">
+        {JAKE_VOICES.map((v) => (
+          <button key={v.id} type="button" onClick={() => hear(v.id)}
+            className={cx('pressable rounded-xl border px-3 py-2 text-left text-sm transition', voice === v.id ? 'border-brand-500 bg-brand-500/10' : 'border-slate-200 hover:border-brand-500/50 dark:border-slate-700')}>
+            <span className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-white">{playing === v.id ? <Loader2 size={14} className="animate-spin" /> : <Volume2 size={14} />} {v.id}</span>
+            <span className="block text-xs text-slate-500">{v.desc}</span>
+          </button>
+        ))}
+        <button type="button" onClick={() => { stopJake(); pick(null); }}
+          className={cx('pressable rounded-xl border px-3 py-2 text-left text-sm transition', voice === null ? 'border-brand-500 bg-brand-500/10' : 'border-slate-200 hover:border-brand-500/50 dark:border-slate-700')}>
+          <span className="font-semibold text-slate-900 dark:text-white">Device voice</span>
+          <span className="block text-xs text-slate-500">Instant, unlimited</span>
+        </button>
+      </div>
+      {failed && <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">The Google voice isn't available right now (it may have reached its free daily limit). Jake will use the device voice meanwhile.</p>}
     </Card>
   );
 }
