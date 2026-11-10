@@ -7,7 +7,7 @@
  * GET  /api/jake          → { ok: true } when a key is configured
  * POST /api/jake          → { kind: 'turn' | 'report', topic, turns: [{ role, text }] } → { text }
  */
-import { TOPICS, callGemini, persona, reportSystem, toMessages, transcript, type Turn } from '../src/lib/jake';
+import { TOPICS, callGemini, persona, reportSystem, toMessages, transcript, type Turn } from '../src/lib/jake.js';
 
 // Node.js runtime (Vercel's default): process.env holds the project's environment variables.
 declare const process: { env: Record<string, string | undefined> };
