@@ -11,6 +11,9 @@ import { TOPICS, callGemini, persona, reportSystem, toMessages, transcript, type
 
 export const config = { runtime: 'edge' };
 
+// Vercel provides environment variables as process.env (written out in full so it is replaced at build time).
+declare const process: { env: Record<string, string | undefined> };
+
 const ALLOWED_ORIGINS = [/^https:\/\/englishpath[\w-]*\.vercel\.app$/, /^https:\/\/braianwow\.github\.io$/, /^http:\/\/localhost(:\d+)?$/];
 
 // Generous per-visitor limits (in memory, per server instance): far above normal daily practice.
@@ -46,7 +49,7 @@ function limited(ip: string): boolean {
 export default async function handler(req: Request): Promise<Response> {
   const headers = cors(req.headers.get('origin'));
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
-  const key = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.GEMINI_API_KEY;
+  const key = process.env.GEMINI_API_KEY?.trim();
   if (req.method === 'GET') return json({ ok: !!key }, 200, headers);
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, headers);
   if (!key) return json({ error: 'Jake is not set up on the server yet.' }, 503, headers);
