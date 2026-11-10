@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, Sparkles, Languages, Loader2, Mic, MicOff, Send, Square, Star, Volume2 } from 'lucide-react';
 import { addMyWords, recordSkill, setLast, useSettings } from '../store/progress';
 import { notify } from '../store/toast';
-import { TOPICS, conversationAi, finalReport, nextTurn, type Report, type TopicId, type Turn } from '../lib/conversation';
+import { TOPICS, conversationAi, finalReport, nextTurn, serverAvailable, type Report, type TopicId, type Turn } from '../lib/conversation';
 import { localReport, localTurn } from '../lib/freeTutor';
 import { describeError } from '../lib/assistant';
 import { getSttEngine, listen, recognitionSupported } from '../lib/recognition';
@@ -18,13 +18,16 @@ import { clearSaved, usePersisted } from '../lib/persist';
 export default function Conversation() {
   const s = useSettings();
   const [topic, setTopic] = usePersisted<TopicId | null>('conv:topic', null);
-  const aiKind = conversationAi(s);
+  // the shared server lets everyone talk to the smart Jake without a key of their own
+  const [serverOk, setServerOk] = useState(false);
+  useEffect(() => { serverAvailable().then(setServerOk); }, []);
+  const aiKind = conversationAi(s, serverOk);
   const hasAi = !!aiKind;
 
   // keep loading the free AI in the background if it was turned on before
   useEffect(() => { if (!hasAi && llmWanted()) startLlm(); }, [hasAi]);
 
-  if (topic) return <Session topic={topic} ai={hasAi} onExit={() => setTopic(null)} />;
+  if (topic) return <Session topic={topic} ai={hasAi} viaServer={aiKind === 'server'} onExit={() => setTopic(null)} />;
 
   return (
     <div>
@@ -40,7 +43,7 @@ export default function Conversation() {
         ? (
           <Card className="mb-5 flex flex-wrap items-center gap-3 p-4">
             <Sparkles size={20} className="text-brand-500" />
-            <p className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">{aiKind === 'gemini' ? 'Gemini AI mode.' : 'Claude AI mode.'}</strong> Jake understands anything you say and answers freely{aiKind === 'gemini' ? ' (Google Gemini, free key)' : ' (your Claude API key)'}.</p>
+            <p className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">{aiKind === 'claude' ? 'Claude AI mode.' : 'Smart AI on.'}</strong> Jake understands anything you say, follows the conversation and corrects you{aiKind === 'claude' ? ' (your Claude API key)' : aiKind === 'gemini' ? ' (your Google Gemini key)' : ' — free for everyone'}.</p>
           </Card>
         )
         : <FreeAiCard />}
@@ -61,7 +64,7 @@ export default function Conversation() {
   );
 }
 
-function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onExit: () => void }) {
+function Session({ topic, ai, viaServer = false, onExit: exit }: { topic: TopicId; ai: boolean; viaServer?: boolean; onExit: () => void }) {
   const s = useSettings();
   const llm = useLlmStatus();
   const t = TOPICS.find((x) => x.id === topic)!;
@@ -122,7 +125,7 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
   const ask = async (history: Turn[]) => {
     setThinking(true); setError('');
     try {
-      const r = ai ? await nextTurn(s, topic, history)
+      const r = ai ? await nextTurn(s, topic, history, viaServer)
         : llm.state === 'ready' && history.length ? { ...(await llmTurn(topic, history).catch(() => localTurn(topic, history))), translation: '' }
         : { ...localTurn(topic, history), translation: '' };
       // attach the correction to the student's last line
@@ -174,7 +177,7 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
     if (!turns.some((x) => x.role === 'me')) { onExit(); return; }
     setEnding(true); setError('');
     try {
-      const r = ai ? await finalReport(s, topic, turns) : localReport(topic, turns);
+      const r = ai ? await finalReport(s, topic, turns, viaServer) : localReport(topic, turns);
       setReport(r);
       clearSaved(saveKey);
       const mine = turns.filter((x) => x.role === 'me').length;
