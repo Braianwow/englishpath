@@ -11,6 +11,8 @@
  */
 import { TOPICS, callGemini, livePersona, persona, reportSystem, toMessages, transcript, type Turn } from '../src/lib/jake';
 
+import { SITE_OFF } from '../src/siteStatus';
+
 export const config = { runtime: 'edge' };
 
 // Vercel provides the project's environment variables as process.env.
@@ -123,6 +125,7 @@ async function geminiSpeech(key: string, text: string, voice: string): Promise<{
 export default async function handler(req: Request): Promise<Response> {
   const headers = cors(req.headers.get('origin'));
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
+  if (SITE_OFF) return json({ ok: false, error: 'EnglishPath is temporarily offline.' }, 503, headers);
   const key = geminiKey();
   if (req.method === 'GET') {
     return json({ ok: !!key }, 200, headers);

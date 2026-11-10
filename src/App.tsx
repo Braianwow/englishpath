@@ -28,6 +28,7 @@ import AccountPage from './pages/AccountPage';
 import Landing from './pages/Landing';
 import { accountsRequired, initCloud, useCloud } from './lib/cloud';
 import { LibraryBig } from 'lucide-react';
+import { SITE_OFF } from './siteStatus';
 
 // The GitHub Pages copy has no accounts: send visitors to the main site.
 if (typeof location !== 'undefined' && location.hostname.endsWith('github.io')) {
@@ -45,6 +46,18 @@ export default function App() {
     mq.addEventListener?.('change', fn);
     return () => mq.removeEventListener?.('change', fn);
   }, []);
+
+  // Site switched off (see src/siteStatus.ts): only a "back soon" page.
+  if (SITE_OFF) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 px-6 text-center dark:bg-slate-950">
+        <LibraryBig size={44} strokeWidth={2.2} className="text-brand-600 dark:text-brand-500" />
+        <div className="font-display text-lg font-extrabold uppercase tracking-[0.14em] text-slate-900 dark:text-white">English<span className="text-brand-600 dark:text-brand-500">Path</span></div>
+        <h1 className="font-display text-3xl font-extrabold text-slate-900 dark:text-white">We'll be back soon</h1>
+        <p className="max-w-md text-slate-600 dark:text-slate-300">EnglishPath is temporarily offline. Your account and your progress are safe.</p>
+      </div>
+    );
+  }
 
   // Not signed in: only the landing page (what EnglishPath is + sign in / create account).
   if (accountsRequired && !cloud.email) {

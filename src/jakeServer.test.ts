@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import handler from '../api/jake';
 
+// these tests check the server as it works when the site is switched on
+vi.mock('./siteStatus', () => ({ SITE_OFF: false }));
+
 const post = (body: unknown, ip = '1.1.1.1') => new Request('https://englishpath-murex.vercel.app/api/jake', {
   method: 'POST', headers: { 'Content-Type': 'application/json', origin: 'https://braianwow.github.io', 'x-forwarded-for': ip }, body: JSON.stringify(body),
 });
