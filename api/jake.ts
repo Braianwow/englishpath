@@ -92,7 +92,15 @@ export default async function handler(req: Request): Promise<Response> {
   const headers = cors(req.headers.get('origin'));
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
   const key = geminiKey();
-  if (req.method === 'GET') return json({ ok: !!key }, 200, headers);
+  if (req.method === 'GET') {
+    // TEMPORARY diagnosis: names of the real-time (Live) models this key can use
+    if (key && new URL(req.url).searchParams.has('live')) {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=300', { headers: { 'x-goog-api-key': key } });
+      const j = await r.json().catch(() => ({})) as { models?: { name: string; supportedGenerationMethods?: string[] }[] };
+      return json({ live: (j.models ?? []).filter((m) => m.supportedGenerationMethods?.some((x) => /bidi/i.test(x))).map((m) => m.name.replace('models/', '')) }, 200, headers);
+    }
+    return json({ ok: !!key }, 200, headers);
+  }
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, headers);
   if (!key) return json({ error: 'Jake is not set up on the server yet.' }, 503, headers);
 
