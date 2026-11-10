@@ -59,7 +59,9 @@ export default async function handler(req: Request): Promise<Response> {
   const key = geminiKey();
   if (req.method === 'GET') {
     // diagnosis: only the NAMES of key-like variables, never their values
-    const names = new URL(req.url).searchParams.has('diag') ? Object.keys(process.env).filter((k) => /gemini|google|api_?key/i.test(k)) : undefined;
+    const names = new URL(req.url).searchParams.has('diag')
+      ? { total: Object.keys(process.env).length, match: Object.keys(process.env).filter((k) => /gemini|google|api_?key|^vercel_env$/i.test(k)), vercelEnv: process.env.VERCEL_ENV ?? null }
+      : undefined;
     return json({ ok: !!key, ...(names ? { names } : {}) }, 200, headers);
   }
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, headers);
