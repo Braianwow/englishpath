@@ -76,8 +76,9 @@ function AccountButton() {
       <CircleUserRound size={20} />
     </NavLink>
   ) : (
-    <NavLink to="/account" className="pressable inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
-      <LogIn size={16} /> <span className="hidden sm:inline">Sign in</span>
+    <NavLink to="/account" title="Sign in" aria-label="Sign in"
+      className="pressable inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 xl:px-3 dark:text-slate-300 dark:hover:bg-slate-800">
+      <LogIn size={18} /> <span className="hidden sm:inline lg:hidden xl:inline">Sign in</span>
     </NavLink>
   );
 }
