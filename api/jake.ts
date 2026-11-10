@@ -62,6 +62,13 @@ export default async function handler(req: Request): Promise<Response> {
     const names = new URL(req.url).searchParams.has('diag')
       ? { total: Object.keys(process.env).length, match: Object.keys(process.env).filter((k) => /gemini|google|api_?key|^vercel_env$/i.test(k)), vercelEnv: process.env.VERCEL_ENV ?? null }
       : undefined;
+    // diagnosis: the Gemini models this key can use (names only)
+    if (key && new URL(req.url).searchParams.has('models')) {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': key } });
+      const j = await r.json().catch(() => ({})) as { models?: { name: string; supportedGenerationMethods?: string[] }[] };
+      const models = (j.models ?? []).filter((m) => m.supportedGenerationMethods?.includes('generateContent')).map((m) => m.name.replace('models/', ''));
+      return json({ ok: true, models }, 200, headers);
+    }
     return json({ ok: !!key, ...(names ? { names } : {}) }, 200, headers);
   }
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, headers);
