@@ -65,20 +65,35 @@ const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3-flas
 export async function callGemini(key: string, system: string, messages: Msg[], maxTokens: number, json = true): Promise<string> {
   const contents = messages.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
   let lastErr = '';
+  const started = Date.now();
+  // As little "thinking" as possible so Jake answers fast: Gemini 3 uses thinkingLevel, 2.5 uses thinkingBudget.
+  const thinkingOptions: (Record<string, unknown> | null)[] = [{ thinkingLevel: 'minimal' }, { thinkingLevel: 'low' }, { thinkingBudget: 0 }, null];
   for (const model of GEMINI_MODELS) {
-    for (const thinking of [true, false]) {
+    for (let t = 0; t < thinkingOptions.length; t++) {
+      const thinking = thinkingOptions[t];
       const body = {
         systemInstruction: { parts: [{ text: system }] },
         contents,
         generationConfig: {
           temperature: 1, topP: 0.95, maxOutputTokens: maxTokens,
           ...(json ? { responseMimeType: 'application/json' } : {}),
-          ...(thinking ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+          ...(thinking ? { thinkingConfig: thinking } : {}),
         },
       };
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body),
-      });
+      // never hang: give up on one attempt after 15 s (and on everything after 22 s)
+      const left = 22000 - (Date.now() - started);
+      if (left < 2000) throw new Error(lastErr || 'Gemini took too long to answer.');
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), Math.min(15000, left));
+      let res: Response;
+      try {
+        res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body), signal: ctrl.signal,
+        });
+      } catch {
+        lastErr = `${model}: took too long to answer`;
+        break; // try the next model
+      } finally { clearTimeout(timer); }
       if (res.ok) {
         const j = await res.json() as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
         const text = j.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
@@ -91,7 +106,7 @@ export async function callGemini(key: string, system: string, messages: Msg[], m
       if (res.status === 400 && /api key|API_KEY/i.test(lastErr)) throw new Error('The Gemini key is not valid. Check it in Settings.');
       if (res.status === 403) throw new Error('The Gemini key is not valid or the API is not enabled. Check it in Settings.');
       if (res.status === 429) throw new Error('Gemini free limit reached for now. Wait a minute and try again.');
-      if (res.status === 400 && thinking) continue; // this model doesn't accept the thinking setting: try without it
+      if (res.status === 400 && thinking) continue; // this model doesn't accept this thinking setting: try the next one
       break; // 404 (model not available) or other error: try the next model
     }
   }
