@@ -65,6 +65,7 @@ const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3-flas
 export async function callGemini(key: string, system: string, messages: Msg[], maxTokens: number, json = true): Promise<string> {
   const contents = messages.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
   let lastErr = '';
+  const attempts: string[] = [];
   const started = Date.now();
   // As little "thinking" as possible so Jake answers fast: Gemini 3 uses thinkingLevel, 2.5 uses thinkingBudget.
   const thinkingOptions: (Record<string, unknown> | null)[] = [{ thinkingLevel: 'minimal' }, { thinkingLevel: 'low' }, { thinkingBudget: 0 }, null];
@@ -82,7 +83,8 @@ export async function callGemini(key: string, system: string, messages: Msg[], m
       };
       // never hang: give up on one attempt after 15 s (and on everything after 22 s)
       const left = 22000 - (Date.now() - started);
-      if (left < 2000) throw new Error(lastErr || 'Gemini took too long to answer.');
+      if (left < 2000) throw new Error(`${lastErr || 'Gemini took too long to answer.'} [${attempts.join(' | ')}]`);
+      const t0 = Date.now();
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), Math.min(15000, left));
       let res: Response;
@@ -92,8 +94,10 @@ export async function callGemini(key: string, system: string, messages: Msg[], m
         });
       } catch {
         lastErr = `${model}: took too long to answer`;
+        attempts.push(`${model}/${t}: timeout after ${Date.now() - t0} ms`);
         break; // try the next model
       } finally { clearTimeout(timer); }
+      attempts.push(`${model}/${t}: ${res.status} in ${Date.now() - t0} ms`);
       if (res.ok) {
         const j = await res.json() as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
         const text = j.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
@@ -103,6 +107,7 @@ export async function callGemini(key: string, system: string, messages: Msg[], m
       }
       const err = await res.json().catch(() => ({})) as { error?: { message?: string; status?: string } };
       lastErr = `${model}: ${err.error?.message ?? `Gemini error ${res.status}`}`;
+      attempts[attempts.length - 1] += ` (${(err.error?.message ?? '').slice(0, 80)})`;
       if (res.status === 400 && /api key|API_KEY/i.test(lastErr)) throw new Error('The Gemini key is not valid. Check it in Settings.');
       if (res.status === 403) throw new Error('The Gemini key is not valid or the API is not enabled. Check it in Settings.');
       if (res.status === 429) throw new Error('Gemini free limit reached for now. Wait a minute and try again.');
@@ -110,5 +115,5 @@ export async function callGemini(key: string, system: string, messages: Msg[], m
       break; // 404 (model not available) or other error: try the next model
     }
   }
-  throw new Error(lastErr || 'Gemini is not available right now.');
+  throw new Error(`${lastErr || 'Gemini is not available right now.'} [${attempts.join(' | ')}]`);
 }

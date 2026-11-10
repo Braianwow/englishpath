@@ -89,7 +89,7 @@ export default async function handler(req: Request): Promise<Response> {
     // don't tell visitors to "check the key in Settings": the key here is the server's
     const friendly = /limit/i.test(msg) ? 'Jake is very busy right now. Try again in a minute.' : 'Jake is not available right now. Try again in a minute.';
     // detail = Google's error message (it never contains the key), useful to fix configuration problems
-    return json({ error: friendly, detail: msg.slice(0, 300) }, 502, headers);
+    return json({ error: friendly, detail: msg.slice(0, 900) }, 502, headers);
   }
 }
 
