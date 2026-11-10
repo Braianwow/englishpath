@@ -120,21 +120,29 @@ async function geminiSpeechStream(key: string, text: string, voice: string, head
     const enc = new TextEncoder(), dec = new TextDecoder();
     let buf = '';
     const out = new ReadableStream<Uint8Array>({
-      async pull(controller) {
-        const { done, value } = await reader.read();
-        if (done) { controller.close(); return; }
-        buf += dec.decode(value, { stream: true });
-        let i: number;
-        while ((i = buf.indexOf('\n')) >= 0) {
-          const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
-          if (!line.startsWith('data:')) continue;
-          try {
-            const j = JSON.parse(line.slice(5)) as { candidates?: { content?: { parts?: { inlineData?: { data?: string; mimeType?: string } }[] } }[] };
-            for (const p of j.candidates?.[0]?.content?.parts ?? []) {
-              if (p.inlineData?.data) controller.enqueue(enc.encode(JSON.stringify({ audio: p.inlineData.data, mime: p.inlineData.mimeType ?? '' }) + '\n'));
+      async start(controller) {
+        const stop = setTimeout(() => { reader.cancel().catch(() => {}); }, 30000);
+        controller.enqueue(enc.encode('{"start":true}\n')); // send something right away so the response starts
+        try {
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, { stream: true });
+            let i: number;
+            while ((i = buf.indexOf('\n')) >= 0) {
+              const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+              if (!line.startsWith('data:')) continue;
+              try {
+                const j = JSON.parse(line.slice(5)) as { candidates?: { content?: { parts?: { inlineData?: { data?: string; mimeType?: string } }[] } }[] };
+                for (const p of j.candidates?.[0]?.content?.parts ?? []) {
+                  if (p.inlineData?.data) controller.enqueue(enc.encode(JSON.stringify({ audio: p.inlineData.data, mime: p.inlineData.mimeType ?? '' }) + '\n'));
+                }
+              } catch { /* ignore a malformed event */ }
             }
-          } catch { /* ignore a malformed event */ }
-        }
+          }
+        } catch { /* stream ended early */ }
+        clearTimeout(stop);
+        controller.close();
       },
       cancel() { reader.cancel().catch(() => {}); },
     });
