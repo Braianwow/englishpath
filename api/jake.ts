@@ -9,10 +9,15 @@
  */
 import { TOPICS, callGemini, persona, reportSystem, toMessages, transcript, type Turn } from '../src/lib/jake';
 
-export const config = { runtime: 'edge' };
-
-// Vercel provides environment variables as process.env (written out in full so it is replaced at build time).
+// Node.js runtime (Vercel's default): process.env holds the project's environment variables.
 declare const process: { env: Record<string, string | undefined> };
+
+/** The key, also accepting common variants of the name in case it was saved slightly differently. */
+function geminiKey(): string | undefined {
+  const env = process.env;
+  const name = Object.keys(env).find((k) => k.trim().toUpperCase().replace(/[\s-]+/g, '_') === 'GEMINI_API_KEY');
+  return (name ? env[name] : undefined)?.trim() || undefined;
+}
 
 const ALLOWED_ORIGINS = [/^https:\/\/englishpath[\w-]*\.vercel\.app$/, /^https:\/\/braianwow\.github\.io$/, /^http:\/\/localhost(:\d+)?$/];
 
@@ -49,8 +54,12 @@ function limited(ip: string): boolean {
 export default async function handler(req: Request): Promise<Response> {
   const headers = cors(req.headers.get('origin'));
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
-  const key = process.env.GEMINI_API_KEY?.trim();
-  if (req.method === 'GET') return json({ ok: !!key }, 200, headers);
+  const key = geminiKey();
+  if (req.method === 'GET') {
+    // diagnosis: only the NAMES of key-like variables, never their values
+    const names = new URL(req.url).searchParams.has('diag') ? Object.keys(process.env).filter((k) => /gemini|google|api_?key/i.test(k)) : undefined;
+    return json({ ok: !!key, ...(names ? { names } : {}) }, 200, headers);
+  }
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, headers);
   if (!key) return json({ error: 'Jake is not set up on the server yet.' }, 503, headers);
 
@@ -79,3 +88,8 @@ export default async function handler(req: Request): Promise<Response> {
   }
 }
 
+
+// Web-standard handlers for Vercel's Node.js runtime
+export const GET = handler;
+export const POST = handler;
+export const OPTIONS = handler;
