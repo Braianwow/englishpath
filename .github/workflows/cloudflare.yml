@@ -26,6 +26,15 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - name: Check the Cloudflare token (never prints it)
+        env:
+          T: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          A: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "length: ${#T}"
+          case "$T" in *[[:space:]]*) echo "contains spaces or line breaks: YES";; *) echo "contains spaces or line breaks: no";; esac
+          echo "user token check:";    curl -s -H "Authorization: Bearer $T" https://api.cloudflare.com/client/v4/user/tokens/verify | jq -c '{success, status: .result.status, errors}'
+          echo "account token check:"; curl -s -H "Authorization: Bearer $T" "https://api.cloudflare.com/client/v4/accounts/$A/tokens/verify" | jq -c '{success, status: .result.status, errors}'
       - name: Deploy
         run: npx wrangler pages deploy --branch main --commit-hash "$GITHUB_SHA" --commit-message "${GITHUB_SHA::7}"
         env:
