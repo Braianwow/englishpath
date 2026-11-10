@@ -75,8 +75,12 @@ export async function currentUser(req: Request, db: D1Database): Promise<{ id: n
     .bind(await sha256(token), Date.now()).first<{ id: number; email: string }>();
 }
 
+// The Vercel copy of the site forwards /api/account and /api/progress here (see vercel.json),
+// so its pages also count as "the site itself".
+const OWN_SITES = [/^https:\/\/englishpath[\w-]*\.vercel\.app$/];
+
 /** Only accept writes from the site itself (blocks other websites from posting with the visitor's cookie). */
 export function sameOrigin(req: Request): boolean {
   const origin = req.headers.get('origin');
-  return !origin || origin === new URL(req.url).origin;
+  return !origin || origin === new URL(req.url).origin || OWN_SITES.some((re) => re.test(origin));
 }
