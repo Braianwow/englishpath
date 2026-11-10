@@ -57,35 +57,7 @@ export default async function handler(req: Request): Promise<Response> {
   const headers = cors(req.headers.get('origin'));
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
   const key = geminiKey();
-  if (req.method === 'GET') {
-    // diagnosis: only the NAMES of key-like variables, never their values
-    const names = new URL(req.url).searchParams.has('diag')
-      ? { total: Object.keys(process.env).length, match: Object.keys(process.env).filter((k) => /gemini|google|api_?key|^vercel_env$/i.test(k)), vercelEnv: process.env.VERCEL_ENV ?? null }
-      : undefined;
-    // diagnosis: the Gemini models this key can use (names only)
-    if (key && new URL(req.url).searchParams.has('models')) {
-      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': key } });
-      const j = await r.json().catch(() => ({})) as { models?: { name: string; supportedGenerationMethods?: string[] }[] };
-      const models = (j.models ?? []).filter((m) => m.supportedGenerationMethods?.includes('generateContent')).map((m) => m.name.replace('models/', ''));
-      return json({ ok: true, models }, 200, headers);
-    }
-    // diagnosis: how long one model takes to answer a short Jake turn (?bench=<model>)
-    const bench = new URL(req.url).searchParams.get('bench');
-    if (key && bench && /^gemini-[\w.-]+$/.test(bench)) {
-      const t0 = Date.now();
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 20000);
-      try {
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${bench}:generateContent`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, signal: ctrl.signal,
-          body: JSON.stringify({ systemInstruction: { parts: [{ text: persona(TOPICS[0].brief) }] }, contents: [{ role: 'user', parts: [{ text: 'I go to Brazil last summer with my friends' }] }], generationConfig: { maxOutputTokens: 400, responseMimeType: 'application/json', thinkingConfig: { thinkingLevel: 'low' } } }),
-        });
-        const j = await r.json().catch(() => ({})) as { candidates?: { content?: { parts?: { text?: string }[] } }[]; error?: { message?: string } };
-        return json({ model: bench, status: r.status, ms: Date.now() - t0, text: j.candidates?.[0]?.content?.parts?.[0]?.text?.slice(0, 200), error: j.error?.message?.slice(0, 120) }, 200, headers);
-      } catch { return json({ model: bench, ms: Date.now() - t0, error: 'timeout' }, 200, headers); } finally { clearTimeout(timer); }
-    }
-    return json({ ok: !!key, ...(names ? { names } : {}) }, 200, headers);
-  }
+  if (req.method === 'GET') return json({ ok: !!key }, 200, headers);
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405, headers);
   if (!key) return json({ error: 'Jake is not set up on the server yet.' }, 503, headers);
 
