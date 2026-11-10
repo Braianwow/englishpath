@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Cloud, CloudOff, Loader2, LogOut, UserRound } from 'lucide-react';
-import { hasLocalProgress, signIn, signOut, useCloud } from '../lib/cloud';
+import { signIn, signOut, useCloud } from '../lib/cloud';
 import { Button, Card, cx } from '../components/ui';
 
 /** Sign in / create an account, so the progress is saved to the cloud and follows you to any device. */
 export default function AccountPage() {
   const cloud = useCloud();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,9 +35,7 @@ export default function AccountPage() {
           <div className="font-semibold text-slate-900 dark:text-white">{cloud.email}</div>
         </div>
         <SyncBadge />
-        <p className="text-sm text-slate-500">Your progress, words and settings are saved to your account automatically. Sign in on any device to continue where you left off. (API keys stay only in each browser.)</p>
         <div className="flex gap-2">
-          <Link to="/" className="pressable inline-flex items-center rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:bg-brand-400">Keep studying</Link>
           <Button variant="secondary" onClick={() => { setBusy(true); setMode('login'); setPassword(''); signOut().finally(() => setBusy(false)); }} disabled={busy}>
             {busy ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />} Sign out
           </Button>
@@ -48,7 +47,7 @@ export default function AccountPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true); setError('');
-    try { await signIn(email, password, mode === 'register'); }
+    try { await signIn(email, password, mode === 'register'); setPassword(''); navigate('/'); }
     catch (err) { setError((err as Error).message); }
     finally { setBusy(false); }
   };
@@ -74,11 +73,6 @@ export default function AccountPage() {
         {error && <div className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{error}</div>}
         <Button type="submit" disabled={busy}>{busy && <Loader2 size={16} className="animate-spin" />} {mode === 'login' ? 'Sign in' : 'Create account'}</Button>
       </form>
-      <p className="mt-4 text-xs text-slate-500">
-        {mode === 'register'
-          ? hasLocalProgress() ? 'The progress you already have in this browser will be saved to your new account.' : 'Your progress will be saved to your account and follow you to any device.'
-          : 'Signing in loads the progress saved in your account on this device.'}
-      </p>
     </Card>
   );
 }
