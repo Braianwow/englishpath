@@ -169,6 +169,8 @@ export interface Settings {
   showSpanish: boolean;
   aiProvider: 'none' | 'anthropic';
   aiKey: string;
+  /** Google Gemini API key (free tier), used by the conversation with Jake. */
+  geminiKey?: string;
   aiModel: string;
   sound: boolean;
   /** Voice used to read English aloud. 'canchero' = relaxed male voice, lower pitch, laid-back pace. */

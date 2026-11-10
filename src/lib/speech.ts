@@ -42,7 +42,7 @@ export function resolveVoice(lang: string): SpeechSynthesisVoice | undefined {
   return voices.find((v) => v.lang === lang) ?? voices[0];
 }
 
-export function speak(text: string, lang = 'en-GB', rate = 0.92, onEnd?: () => void) {
+export function speak(text: string, lang = 'en-GB', rate = 0.92, onEnd?: () => void, voiceOverride?: string) {
   const s = getSettings();
   const clean = text.replace(/[[\]]/g, '');
   if (s.voiceEngine === 'eleven' && s.elevenKey && s.elevenVoiceId) {
@@ -55,17 +55,17 @@ export function speak(text: string, lang = 'en-GB', rate = 0.92, onEnd?: () => v
     return;
   }
   // The free AI voice is opt-in: loading it uses the GPU heavily for a while and makes the page stutter.
-  speakLocal(clean, lang, rate, onEnd, s.voiceEngine === 'ai' ? 'ai' : 'system');
+  speakLocal(clean, lang, rate, onEnd, s.voiceEngine === 'ai' ? 'ai' : 'system', voiceOverride);
 }
 
-function speakLocal(clean: string, lang: string, rate: number, onEnd: (() => void) | undefined, engine: string) {
+function speakLocal(clean: string, lang: string, rate: number, onEnd: (() => void) | undefined, engine: string, voiceOverride?: string) {
   const s = getSettings();
   if (engine === 'ai' && aiSupported()) {
     const st = getAiStatus().state;
     const run = () => {
       try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
       const speed = Math.min(1.5, Math.max(0.5, rate * (s.voiceRate ?? 1)));
-      speakAi(clean, s.aiVoice ?? DEFAULT_AI_VOICE, speed, onEnd).then((ok) => { if (!ok) speakSystem(clean, lang, rate, onEnd); });
+      speakAi(clean, voiceOverride ?? s.aiVoice ?? DEFAULT_AI_VOICE, speed, onEnd).then((ok) => { if (!ok) speakSystem(clean, lang, rate, onEnd); });
     };
     if (st === 'ready') { run(); return; }
     // Already downloaded before: it loads from the cache in a few seconds, so wait for it.

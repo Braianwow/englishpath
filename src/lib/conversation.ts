@@ -21,7 +21,7 @@ export interface Report {
 }
 
 const persona = (brief: string) => `You are Jake, an English conversation partner for a Spanish-speaking (Argentine) student at B1–B2 level.
-Personality: a charming, cocky, flirty-but-respectful "fuckboy" type — confident, playful, teasing, laid-back, uses casual modern English ("no way", "lowkey", "for real", "babe" occasionally) but stays clear and never sexual or rude. You make the student feel like talking.
+Personality: a smooth, charming, cocky "fuckboy" type — confident, flirty, teasing, laid-back and funny. You flirt playfully (cheeky compliments, "babe", "trouble", a wink in your words), use casual modern slang ("no way", "lowkey", "for real", "vibes", "that's wild"), tease the student when they're shy and hype them up when they do well. Never explicit, never sexual, never rude. Every reply should feel different: react to the specifics of what they said, share a quick opinion or mini-story of your own, and vary how you start your sentences.
 Topic of this conversation: ${brief}.
 Rules:
 - This is a SPOKEN conversation: reply in 1–3 short sentences (max ~40 words) and almost always end with a question that keeps the conversation going.
@@ -37,7 +37,51 @@ function parseJson<T>(text: string): T {
   return JSON.parse(text.slice(start, end + 1)) as T;
 }
 
+/** Which AI the conversation uses: Claude (paid key) first, then Google Gemini (free key). */
+export const conversationAi = (s: Settings): 'claude' | 'gemini' | null =>
+  s.aiProvider === 'anthropic' && s.aiKey ? 'claude' : s.geminiKey ? 'gemini' : null;
+
+const GEMINI_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+
+/** Google Gemini (free tier) through its REST API; the key goes in a header, never in the URL. */
+export async function callGemini(key: string, system: string, messages: { role: 'user' | 'assistant'; content: string }[], maxTokens: number, json = true): Promise<string> {
+  const contents = messages.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+  let lastErr = '';
+  for (const model of GEMINI_MODELS) {
+    for (const thinking of [true, false]) {
+      const body = {
+        systemInstruction: { parts: [{ text: system }] },
+        contents,
+        generationConfig: {
+          temperature: 1, topP: 0.95, maxOutputTokens: maxTokens,
+          ...(json ? { responseMimeType: 'application/json' } : {}),
+          ...(thinking ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+        },
+      };
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const j = await res.json() as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
+        const text = j.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
+        if (text) return text;
+        lastErr = 'The AI gave an empty answer. Try saying it another way.';
+        break;
+      }
+      const err = await res.json().catch(() => ({})) as { error?: { message?: string; status?: string } };
+      lastErr = err.error?.message ?? `Gemini error ${res.status}`;
+      if (res.status === 400 && /api key|API_KEY/i.test(lastErr)) throw new Error('The Gemini key is not valid. Check it in Settings.');
+      if (res.status === 403) throw new Error('The Gemini key is not valid or the API is not enabled. Check it in Settings.');
+      if (res.status === 429) throw new Error('Gemini free limit reached for now. Wait a minute and try again.');
+      if (res.status === 400 && thinking) continue; // this model doesn't accept the thinking setting: try without it
+      break; // 404 (model not available) or other error: try the next model
+    }
+  }
+  throw new Error(lastErr || 'Gemini is not available right now.');
+}
+
 async function call(settings: Settings, system: string, messages: { role: 'user' | 'assistant'; content: string }[], maxTokens: number): Promise<string> {
+  if (conversationAi(settings) === 'gemini') return callGemini(settings.geminiKey!, system, messages, maxTokens);
   const { default: Anthropic } = await import('@anthropic-ai/sdk');
   const client = new Anthropic({ apiKey: settings.aiKey, dangerouslyAllowBrowser: true });
   const res = await client.beta.messages.create({

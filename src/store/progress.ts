@@ -255,7 +255,7 @@ export function resetProgress() {
 }
 
 export function exportProgress(): string {
-  return JSON.stringify({ progress: state, settings: { ...settings, aiKey: '' } }, null, 2);
+  return JSON.stringify({ progress: state, settings: { ...settings, aiKey: '', geminiKey: '' } }, null, 2);
 }
 
 export function importProgress(json: string) {

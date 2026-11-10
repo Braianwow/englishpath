@@ -42,7 +42,7 @@ self.onmessage = async (ev: MessageEvent<In>) => {
   if (msg.type === 'load') { load(msg.model, msg.dtype).catch(() => {}); return; }
   try {
     const p = await load(msg.model, msg.dtype);
-    const out = await p(msg.messages as never, { max_new_tokens: msg.maxTokens, do_sample: false, repetition_penalty: 1.1 } as never) as unknown as { generated_text: Msg[] }[];
+    const out = await p(msg.messages as never, { max_new_tokens: msg.maxTokens, do_sample: true, temperature: 0.8, top_p: 0.9, repetition_penalty: 1.15 } as never) as unknown as { generated_text: Msg[] }[];
     const conv = out[0]?.generated_text;
     const text = Array.isArray(conv) ? conv[conv.length - 1]?.content ?? '' : String(conv ?? '');
     postMessage({ type: 'result', id: msg.id, text: text.trim() });

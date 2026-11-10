@@ -6,6 +6,7 @@ import { setThemeAnimated } from '../lib/theme';
 import { Button, Card, PageHeader, cx } from '../components/ui';
 import { VOICE_STYLES, englishVoices, resolveVoice, speak, speechSupported } from '../lib/speech';
 import ElevenPanel from '../components/ElevenPanel';
+import { callGemini } from '../lib/conversation';
 import { browserSttAvailable, getSttEngine, setSttEngine, type SttEngine } from '../lib/recognition';
 import { preloadLocalStt } from '../lib/localStt';
 import { AI_VOICES, DEFAULT_AI_VOICE, aiSupported, loadAiVoice, useAiStatus } from '../lib/neuralTts';
@@ -193,6 +194,8 @@ export default function SettingsPage() {
         </div>
       </Card>
 
+      <GeminiSettings />
+
       <Card>
         <div className="mb-1 font-semibold text-slate-900 dark:text-white">Data and progress</div>
         <p className="mb-3 text-sm text-slate-500">Your progress is saved in this browser (local storage). Export it to keep a copy or move it to another device.</p>
@@ -228,6 +231,44 @@ function SpeechRecognitionSettings() {
           </button>
         ))}
       </div>
+    </Card>
+  );
+}
+
+/** Google Gemini: a smart AI with a free tier, used by the conversation with Jake. */
+function GeminiSettings() {
+  const s = useSettings();
+  const [key, setKey] = useState(s.geminiKey ?? '');
+  const [state, setState] = useState<'idle' | 'testing' | 'ok' | 'error'>('idle');
+  const [msg, setMsg] = useState('');
+  const test = async (k: string) => {
+    setState('testing'); setMsg('');
+    try {
+      const out = await callGemini(k, 'You are Jake, a cocky, flirty English tutor. Answer in one short sentence.', [{ role: 'user', content: 'Say hi to your new student.' }], 60, false);
+      setState('ok'); setMsg(out.trim());
+    } catch (e) { setState('error'); setMsg((e as Error).message); }
+  };
+  const save = async () => {
+    const k = key.trim();
+    updateSettings({ geminiKey: k });
+    if (k) await test(k);
+  };
+  return (
+    <Card>
+      <div className="mb-1 flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><KeyRound size={18} /> Smart AI for Jake — Google Gemini (free)</div>
+      <p className="mb-3 text-sm text-slate-500">With a free Gemini key, Jake understands anything you say, follows the conversation and corrects you like a real tutor. Google's free tier is enough for daily practice. The key is stored only in this browser and sent only to Google.</p>
+      <ol className="mb-3 list-decimal space-y-1 pl-5 text-sm text-slate-600 dark:text-slate-300">
+        <li>Open <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="font-semibold text-brand-600 hover:underline">aistudio.google.com/apikey</a> and sign in with your Google account.</li>
+        <li>Click <strong>Create API key</strong> and copy it.</li>
+        <li>Paste it here and click <strong>Save and test</strong>.</li>
+      </ol>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input type="password" autoComplete="off" value={key} onChange={(e) => setKey(e.target.value)} placeholder="AIza…" className="input" />
+        <Button onClick={save} disabled={!key.trim() || state === 'testing'}>{state === 'testing' ? 'Testing…' : 'Save and test'}</Button>
+        {s.geminiKey && <Button variant="ghost" onClick={() => { setKey(''); updateSettings({ geminiKey: '' }); setState('idle'); setMsg(''); }}>Delete key</Button>}
+      </div>
+      {state === 'ok' && <p className="mt-2 text-sm text-emerald-600 dark:text-emerald-400">✓ Working. Jake says: “{msg}”</p>}
+      {state === 'error' && <p className="mt-2 text-sm text-rose-600">{msg}</p>}
     </Card>
   );
 }

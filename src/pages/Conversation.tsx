@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, Sparkles, Languages, Loader2, Mic, MicOff, Send, Square, Star, Volume2 } from 'lucide-react';
 import { addMyWords, recordSkill, setLast, useSettings } from '../store/progress';
 import { notify } from '../store/toast';
-import { TOPICS, finalReport, nextTurn, type Report, type TopicId, type Turn } from '../lib/conversation';
+import { TOPICS, conversationAi, finalReport, nextTurn, type Report, type TopicId, type Turn } from '../lib/conversation';
 import { localReport, localTurn } from '../lib/freeTutor';
 import { describeError } from '../lib/assistant';
 import { getSttEngine, listen, recognitionSupported } from '../lib/recognition';
@@ -18,7 +18,8 @@ import { clearSaved, usePersisted } from '../lib/persist';
 export default function Conversation() {
   const s = useSettings();
   const [topic, setTopic] = usePersisted<TopicId | null>('conv:topic', null);
-  const hasAi = s.aiProvider === 'anthropic' && !!s.aiKey;
+  const aiKind = conversationAi(s);
+  const hasAi = !!aiKind;
 
   // keep loading the free AI in the background if it was turned on before
   useEffect(() => { if (!hasAi && llmWanted()) startLlm(); }, [hasAi]);
@@ -39,7 +40,7 @@ export default function Conversation() {
         ? (
           <Card className="mb-5 flex flex-wrap items-center gap-3 p-4">
             <Sparkles size={20} className="text-brand-500" />
-            <p className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">Claude AI mode.</strong> Jake answers freely to anything you say, using your Claude API key.</p>
+            <p className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-300"><strong className="text-slate-900 dark:text-white">{aiKind === 'gemini' ? 'Gemini AI mode.' : 'Claude AI mode.'}</strong> Jake understands anything you say and answers freely{aiKind === 'gemini' ? ' (Google Gemini, free key)' : ' (your Claude API key)'}.</p>
           </Card>
         )
         : <FreeAiCard />}
@@ -114,7 +115,8 @@ function Session({ topic, ai, onExit: exit }: { topic: TopicId; ai: boolean; onE
     };
     // safety net: whatever happens with the voice, the conversation never stays stuck on "speaking"
     guard = setTimeout(end, 15000 + text.split(/\s+/).length * 600);
-    speak(text, 'en-US', 1, end);
+    // Jake's own voice: Fenrir, deep and laid-back (the "bad boy" voice), a little slower
+    speak(text, 'en-US', 0.94, end, 'am_fenrir');
   };
 
   const ask = async (history: Turn[]) => {
@@ -328,8 +330,8 @@ function FreeAiCard() {
         {llm.state === 'ready' && <Button size="sm" variant="ghost" onClick={stopLlm}>Turn off</Button>}
         {(llm.state === 'off' || llm.state === 'error') && gpu && <Button size="sm" onClick={startLlm}>Turn on free AI</Button>}
       </div>
-      {llm.state === 'off' && gpu && <p className="mt-2 text-xs text-slate-500">Downloads an 800 MB model once (it stays saved in the browser). Works best on computers with a graphics card. Optional: a Claude API key in <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Settings</Link> gives the smartest Jake.</p>}
-      {gpu === false && llm.state !== 'ready' && <p className="mt-2 text-xs text-slate-500">This browser can't run the free AI (it needs WebGPU: an up-to-date Chrome or Edge on a computer with a graphics card). You can still use the free mode, or add a Claude API key in <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Settings</Link>.</p>}
+      {llm.state === 'off' && gpu && <p className="mt-2 text-xs text-slate-500">Downloads an 800 MB model once (it stays saved in the browser). Works best on computers with a graphics card. <strong>Want a much smarter Jake for free?</strong> Add a free Google Gemini key in <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Settings</Link>.</p>}
+      {gpu === false && llm.state !== 'ready' && <p className="mt-2 text-xs text-slate-500">This browser can't run the free AI (it needs WebGPU: an up-to-date Chrome or Edge on a computer with a graphics card). You can still use the free mode, or add a free Google Gemini key in <Link to="/settings" className="font-semibold text-brand-600 hover:underline">Settings</Link>.</p>}
       {llm.state === 'loading' && (
         <div className="mt-3">
           <div className="mb-1 text-xs text-slate-500">Downloading Jake's brain… {Math.round(llm.progress * 100)}%{llm.mb ? ` of ${(llm.mb / 1000).toFixed(1)} GB` : ''} — you can start talking meanwhile; he switches to AI when it's ready.</div>
