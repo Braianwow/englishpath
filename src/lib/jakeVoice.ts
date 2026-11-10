@@ -33,6 +33,8 @@ let token = 0;
 export function stopJake() {
   token++;
   try { current?.stop(); } catch { /* already stopped */ }
+  for (const s of scheduled) { try { s.stop(); } catch { /* already stopped */ } }
+  scheduled = [];
   current = null;
 }
 
@@ -41,7 +43,7 @@ async function fetchAudio(text: string, voice: string): Promise<AudioBuffer> {
   const hit = cache.get(k);
   if (hit) return hit;
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 15000);
+  const timer = setTimeout(() => ctrl.abort(), 10000);
   try {
     const res = await fetch(SERVER, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
@@ -67,24 +69,57 @@ async function fetchAudio(text: string, voice: string): Promise<AudioBuffer> {
   } finally { clearTimeout(timer); }
 }
 
-/** Speaks with Jake's human voice. Resolves false if it couldn't (so the caller can use another voice). */
+/** Splits a reply into sentences (very short ones are joined to the next) to generate them in parallel. */
+export function voiceChunks(text: string): string[] {
+  const parts = text.replace(/[*_#]/g, '').match(/[^.!?…]+[.!?…]+["'”’)]*\s*|[^.!?…]+$/g)?.map((s) => s.trim()).filter(Boolean) ?? [text];
+  const out: string[] = [];
+  for (const p of parts) {
+    if (out.length && out[out.length - 1].split(/\s+/).length < 3) out[out.length - 1] += ` ${p}`;
+    else out.push(p);
+  }
+  return out.slice(0, 4);
+}
+
+let scheduled: AudioBufferSourceNode[] = [];
+
+/**
+ * Speaks with Jake's human voice. All sentences are requested at once and played in order,
+ * so Jake starts talking as soon as the first (short) sentence is ready.
+ * Resolves false if not even the first sentence could be played (so the caller can use another voice).
+ */
 export async function speakJake(text: string, voice: string, onEnd?: () => void): Promise<boolean> {
   stopJake();
+  for (const s of scheduled) { try { s.stop(); } catch { /* ignore */ } }
+  scheduled = [];
   const my = token;
+  let done = false;
+  const finish = () => { if (!done && my === token) { done = true; onEnd?.(); } };
   try {
     if (!(await audioAllowed())) return false;
-    const buf = await fetchAudio(text.replace(/[*_#]/g, ''), voice);
-    if (my !== token) return true; // something else started meanwhile
+    const jobs = voiceChunks(text).map((t) => fetchAudio(t, voice));
+    jobs.forEach((j) => j.catch(() => {}));
     const ctx = sharedAudioContext();
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.connect(ctx.destination);
-    let done = false;
-    const finish = () => { if (!done && my === token) { done = true; onEnd?.(); } };
-    src.onended = () => { if (current === src) current = null; finish(); };
-    current = src;
-    src.start();
-    setTimeout(finish, buf.duration * 1000 + 1500); // safety net
+    let at = 0;
+    let last: AudioBufferSourceNode | null = null;
+    for (let i = 0; i < jobs.length; i++) {
+      let buf: AudioBuffer;
+      try { buf = await jobs[i]; } catch { if (i === 0) return false; continue; } // first failed → let the caller use another voice
+      if (my !== token) return true; // something else started meanwhile
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      at = Math.max(at, ctx.currentTime + 0.02);
+      src.onended = () => {
+        scheduled = scheduled.filter((x) => x !== src);
+        if (current === src) current = null;
+        if (src === last) finish();
+      };
+      src.start(at);
+      at += buf.duration + 0.05;
+      current = src; scheduled.push(src); last = src;
+    }
+    if (!last) return false;
+    setTimeout(finish, Math.max(0, (at - ctx.currentTime) * 1000) + 1500); // safety net
     return true;
   } catch {
     return false;

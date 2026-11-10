@@ -88,69 +88,6 @@ async function geminiSpeech(key: string, text: string, voice: string): Promise<{
   throw new Error(lastErr);
 }
 
-/**
- * Streams Jake's voice as Google generates it: one JSON line per audio chunk ({ audio, mime }),
- * so the app can start playing after the first chunk instead of waiting for the whole sentence.
- */
-async function geminiSpeechStream(key: string, text: string, voice: string, headers: Record<string, string>): Promise<Response> {
-  const prompt = `Say in a smooth, flirty, confident way: ${text}`;
-  let lastErr = '';
-  for (const model of TTS_MODELS) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 8000); // time to get the first bytes
-    let res: Response;
-    try {
-      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`, {
-        method: 'POST', signal: ctrl.signal,
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } },
-        }),
-      });
-    } catch { clearTimeout(timer); lastErr = `${model}: took too long`; continue; }
-    clearTimeout(timer);
-    if (!res.ok || !res.body) {
-      const j = await res.json().catch(() => ({})) as { error?: { message?: string } };
-      lastErr = `${model}: ${j.error?.message ?? res.status}`;
-      continue;
-    }
-    // Google sends server-sent events ("data: {json}"); forward only the audio chunks, one JSON per line
-    const reader = res.body.getReader();
-    const enc = new TextEncoder(), dec = new TextDecoder();
-    let buf = '';
-    const out = new ReadableStream<Uint8Array>({
-      async start(controller) {
-        const stop = setTimeout(() => { reader.cancel().catch(() => {}); }, 30000);
-        controller.enqueue(enc.encode('{"start":true}\n')); // send something right away so the response starts
-        try {
-          for (;;) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buf += dec.decode(value, { stream: true });
-            let i: number;
-            while ((i = buf.indexOf('\n')) >= 0) {
-              const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
-              if (!line.startsWith('data:')) continue;
-              try {
-                const j = JSON.parse(line.slice(5)) as { candidates?: { content?: { parts?: { inlineData?: { data?: string; mimeType?: string } }[] } }[] };
-                for (const p of j.candidates?.[0]?.content?.parts ?? []) {
-                  if (p.inlineData?.data) controller.enqueue(enc.encode(JSON.stringify({ audio: p.inlineData.data, mime: p.inlineData.mimeType ?? '' }) + '\n'));
-                }
-              } catch { /* ignore a malformed event */ }
-            }
-          }
-        } catch { /* stream ended early */ }
-        clearTimeout(stop);
-        controller.close();
-      },
-      cancel() { reader.cancel().catch(() => {}); },
-    });
-    return new Response(out, { status: 200, headers: { ...headers, 'Content-Type': 'application/x-ndjson', 'Cache-Control': 'no-store', 'X-Voice-Model': model } });
-  }
-  return json({ error: 'Voice not available right now.', detail: lastErr.slice(0, 300) }, 502, headers);
-}
-
 export default async function handler(req: Request): Promise<Response> {
   const headers = cors(req.headers.get('origin'));
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers });
@@ -164,14 +101,6 @@ export default async function handler(req: Request): Promise<Response> {
 
   let body: { kind?: string; topic?: string; turns?: { role?: string; text?: string }[]; text?: string; voice?: string };
   try { body = await req.json(); } catch { return json({ error: 'Bad request' }, 400, headers); }
-
-  // Jake's voice, streamed in chunks as it is generated
-  if (body.kind === 'ttsStream') {
-    const text = typeof body.text === 'string' ? body.text.trim().slice(0, 400) : '';
-    const voice = JAKE_VOICES.includes(body.voice ?? '') ? body.voice! : JAKE_VOICES[0];
-    if (!text) return json({ error: 'Bad request' }, 400, headers);
-    return geminiSpeechStream(key, text, voice, headers);
-  }
 
   // Jake's voice: Google's speech model reads a short line with one of Jake's voices
   if (body.kind === 'tts') {
