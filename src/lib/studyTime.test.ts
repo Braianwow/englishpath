@@ -27,18 +27,18 @@ describe('study time & streak', () => {
     expect(fmtClock(3725)).toBe('1:02:05');
   });
 
-  it('only days with 1.5 hours count for the streak', () => {
-    const s = state([[-3, 130], [-2, 95], [-1, 90]]);
+  it('only days with 2 hours count for the streak', () => {
+    const s = state([[-3, 130], [-2, 125], [-1, 120]]);
     expect(streak(s).current).toBe(3);
-    expect(streak(state([[-2, 130], [-1, 60]])).current).toBe(0); // yesterday short → streak lost
+    expect(streak(state([[-2, 130], [-1, 90]])).current).toBe(0); // yesterday short → streak lost
   });
 
-  it('today keeps the streak alive until it is over, and adds to it at 90 min', () => {
+  it('today keeps the streak alive until it is over, and adds to it at 120 min', () => {
     const s = state([[-1, 150], [0, 40]]);
     const st = streak(s);
     expect(st.current).toBe(1);
     expect(st.activeToday).toBe(false);
-    expect(st.missingMin).toBe(50);
-    expect(streak(s, 91).current).toBe(2);
+    expect(st.missingMin).toBe(80);
+    expect(streak(s, 121).current).toBe(2);
   });
 });

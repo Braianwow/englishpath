@@ -14,10 +14,10 @@ export default {
           50: '#f5fee6', 100: '#e8fcc6', 200: '#d3f98f', 300: '#b8f24a', 400: '#acf31c',
           500: '#9fef00', 600: '#6fa800', 700: '#527d00', 800: '#3f6006', 900: '#344f0a',
         },
-        // Neutrals: near-black surfaces in dark mode, easy on the eyes
+        // Blue-grey neutrals: deep navy surfaces in dark mode
         slate: {
           50: '#f6f8fb', 100: '#eef1f6', 200: '#dfe4ec', 300: '#c6cfdc', 400: '#a4b1cd', 500: '#7b88a1',
-          600: '#536079', 700: '#2a313d', 800: '#1b2029', 900: '#12151b', 950: '#090b0f',
+          600: '#536079', 700: '#2f3b4f', 800: '#232f42', 900: '#1a2332', 950: '#111927',
         },
       },
       keyframes: {

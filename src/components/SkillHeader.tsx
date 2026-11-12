@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { BookOpen, Brain, Ear, Layers, Mic, PenLine } from 'lucide-react';
 import { cx } from './ui';
 
-/** The six study areas of the daily study plan, as a single selector. */
+/** The six study areas from the 2-hour study plan, as a single selector. */
 export const SKILLS = [
   { id: 'grammar', to: '/courses', label: 'Grammar', icon: Layers, desc: 'All 145 units, step by step.' },
   { id: 'vocabulary', to: '/vocabulary', label: 'Vocabulary', icon: Brain, desc: 'Flashcards with spaced repetition.' },

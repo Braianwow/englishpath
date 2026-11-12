@@ -14,7 +14,7 @@ import { AI_VOICES, DEFAULT_AI_VOICE, aiSupported, loadAiVoice, useAiStatus } fr
 const SAMPLES = [
   "Hey… you came back. I knew you would. Let's learn some English.",
   "Relax. Nobody gets the present perfect right the first time. Except me.",
-  "An hour and a half a day, babe. Don't break the streak.",
+  "Two hours a day, babe. Don't break the streak.",
   "I've been waiting for you. That's present perfect continuous, by the way.",
 ];
 

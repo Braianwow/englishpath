@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Brain, CheckCircle2, ChevronLeft, Flag, Layers, RefreshCw, Repeat, Star, BarChart3, ClipboardCheck, Search } from 'lucide-react';
+import { Brain, CheckCircle2, ChevronLeft, Flag, Layers, NotebookPen, RefreshCw, Repeat, Star, BarChart3, ClipboardCheck, Search } from 'lucide-react';
 import { VOCAB, VOCAB_CATEGORIES, WORD_BY_ID, CATEGORY_REF } from '../content/vocab';
 import { WB_BY_ID } from '../content/workbook';
 import type { VocabWord } from '../types';
@@ -11,28 +11,29 @@ import { normalize, shuffle } from '../lib/grade';
 import { Badge, Button, Card, Empty, LinkButton, PageHeader, Progress, SourceTag, cx } from '../components/ui';
 import { SpeakBtn } from '../components/ExerciseView';
 import { SkillTabs } from '../components/SkillHeader';
+import MyWords from '../components/MyWords';
 import { highlightParts } from '../lib/myWords';
 import { usePersisted } from '../lib/persist';
 
-type Tab = 'review' | 'browse' | 'stats';
+type Tab = 'review' | 'mine' | 'browse' | 'stats';
 
 export default function Vocabulary() {
   const [sp, setSp] = useSearchParams();
-  const t = sp.get('tab') as Tab | null;
-  const tab: Tab = t === 'browse' || t === 'stats' ? t : 'review';
+  const tab = (sp.get('tab') as Tab) || 'review';
   const setTab = (t: Tab) => setSp({ tab: t }, { replace: true });
   return (
     <div>
       <SkillTabs active="vocabulary" />
-      <PageHeader title="Words" subtitle="The course vocabulary as flashcards with spaced repetition: the words you find hard come back more often. Your own words are in My words." actions={<LinkButton to="/exam/vocab" variant="secondary"><ClipboardCheck size={16} /> Vocabulary quiz</LinkButton>} />
+      <PageHeader title="Vocabulario" subtitle="Flashcards with spaced repetition: the words you find hard come back more often." actions={<LinkButton to="/exam/vocab" variant="secondary"><ClipboardCheck size={16} /> Vocabulary quiz</LinkButton>} />
       <div className="mb-5 inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
-        {([['review', 'Review', Repeat], ['browse', 'Browse', Layers], ['stats', 'Statistics', BarChart3]] as const).map(([id, label, Icon]) => (
+        {([['review', 'Review', Repeat], ['mine', 'My words', NotebookPen], ['browse', 'Browse', Layers], ['stats', 'Statistics', BarChart3]] as const).map(([id, label, Icon]) => (
           <button key={id} onClick={() => setTab(id)} className={cx('inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition', tab === id ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500')}>
             <Icon size={15} /> {label}
           </button>
         ))}
       </div>
       {tab === 'review' && <Review />}
+      {tab === 'mine' && <MyWords />}
       {tab === 'browse' && <Browse />}
       {tab === 'stats' && <Stats />}
     </div>
