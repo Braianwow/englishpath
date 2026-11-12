@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Brain, CheckCircle2, Flame, Gift, GraduationCap, Headphones, Info, Mic, PenLine, Target } from 'lucide-react';
+import { BookOpen, BookText, Brain, CalendarCheck, CheckCircle2, ClipboardCheck, Flame, Gift, GraduationCap, Headphones, Info, Layers, MessageCircle, Mic, NotebookPen, PenLine, Target, TrendingUp } from 'lucide-react';
 import { useProgress } from '../store/progress';
 import { useStudyTime } from '../store/timer';
 import { UNIT_BY_ID } from '../content';
@@ -8,6 +8,16 @@ import { streak } from '../lib/gamification';
 import { STREAK_FOR_BOOK, booksEarned } from '../lib/books';
 import { DAILY_GOAL_MIN, SECTION_GOAL_SECS } from '../lib/studyTime';
 import { LinkButton, cx } from '../components/ui';
+
+/** Quick links next to the daily goal. */
+const SHORTCUTS = [
+  { to: '/my-words', label: 'My words', sub: 'Your own word list', icon: NotebookPen, tint: 'bg-brand-500/15 text-brand-700 dark:text-brand-400' },
+  { to: '/grammar', label: 'Grammar sheets', sub: 'The rules of each unit', icon: Layers, tint: 'bg-violet-500/15 text-violet-500' },
+  { to: '/reference', label: 'Reference', sub: 'Irregular verbs and more', icon: BookText, tint: 'bg-sky-500/15 text-sky-500' },
+  { to: '/plan', label: 'Study plan', sub: 'Your daily routine', icon: CalendarCheck, tint: 'bg-amber-500/15 text-amber-500' },
+  { to: '/progress', label: 'Progress', sub: 'Level, XP and history', icon: TrendingUp, tint: 'bg-emerald-500/15 text-emerald-500' },
+  { to: '/assistant', label: 'Assistant', sub: 'Ask any English question', icon: MessageCircle, tint: 'bg-rose-500/15 text-rose-500' },
+] as const;
 
 const STEP_NAMES = ['Learn', 'Examples', 'Practice', 'Advanced practice', 'Test'];
 const panel = 'rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900';
@@ -51,7 +61,43 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* What to study (rows of 4), with the daily goal as the last card */}
+      {/* Daily goal + shortcuts */}
+      <div className="grid gap-4 lg:grid-cols-4">
+            <div className={cx(panel, 'flex flex-col p-5')}>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
+                  <strong>Daily goal</strong>
+                  <span title="Study 2 hours a day, in the sections you choose (for example, 4 blocks of 30 minutes), for the day to count towards your streak." className="cursor-help text-slate-400"><Info size={14} /></span>
+                </span>
+                <Link to="/progress" className="text-xs font-semibold text-brand-700 hover:underline dark:text-brand-500">See progress</Link>
+              </div>
+          <div>
+            <div className="flex items-center gap-1.5 whitespace-nowrap font-display text-xl font-bold text-slate-900 dark:text-white">
+              <Flame size={19} className={st.activeToday ? 'text-orange-500' : 'text-slate-400'} /> {st.current} {st.current === 1 ? 'day' : 'days'}
+            </div>
+            <div className="mt-0.5 text-xs text-slate-500">Streak · best {st.best} · {st.activeToday ? <span className="font-semibold text-brand-700 dark:text-brand-500">done today!</span> : <><strong className="text-slate-800 dark:text-slate-200">{st.missingMin} min</strong> to go</>}</div>
+          </div>
+          <div className="mt-3 flex items-center gap-3">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800"><div className="h-full rounded-full bg-brand-500 transition-all duration-700" style={{ width: `${Math.min(100, (minutes / DAILY_GOAL_MIN) * 100)}%` }} /></div>
+            <span className="text-xs tabular-nums text-slate-500">{Math.min(minutes, DAILY_GOAL_MIN)}/{DAILY_GOAL_MIN}</span>
+          </div>
+          <BookReward current={st.current} minutes={minutes} />
+          <LinkButton to="/plan" variant="secondary" size="sm" className="mt-auto w-full">See study plan</LinkButton>
+            </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:col-span-3">
+          {SHORTCUTS.map(({ to, label, sub, icon: Icon, tint }) => (
+            <Link key={to} to={to} className={cx(panel, 'pressable group flex items-center gap-3 p-4 transition hover:border-brand-500/50')}>
+              <span className={cx('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', tint)}><Icon size={19} /></span>
+              <span className="min-w-0">
+                <span className="block font-semibold text-slate-900 dark:text-white">{label}</span>
+                <span className="block truncate text-xs text-slate-500">{sub}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* What to study (rows of 4) */}
       <section>
         <SectionTitle>What do you want to study?</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -91,27 +137,11 @@ export default function Dashboard() {
               text="Emails, essays and stories, with a checklist to review what you wrote."
               to="/writing" cta="Write"
             />
-            <div className={cx(panel, 'flex min-h-[230px] flex-col p-5')}>
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
-                  <strong>Daily goal</strong>
-                  <span title="Study 2 hours a day, in the sections you choose (for example, 4 blocks of 30 minutes), for the day to count towards your streak." className="cursor-help text-slate-400"><Info size={14} /></span>
-                </span>
-                <Link to="/progress" className="text-xs font-semibold text-brand-700 hover:underline dark:text-brand-500">See progress</Link>
-              </div>
-          <div>
-            <div className="flex items-center gap-1.5 whitespace-nowrap font-display text-xl font-bold text-slate-900 dark:text-white">
-              <Flame size={19} className={st.activeToday ? 'text-orange-500' : 'text-slate-400'} /> {st.current} {st.current === 1 ? 'day' : 'days'}
-            </div>
-            <div className="mt-0.5 text-xs text-slate-500">Streak · best {st.best} · {st.activeToday ? <span className="font-semibold text-brand-700 dark:text-brand-500">done today!</span> : <><strong className="text-slate-800 dark:text-slate-200">{st.missingMin} min</strong> to go</>}</div>
-          </div>
-          <div className="mt-3 flex items-center gap-3">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800"><div className="h-full rounded-full bg-brand-500 transition-all duration-700" style={{ width: `${Math.min(100, (minutes / DAILY_GOAL_MIN) * 100)}%` }} /></div>
-            <span className="text-xs tabular-nums text-slate-500">{Math.min(minutes, DAILY_GOAL_MIN)}/{DAILY_GOAL_MIN}</span>
-          </div>
-          <BookReward current={st.current} minutes={minutes} />
-          <LinkButton to="/plan" variant="secondary" size="sm" className="mt-auto w-full">See study plan</LinkButton>
-            </div>
+            <FeatureCard
+              tag="Tests" title="Test yourself" glow="indigo" icon={ClipboardCheck} showMinutes={false}
+              text="Mock exams by unit and by module, to see where you stand."
+              to="/exams" cta="Take a test"
+            />
         </div>
       </section>
     </div>
@@ -126,10 +156,11 @@ const GLOW = {
   amber: { bg: 'bg-amber-500', text: 'text-amber-500', dot: 'bg-amber-500' },
   fuchsia: { bg: 'bg-fuchsia-500', text: 'text-fuchsia-500', dot: 'bg-fuchsia-500' },
   emerald: { bg: 'bg-emerald-500', text: 'text-emerald-500', dot: 'bg-emerald-500' },
+  indigo: { bg: 'bg-indigo-500', text: 'text-indigo-400', dot: 'bg-indigo-500' },
 } as const;
 
-function FeatureCard({ tag, title, text, to, cta, icon: Icon, glow, extra, secs = 0 }: {
-  tag: string; title: string; text: React.ReactNode; to: string; cta: string; icon: typeof Brain; glow: keyof typeof GLOW; extra?: React.ReactNode; secs?: number;
+function FeatureCard({ tag, title, text, to, cta, icon: Icon, glow, extra, secs = 0, showMinutes = true }: {
+  tag: string; title: string; text: React.ReactNode; to: string; cta: string; icon: typeof Brain; glow: keyof typeof GLOW; extra?: React.ReactNode; secs?: number; showMinutes?: boolean;
 }) {
   const g = GLOW[glow];
   const min = Math.min(30, Math.floor(secs / 60));
@@ -144,10 +175,11 @@ function FeatureCard({ tag, title, text, to, cta, icon: Icon, glow, extra, secs 
       <div className="relative">{extra}</div>
       <div className="relative mt-auto flex flex-col items-start gap-2 pt-5">
         <LinkButton to={to} size="sm" className="px-5 py-2.5">{cta}</LinkButton>
-        <span className="flex items-center gap-1.5 text-xs tabular-nums text-slate-500" title="Minutes studied today in this section">
+        {showMinutes && <span className="flex items-center gap-1.5 text-xs tabular-nums text-slate-500" title="Minutes studied today in this section">
           {done ? <CheckCircle2 size={14} className="text-brand-600 dark:text-brand-500" /> : <span className={cx('h-1.5 w-1.5 rounded-full', min > 0 ? g.dot : 'bg-slate-300 dark:bg-slate-700')} />}
           {min}/30 min today
-        </span>
+        </span>}
+        {!showMinutes && <span aria-hidden className="invisible text-xs">0/30 min today</span>}
       </div>
     </div>
   );
