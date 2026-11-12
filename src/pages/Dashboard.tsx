@@ -42,41 +42,16 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Welcome + daily goal */}
-      <div className="grid items-start gap-6 lg:grid-cols-[1fr_340px]">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-slate-900 dark:text-white">{greeting()} 👋</h1>
-          <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-            Estimated level: <span className="font-semibold text-brand-700 dark:text-brand-500">{level.label}</span>
-            <span className="mx-1.5">·</span>
-            You're on: <span className="font-semibold text-brand-700 dark:text-brand-500">Unit {u.n}</span>
-          </p>
-        </div>
-        <div>
-          <SectionTitle info="Study 2 hours a day, in the sections you choose (for example, 4 blocks of 30 minutes), for the day to count towards your streak." right={<Link to="/progress" className="pressable rounded-lg px-2.5 py-1 text-sm font-semibold text-brand-700 hover:bg-slate-100 dark:text-brand-500 dark:hover:bg-slate-800">See progress</Link>}>Daily goal</SectionTitle>
-          <div className={cx(panel, 'flex flex-col p-4')}>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-1.5 font-display text-xl font-bold text-slate-900 dark:text-white">
-                  <Flame size={19} className={st.activeToday ? 'text-orange-500' : 'text-slate-400'} /> {st.current} {st.current === 1 ? 'day' : 'days'}
-                </div>
-                <div className="text-xs text-slate-500">Streak · best: {st.best}</div>
-              </div>
-              <div className="text-right text-xs text-slate-500">{st.activeToday ? <span className="font-semibold text-brand-700 dark:text-brand-500">Done today!</span> : <>Still to go: <strong className="text-slate-800 dark:text-slate-200">{st.missingMin} min</strong></>}</div>
-            </div>
-            <div className="mt-3 flex items-center gap-3">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800"><div className="h-full rounded-full bg-brand-500 transition-all duration-700" style={{ width: `${Math.min(100, (minutes / DAILY_GOAL_MIN) * 100)}%` }} /></div>
-              <span className="text-xs tabular-nums text-slate-500">{Math.min(minutes, DAILY_GOAL_MIN)}/{DAILY_GOAL_MIN}</span>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <BookReward current={st.current} minutes={minutes} />
-            </div>
-            <LinkButton to="/plan" variant="secondary" size="sm" className="mt-3 w-full">See study plan</LinkButton>
-          </div>
-        </div>
+      <div>
+        <h1 className="font-display text-3xl font-bold text-slate-900 dark:text-white">{greeting()} 👋</h1>
+        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+          Estimated level: <span className="font-semibold text-brand-700 dark:text-brand-500">{level.label}</span>
+          <span className="mx-1.5">·</span>
+          You're on: <span className="font-semibold text-brand-700 dark:text-brand-500">Unit {u.n}</span>
+        </p>
       </div>
 
-      {/* What to study: rows of 4 */}
+      {/* What to study (rows of 4), with the daily goal as the last card */}
       <section>
         <SectionTitle>What do you want to study?</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -116,6 +91,27 @@ export default function Dashboard() {
               text="Emails, essays and stories, with a checklist to review what you wrote."
               to="/writing" cta="Write"
             />
+            <div className={cx(panel, 'flex min-h-[230px] flex-col p-5')}>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
+                  <strong>Daily goal</strong>
+                  <span title="Study 2 hours a day, in the sections you choose (for example, 4 blocks of 30 minutes), for the day to count towards your streak." className="cursor-help text-slate-400"><Info size={14} /></span>
+                </span>
+                <Link to="/progress" className="text-xs font-semibold text-brand-700 hover:underline dark:text-brand-500">See progress</Link>
+              </div>
+          <div>
+            <div className="flex items-center gap-1.5 whitespace-nowrap font-display text-xl font-bold text-slate-900 dark:text-white">
+              <Flame size={19} className={st.activeToday ? 'text-orange-500' : 'text-slate-400'} /> {st.current} {st.current === 1 ? 'day' : 'days'}
+            </div>
+            <div className="mt-0.5 text-xs text-slate-500">Streak · best {st.best} · {st.activeToday ? <span className="font-semibold text-brand-700 dark:text-brand-500">done today!</span> : <><strong className="text-slate-800 dark:text-slate-200">{st.missingMin} min</strong> to go</>}</div>
+          </div>
+          <div className="mt-3 flex items-center gap-3">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800"><div className="h-full rounded-full bg-brand-500 transition-all duration-700" style={{ width: `${Math.min(100, (minutes / DAILY_GOAL_MIN) * 100)}%` }} /></div>
+            <span className="text-xs tabular-nums text-slate-500">{Math.min(minutes, DAILY_GOAL_MIN)}/{DAILY_GOAL_MIN}</span>
+          </div>
+          <BookReward current={st.current} minutes={minutes} />
+          <LinkButton to="/plan" variant="secondary" size="sm" className="mt-auto w-full">See study plan</LinkButton>
+            </div>
         </div>
       </section>
     </div>
@@ -157,23 +153,23 @@ function FeatureCard({ tag, title, text, to, cta, icon: Icon, glow, extra, secs 
   );
 }
 
-/** Weekly streak reward: a book every 7 days in a row. Same one-line chip, with 7 tiny squares that fill with flames. */
+/** Weekly streak reward: a book every 7 days in a row, with 7 squares that fill with flames. */
 function BookReward({ current, minutes }: { current: number; minutes: number }) {
   const p = useProgress();
   const earned = booksEarned(p, minutes);
   const towards = current % STREAK_FOR_BOOK;
   const left = STREAK_FOR_BOOK - towards;
   return (
-    <div className="col-span-2 flex items-center justify-between gap-1.5 rounded-lg bg-slate-100 px-2 py-2 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+    <div className="mb-3 mt-3 rounded-lg bg-slate-100 px-2.5 py-2 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200"
       title={`Keep your streak 7 days in a row to get a book · ${left} ${left === 1 ? 'day' : 'days'} left${earned ? ` · books earned: ${earned}` : ''}`}>
-      <span className="flex min-w-0 items-center gap-1.5 truncate"><Gift size={14} className="shrink-0 text-amber-500" /> A book · weekly reward</span>
-      <span className="flex shrink-0 gap-[2px]">
+      <div className="flex items-center gap-1.5 whitespace-nowrap"><Gift size={14} className="shrink-0 text-amber-500" /> A book · weekly reward</div>
+      <div className="mt-1.5 flex gap-1">
         {Array.from({ length: STREAK_FOR_BOOK }, (_, i) => (
-          <span key={i} className={cx('flex h-[10px] w-[10px] items-center justify-center rounded-[2px]', i < towards ? 'bg-orange-500 text-white' : 'bg-slate-300 dark:bg-slate-600')}>
-            {i < towards && <Flame size={7} strokeWidth={3} />}
+          <span key={i} className={cx('flex h-3.5 flex-1 items-center justify-center rounded-[3px]', i < towards ? 'bg-orange-500 text-white' : 'bg-slate-300 dark:bg-slate-600')}>
+            {i < towards && <Flame size={9} strokeWidth={3} />}
           </span>
         ))}
-      </span>
+      </div>
     </div>
   );
 }
