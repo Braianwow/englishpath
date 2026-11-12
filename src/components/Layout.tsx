@@ -89,7 +89,7 @@ function StreakPill() {
   const st = streak(p, minutes);
   return (
     <NavLink to="/" className={cx('pressable inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-semibold', st.activeToday ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400')}
-      title={st.activeToday ? 'Streak: you have done your 2 hours today' : `Streak: ${st.missingMin} min left today`}>
+      title={st.activeToday ? 'Streak: you have done your 1.5 hours today' : `Streak: ${st.missingMin} min left today`}>
       <Flame size={15} /> {st.current}
     </NavLink>
   );

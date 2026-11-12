@@ -67,7 +67,7 @@ export default function Dashboard() {
               <div className="mb-3 flex items-center justify-between gap-2">
                 <span className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
                   <strong>Daily goal</strong>
-                  <span title="Study 2 hours a day, in the sections you choose (for example, 4 blocks of 30 minutes), for the day to count towards your streak." className="cursor-help text-slate-400"><Info size={14} /></span>
+                  <span title="Study 1.5 hours a day, in the sections you choose (for example, 3 blocks of 30 minutes), for the day to count towards your streak." className="cursor-help text-slate-400"><Info size={14} /></span>
                 </span>
                 <Link to="/progress" className="text-xs font-semibold text-brand-700 hover:underline dark:text-brand-500">See progress</Link>
               </div>
@@ -169,8 +169,8 @@ function FeatureCard({ tag, title, text, to, cta, icon: Icon, glow, extra, secs 
     <div className={cx(panel, 'relative flex min-h-[230px] flex-col overflow-hidden p-5')}>
       <div className={cx('pointer-events-none absolute -bottom-10 -right-10 h-48 w-48 rounded-full opacity-30 blur-3xl', g.bg)} />
       <Icon size={96} strokeWidth={1.2} className={cx('pointer-events-none absolute -right-3 bottom-6 opacity-25', g.text)} />
-      <div className="relative text-sm text-slate-600 dark:text-slate-300">EnglishPath <strong>{tag}</strong></div>
-      <div className="relative mt-3 font-display text-xl font-bold text-slate-900 dark:text-white">{title}</div>
+      <div className="relative text-sm text-slate-600 dark:text-slate-300">{title}</div>
+      <div className="relative mt-2 font-display text-2xl font-bold text-slate-900 dark:text-white">{tag}</div>
       <p className="relative mt-2 text-sm text-slate-500 dark:text-slate-400">{text}</p>
       <div className="relative">{extra}</div>
       <div className="relative mt-auto flex flex-col items-start gap-2 pt-5">
