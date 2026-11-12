@@ -33,7 +33,7 @@ const SKILLS = [
 
 const STEPS = [
   { title: 'Create your free account', text: 'Just an email and a password. Your progress is saved to your account from day one.' },
-  { title: 'Follow your daily plan', text: 'Two hours a day across the six skills, with a timer and a streak to keep you going.' },
+  { title: 'Follow your daily plan', text: 'An hour and a half a day, in the skills you choose, with a timer and a streak to keep you going.' },
   { title: 'Watch yourself improve', text: 'XP, accuracy, mastered units and your estimated level, on any device you sign in from.' },
 ];
 

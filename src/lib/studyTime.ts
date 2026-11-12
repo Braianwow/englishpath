@@ -1,8 +1,8 @@
 import type { DayLog } from '../types';
 
-/** Each section has a 30-minute block; the day needs 2 hours to count for the streak. */
+/** Each section has a 30-minute block; the day needs 1.5 hours (in any sections you choose) to count for the streak. */
 export const SECTION_GOAL_SECS = 30 * 60;
-export const DAILY_GOAL_MIN = 120;
+export const DAILY_GOAL_MIN = 90;
 
 export const SECTION_IDS = ['grammar', 'vocabulary', 'listening', 'speaking', 'reading', 'writing'] as const;
 export type SectionId = (typeof SECTION_IDS)[number];
