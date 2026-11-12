@@ -43,7 +43,7 @@ export function SectionTimer({ section }: { section: SectionId }) {
             <Play size={13} fill="currentColor" /> Play
           </button>
         )}
-        <Link to="/" className="shrink-0 rounded-xl px-2 py-1 text-right hover:bg-slate-100 dark:hover:bg-slate-800" title="Daily goal: 2 hours">
+        <Link to="/" className="shrink-0 rounded-xl px-2 py-1 text-right hover:bg-slate-100 dark:hover:bg-slate-800" title="Daily goal: 1.5 hours, in any sections you choose">
           <div className={cx('text-sm font-bold tabular-nums', minutes >= DAILY_GOAL_MIN ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-200')}>{Math.min(minutes, DAILY_GOAL_MIN)}/{DAILY_GOAL_MIN}</div>
           <div className="text-[11px] text-slate-500">min today</div>
         </Link>

@@ -83,7 +83,7 @@ function tick(label: string) {
   }
   const total = totalSecs(before);
   if (total < DAILY_GOAL_MIN * 60 && total + add >= DAILY_GOAL_MIN * 60) {
-    notify({ kind: 'level', title: '2 hours done!', body: 'Today counts towards your streak.' });
+    notify({ kind: 'level', title: '1.5 hours done!', body: 'Today counts towards your streak.' });
     flush();
   }
   if (totalSecs(pending) >= FLUSH_EVERY) flush();
