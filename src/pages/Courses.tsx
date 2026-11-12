@@ -126,7 +126,7 @@ export default function Courses() {
         {[
           { to: '/workbook', icon: NotebookPen, label: 'Objective First' },
           { to: '/readings', icon: BookOpen, label: 'Reading' },
-          { to: '/plan', icon: CalendarCheck, label: 'Study plan' },
+          { to: '/plan', icon: CalendarCheck, label: '2-hour plan' },
         ].map(({ to, icon: Icon, label }) => (
           <Link key={to} to={to} className="pressable flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-center text-sm font-medium text-slate-700 hover:shadow-md dark:bg-slate-900 dark:text-slate-200">
             <Icon size={20} className="text-brand-500" /> {label}
