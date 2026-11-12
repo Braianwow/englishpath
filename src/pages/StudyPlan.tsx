@@ -40,7 +40,7 @@ export default function StudyPlan() {
 
   return (
     <div>
-      <PageHeader title="Study plan" subtitle="Pick the skills you want: 1.5 hours a day (for example, 3 blocks of 30 minutes) keeps your streak. The full B1–B2 routine from your PDF is below." actions={<SourceTag src="plan" />} />
+      <PageHeader title="2-hour study plan" subtitle="The B1–B2 daily routine from your PDF: 30 minutes for each skill." actions={<SourceTag src="plan" />} />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-4">
         <Card className="p-4"><div className="text-xs uppercase text-slate-500">Grammar topics (7 days)</div><div className="font-display text-2xl font-bold text-slate-900 dark:text-white">{topics}</div><div className="text-xs text-slate-500">Plan goal: 1–3 a week</div><Progress className="mt-2" value={topics / 3} /></Card>

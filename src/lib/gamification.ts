@@ -12,7 +12,7 @@ export function levelInfo(xp: number) {
 }
 
 /**
- * A day counts for the streak only with at least 1.5 hours of study (in any sections).
+ * A day counts for the streak only with at least 2 hours of study.
  * Today does not break the streak until it is over: if today is not done yet,
  * the streak shown is the one up to yesterday.
  */
@@ -53,9 +53,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'correct-1000', title: '1000 correct', desc: 'You answered 1000 exercises correctly.', icon: 'Rocket', check: (s) => totalCorrect(s) >= 1000 },
   { id: 'words-20', title: 'First 20 words', desc: 'You reviewed 20 words successfully.', icon: 'BookA', check: (s) => learnedCards(s) >= 20 },
   { id: 'words-100', title: 'Growing vocabulary', desc: 'You reviewed 100 words successfully.', icon: 'Library', check: (s) => learnedCards(s) >= 100 },
-  { id: 'streak-3', title: '3-day streak', desc: 'You studied 1.5 hours a day for 3 days in a row.', icon: 'Flame', check: (s) => streak(s).current >= 3 },
-  { id: 'streak-7', title: 'A whole week', desc: 'You studied 1.5 hours a day for 7 days in a row.', icon: 'Flame', check: (s) => streak(s).current >= 7 },
-  { id: 'streak-30', title: 'A month-long habit', desc: 'You studied 1.5 hours a day for 30 days in a row.', icon: 'CalendarCheck', check: (s) => streak(s).current >= 30 },
+  { id: 'streak-3', title: '3-day streak', desc: 'You studied 2 hours a day for 3 days in a row.', icon: 'Flame', check: (s) => streak(s).current >= 3 },
+  { id: 'streak-7', title: 'A whole week', desc: 'You studied 2 hours a day for 7 days in a row.', icon: 'Flame', check: (s) => streak(s).current >= 7 },
+  { id: 'streak-30', title: 'A month-long habit', desc: 'You studied 2 hours a day for 30 days in a row.', icon: 'CalendarCheck', check: (s) => streak(s).current >= 30 },
   { id: 'fixer', title: 'Learning from mistakes', desc: 'You fixed 10 mistakes in a review session.', icon: 'Wrench', check: (s) => s.exams.filter((e) => e.kind === 'review').reduce((a, e) => a + e.correct, 0) >= 10 },
   { id: 'cumulative', title: 'Cumulative test', desc: 'You passed a module cumulative test.', icon: 'GraduationCap', check: (s) => s.exams.some((e) => (e.kind === 'module' || e.kind === 'cumulative') && e.score >= 70) },
   { id: 'reader', title: 'Lector', desc: 'You completed 3 reading texts with 70% or more.', icon: 'BookOpen', check: (s) => Object.values(s.readings).filter((r) => r.best >= 70).length >= 3 },
