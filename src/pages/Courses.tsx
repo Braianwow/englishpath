@@ -124,7 +124,7 @@ export default function Courses() {
       {/* Other material, kept small */}
       <div className="mt-8 grid grid-cols-3 gap-3">
         {[
-          { to: '/workbook', icon: NotebookPen, label: 'Objective First' },
+          { to: '/readings', icon: NotebookPen, label: 'Objective First' },
           { to: '/readings', icon: BookOpen, label: 'Reading' },
           { to: '/plan', icon: CalendarCheck, label: '2-hour plan' },
         ].map(({ to, icon: Icon, label }) => (

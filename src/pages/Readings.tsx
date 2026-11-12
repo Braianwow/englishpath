@@ -1,34 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, BookOpen } from 'lucide-react';
-import { READINGS, READING_BY_ID } from '../content/readings';
+import { READING_BY_ID } from '../content/readings';
 import { WB_BY_ID } from '../content/workbook';
-import { useProgress, recordReading, recordExam, setLast } from '../store/progress';
+import { recordReading, recordExam, setLast } from '../store/progress';
 import { Badge, Button, Card, PageHeader, SourceTag } from '../components/ui';
 import ExamRunner, { ExamReport, type ExamOutcome } from '../components/ExamRunner';
 import { SpeakBtn } from '../components/ExerciseView';
 import { SkillTabs } from '../components/SkillHeader';
+import { WorkbookGrid } from './Workbook';
 
 export default function Readings() {
   const { rid } = useParams();
-  const p = useProgress();
   if (rid && READING_BY_ID[rid]) return <ReadingView id={rid} />;
   return (
     <div>
       <SkillTabs active="reading" />
-      <PageHeader title="Reading" subtitle="Reading comprehension on the workbook topics. Read the text and answer the questions." />
-      <div className="grid gap-4 sm:grid-cols-2">
-        {READINGS.map((r) => (
-          <Link key={r.id} to={`/readings/${r.id}`}>
-            <Card className="h-full transition hover:-translate-y-0.5 hover:shadow-md">
-              <div className="mb-2 flex items-center justify-between gap-2"><Badge tone="sky">{r.theme}</Badge>{p.readings[r.id] && <Badge tone={p.readings[r.id].best >= 70 ? 'green' : 'amber'}>Mejor: {p.readings[r.id].best}%</Badge>}</div>
-              <div className="font-semibold text-slate-900 dark:text-white">{r.title}</div>
-              <div className="mt-1 text-sm text-slate-500">{r.qs.length} questions{r.ref && WB_BY_ID[r.ref] ? ` · Objective First Unit ${WB_BY_ID[r.ref].n} topic` : ''}</div>
-            </Card>
-          </Link>
-        ))}
-      </div>
-      <p className="mt-6 text-sm text-slate-500">These texts are extra material written for this platform on the workbook topics; they are not the original texts from the book.</p>
+      <PageHeader title="Reading" subtitle="The Objective First units and how far you've got in each one. The stories are inside their unit." actions={<SourceTag src="obj" />} />
+      <WorkbookGrid />
     </div>
   );
 }
@@ -44,7 +33,7 @@ function ReadingView({ id }: { id: string }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <Link to="/readings" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-600"><ChevronLeft size={16} /> Reading</Link>
+      <Link to={r.ref && WB_BY_ID[r.ref] ? `/workbook/${r.ref}` : '/readings'} className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-600"><ChevronLeft size={16} /> {r.ref && WB_BY_ID[r.ref] ? `Objective First · Unit ${WB_BY_ID[r.ref].n}` : 'Reading'}</Link>
       {phase !== 'quiz' && (
         <Card className="mx-auto w-full max-w-3xl p-6 sm:p-8">
           <div className="mb-2 flex flex-wrap items-center gap-2"><Badge tone="sky">{r.theme}</Badge><SourceTag src={r.src} /></div>

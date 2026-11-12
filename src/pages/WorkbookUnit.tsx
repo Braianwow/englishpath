@@ -19,7 +19,7 @@ export default function WorkbookUnit() {
   const p = useProgress();
   const [practice, setPractice] = useState<ReturnType<typeof buildFocusPractice> | null>(null);
   useEffect(() => { if (w) setLast({ kind: 'unit', id: w.id, title: `Objective First · Unit ${w.n}`, path: `/workbook/${w.id}` }); }, [w]);
-  if (!w) return <Navigate to="/workbook" replace />;
+  if (!w) return <Navigate to="/readings" replace />;
   const s = wbStats(w.id, p);
   const readings = READINGS.filter((r) => r.ref === w.id);
 
@@ -27,7 +27,7 @@ export default function WorkbookUnit() {
 
   return (
     <div className="flex flex-col gap-5">
-      <Link to="/workbook" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-600"><ChevronLeft size={16} /> Objective First</Link>
+      <Link to="/readings" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-600"><ChevronLeft size={16} /> Reading</Link>
       <PageHeader eyebrow={`Unit ${w.n} · ${w.topic}`} title={w.title} subtitle={!w.titleKnown ? "This unit's title couldn't be read in the PDF scan, so its topic is shown." : undefined} actions={<SourceTag src="obj" />} />
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="flex flex-col gap-5 lg:col-span-2">

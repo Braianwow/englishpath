@@ -13,9 +13,9 @@ export function sectionFor(pathname: string): SectionId | null {
   if (p.startsWith('/vocabulary') || p.startsWith('/my-words') || p.startsWith('/exam/vocab')) return 'vocabulary';
   if (p.startsWith('/listening')) return 'listening';
   if (p.startsWith('/speaking') || p.startsWith('/conversation')) return 'speaking';
-  if (p.startsWith('/readings')) return 'reading';
+  if (p.startsWith('/readings') || p.startsWith('/workbook')) return 'reading';
   if (p.startsWith('/writing')) return 'writing';
-  if (['/courses', '/learn', '/grammar', '/practice', '/exams', '/exam', '/workbook', '/reference'].some((r) => p.startsWith(r))) return 'grammar';
+  if (['/courses', '/learn', '/grammar', '/practice', '/exams', '/exam', '/reference'].some((r) => p.startsWith(r))) return 'grammar';
   return null;
 }
 

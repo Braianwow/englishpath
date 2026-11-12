@@ -17,7 +17,6 @@ import Assistant from './pages/Assistant';
 import StudyPlan from './pages/StudyPlan';
 import Reference from './pages/Reference';
 import SettingsPage from './pages/SettingsPage';
-import Workbook from './pages/Workbook';
 import WorkbookUnit from './pages/WorkbookUnit';
 import Readings from './pages/Readings';
 import Listening from './pages/Listening';
@@ -75,7 +74,7 @@ export default function App() {
           <Route path="/learn/:unitId" element={<UnitLesson />} />
           <Route path="/grammar" element={<Grammar />} />
           <Route path="/grammar/:unitId" element={<GrammarSheet />} />
-          <Route path="/workbook" element={<Workbook />} />
+          <Route path="/workbook" element={<Navigate to="/readings" replace />} />
           <Route path="/workbook/:wid" element={<WorkbookUnit />} />
           <Route path="/vocabulary" element={<Vocabulary />} />
           <Route path="/my-words" element={<MyWordsPage />} />

@@ -28,9 +28,10 @@ const MAIN = [
 
 /** Desktop top bar: the home page already has the topics, so no Home / Learn / Practise here. */
 const TOP = [
-  { to: '/vocabulary', label: 'Words', icon: Brain },
-  { to: '/my-words', label: 'My words', icon: NotebookPen },
-  { to: '/progress', label: 'Progress', icon: TrendingUp },
+  { to: '/', label: 'Home', icon: Home, end: true },
+  { to: '/courses', label: 'Learn', icon: GraduationCap },
+];
+const TOP_BOX = [
   { to: '/assistant', label: 'Assistant', icon: MessageCircle },
   { to: '/exams', label: 'Tests', icon: ClipboardCheck },
   { to: '/settings', label: 'Settings', icon: Settings },
@@ -39,7 +40,7 @@ const TOP = [
 const MORE = [
   { to: '/exams', label: 'Tests', icon: ClipboardCheck },
   { to: '/grammar', label: 'Grammar sheets', icon: Layers },
-  { to: '/workbook', label: 'Objective First', icon: NotebookPen },
+  { to: '/readings', label: 'Objective First', icon: NotebookPen },
   { to: '/readings', label: 'Reading', icon: BookOpen },
   { to: '/assistant', label: 'Assistant', icon: MessageCircle },
   { to: '/plan', label: 'Study plan', icon: CalendarCheck },
@@ -137,6 +138,7 @@ export default function Layout() {
           <span className="hidden h-6 w-px bg-slate-200 min-[900px]:block dark:bg-slate-800" />
           <nav className="hidden items-center min-[900px]:flex">
             {TOP.map((m) => <TopLink key={m.to} {...m} />)}
+            {TOP_BOX.map((m) => <TopLink key={m.to} {...m} />)}
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <StreakPill />
