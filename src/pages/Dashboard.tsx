@@ -7,7 +7,8 @@ import { dueCards, estimatedLevel, nextUnit } from '../lib/adaptive';
 import { streak } from '../lib/gamification';
 import { STREAK_FOR_BOOK, booksEarned } from '../lib/books';
 import { addDays, todayKey } from '../lib/dates';
-import { DAILY_GOAL_MIN, SECTION_GOAL_SECS, dayMinutes } from '../lib/studyTime';
+import { DAILY_GOAL_MIN, SECTION_GOAL_SECS, dayMinutes, fmtClock } from '../lib/studyTime';
+import { SKILLS } from '../components/SkillHeader';
 import { LinkButton, cx } from '../components/ui';
 
 const STEP_NAMES = ['Learn', 'Examples', 'Practice', 'Advanced practice', 'Test'];
@@ -55,7 +56,7 @@ export default function Dashboard() {
       </div>
 
       {/* Study + daily goal */}
-      <div className="grid items-start gap-4 lg:grid-cols-[1fr_1fr_0.85fr]">
+      <div className="grid items-start gap-4 lg:grid-cols-[1fr_1fr_0.9fr]">
         <div className="lg:col-span-2">
           <SectionTitle>What do you want to study?</SectionTitle>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -92,7 +93,7 @@ export default function Dashboard() {
             />
           </div>
         </div>
-        <div className="lg:sticky lg:top-24">
+        <div>
           <SectionTitle info="Study 1.5 hours a day, in the sections you choose (for example, 3 blocks of 30 minutes), for the day to count towards your streak." right={<Link to="/progress" className="pressable rounded-lg px-2.5 py-1 text-sm font-semibold text-brand-700 hover:bg-slate-100 dark:text-brand-500 dark:hover:bg-slate-800">See progress</Link>}>Daily goal</SectionTitle>
           <div className={cx(panel, 'flex flex-col p-4')}>
             <div className="flex items-center justify-between">
@@ -108,8 +109,19 @@ export default function Dashboard() {
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800"><div className="h-full rounded-full bg-brand-500 transition-all duration-700" style={{ width: `${Math.min(100, (minutes / DAILY_GOAL_MIN) * 100)}%` }} /></div>
               <span className="text-xs tabular-nums text-slate-500">{Math.min(minutes, DAILY_GOAL_MIN)}/{DAILY_GOAL_MIN}</span>
             </div>
-            <p className="mt-2 text-xs text-slate-500">1.5 hours a day in the sections you choose.</p>
-            <BookReward current={st.current} minutes={minutes} />
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {SKILLS.map(({ id, to, label }) => {
+                const v = secs[id] ?? 0;
+                const done = v >= SECTION_GOAL_SECS;
+                return (
+                  <Link key={id} to={to} className="pressable flex items-center justify-between rounded-lg bg-slate-100 px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700" title={`${label}: ${fmtClock(v)} of 30:00`}>
+                    {label}
+                    {done ? <CheckCircle2 size={15} className="text-brand-600 dark:text-brand-500" /> : v > 0 ? <span className="tabular-nums text-slate-500">{Math.floor(v / 60)}m</span> : <CheckCircle2 size={15} className="text-slate-300 dark:text-slate-600" />}
+                  </Link>
+                );
+              })}
+              <BookReward current={st.current} minutes={minutes} />
+            </div>
             <LinkButton to="/plan" variant="secondary" size="sm" className="mt-3 w-full">See study plan</LinkButton>
           </div>
         </div>
@@ -184,22 +196,15 @@ function Week() {
   );
 }
 
-/** Weekly streak reward: a book every 7 days in a row. */
+/** Weekly streak reward: a book every 7 days in a row (one chip, like the sections above). */
 function BookReward({ current, minutes }: { current: number; minutes: number }) {
   const p = useProgress();
   const earned = booksEarned(p, minutes);
-  const towards = current % STREAK_FOR_BOOK;
-  const left = STREAK_FOR_BOOK - towards;
+  const left = STREAK_FOR_BOOK - (current % STREAK_FOR_BOOK);
   return (
-    <div className="mt-3 flex items-center gap-2.5 rounded-lg bg-slate-100 px-2.5 py-2 dark:bg-slate-800" title="Keep your streak 7 days in a row to get a book">
-      <Gift size={16} className="shrink-0 text-amber-500" />
-      <div className="min-w-0 flex-1">
-        <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">A book <span className="font-normal text-slate-500">· weekly reward</span></div>
-        <div className="mt-1 flex gap-1">
-          {Array.from({ length: STREAK_FOR_BOOK }, (_, i) => <span key={i} className={cx('h-1.5 flex-1 rounded-full', i < towards ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-700')} />)}
-        </div>
-      </div>
-      <div className="shrink-0 text-right text-[11px] leading-tight text-slate-500">{left} {left === 1 ? 'day' : 'days'}<br />left{earned > 0 && <> · 📚 {earned}</>}</div>
+    <div className="col-span-2 flex items-center justify-between rounded-lg bg-slate-100 px-2.5 py-2 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200" title="Keep your streak 7 days in a row to get a book">
+      <span className="flex items-center gap-1.5"><Gift size={14} className="text-amber-500" /> A book · weekly reward</span>
+      <span className="tabular-nums text-slate-500">{left} {left === 1 ? 'day' : 'days'} left{earned > 0 && <> · 📚 {earned}</>}</span>
     </div>
   );
 }
