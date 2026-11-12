@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
-  BookOpen, Brain, CalendarCheck, ClipboardCheck, Flame, GraduationCap, Home, Layers, LayoutGrid, LibraryBig,
+  BookOpen, Brain, CalendarCheck, ClipboardCheck, Flame, GraduationCap, Home, Layers, LibraryBig,
   MessageCircle, Moon, MoreHorizontal, NotebookPen, Settings, Sun, Target, TrendingUp, X, BookText,
 } from 'lucide-react';
 import { cx } from './ui';
@@ -95,56 +95,6 @@ function StreakPill() {
   );
 }
 
-function TopLink({ to, label, icon: Icon, end }: { to: string; label: string; icon: typeof Home; end?: boolean }) {
-  return (
-    <NavLink
-      to={to} end={end}
-      className={({ isActive }) => cx(
-        'pressable relative flex h-16 items-center gap-2 whitespace-nowrap px-2.5 text-sm font-semibold transition-colors',
-        isActive ? 'text-slate-900 after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-brand-500 dark:text-white' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white',
-      )}
-    >
-      <Icon size={16} /> {label}
-    </NavLink>
-  );
-}
-
-/** Desktop "apps" menu with the secondary pages. */
-function MoreMenu({ active }: { active: boolean }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const loc = useLocation();
-  useEffect(() => setOpen(false), [loc.pathname]);
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('mousedown', close);
-    document.addEventListener('keydown', esc);
-    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('keydown', esc); };
-  }, [open]);
-  return (
-    <div ref={ref} className="relative">
-      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label="More sections" title="More sections"
-        className={cx('pressable flex h-9 w-9 items-center justify-center rounded-xl transition', open || active ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800')}>
-        <LayoutGrid size={18} />
-      </button>
-      {open && (
-        <div className="absolute right-0 top-12 z-50 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl animate-fade-up dark:border-slate-700 dark:bg-slate-900">
-          <div className="grid grid-cols-2 gap-1">
-            {MORE.map(({ to, label, icon: Icon }) => (
-              <NavLink key={to} to={to} className={({ isActive }) => cx('pressable flex flex-col items-start gap-1.5 rounded-xl p-3 text-sm font-medium transition',
-                isActive ? 'bg-brand-50 text-brand-800 dark:bg-brand-500/10 dark:text-brand-300' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800')}>
-                <Icon size={18} className="text-brand-600 dark:text-brand-500" /> {label}
-              </NavLink>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function Layout() {
   const loc = useLocation();
   const inMore = MORE.some((m) => loc.pathname.startsWith(m.to));
@@ -158,16 +108,16 @@ export default function Layout() {
     <div className="min-h-screen">
       {/* Top navigation bar */}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/90">
-        <div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-4 sm:px-6">
+        <div className="mx-auto grid h-16 max-w-5xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6">
+          <span />
           <Brand />
-          <span className="hidden h-6 w-px bg-slate-200 lg:block dark:bg-slate-800" />
-          <nav className="hidden items-center lg:flex">
-            {MAIN.map((m) => <TopLink key={m.to} {...m} />)}
-          </nav>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             <StreakPill />
             <AccountButton />
-            <div className="hidden lg:block"><MoreMenu active={inMore} /></div>
+            <NavLink to="/settings" aria-label="Settings" title="Settings"
+              className={({ isActive }) => cx('pressable hidden h-9 w-9 items-center justify-center rounded-xl transition sm:flex', isActive ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800')}>
+              <Settings size={18} />
+            </NavLink>
             <ThemeSwitch />
           </div>
         </div>
