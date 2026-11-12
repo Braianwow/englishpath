@@ -1,10 +1,8 @@
-import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Brain, Check, CheckCircle2, ChevronLeft, ChevronRight, CircleDashed, Flame, GraduationCap, Info, NotebookPen, Target, Wrench } from 'lucide-react';
+import { BookOpen, Brain, Check, CheckCircle2, Flame, GraduationCap, Headphones, Info, Mic, PenLine, Target } from 'lucide-react';
 import { useProgress } from '../store/progress';
 import { useStudyTime } from '../store/timer';
-import { PATH, UNIT_BY_ID } from '../content';
-import { COLOR, moduleOf } from '../content/modules';
+import { UNIT_BY_ID } from '../content';
 import { dueCards, estimatedLevel, nextUnit } from '../lib/adaptive';
 import { streak } from '../lib/gamification';
 import { addDays, todayKey } from '../lib/dates';
@@ -55,14 +53,13 @@ export default function Dashboard() {
             You're on: <span className="font-semibold text-brand-700 dark:text-brand-500">Unit {u.n}</span>
           </p>
         </div>
-        <LinkButton to="/progress" variant="secondary" size="sm" className="px-5 py-2.5">See progress</LinkButton>
       </div>
 
-      <Recommended currentId={u.id} mistakes={mistakes} cards={cards} />
+      <Topics />
 
       {/* Study + daily goal */}
-      <div className="grid gap-4 lg:grid-cols-[1fr_1fr_0.9fr]">
-        <div className="lg:col-span-2">
+      <div className="grid gap-4 min-[900px]:grid-cols-[1fr_1fr_0.9fr]">
+        <div className="min-[900px]:col-span-2">
           <SectionTitle>Your study</SectionTitle>
           <div className="grid gap-4 sm:grid-cols-2">
             <FeatureCard
@@ -79,7 +76,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div>
-          <SectionTitle info="You need 2 hours of study every day (for example, 4 blocks of 30 minutes) for the day to count towards your streak.">Daily goal</SectionTitle>
+          <SectionTitle info="You need 2 hours of study every day (for example, 4 blocks of 30 minutes) for the day to count towards your streak." right={<LinkButton to="/progress" variant="secondary" size="sm" className="px-4 py-2">See progress</LinkButton>}>Daily goal</SectionTitle>
           <div className={cx(panel, 'flex flex-col p-4')}>
             <div className="flex items-center justify-between">
               <div>
@@ -111,80 +108,44 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Skills row */}
-      <div className="-mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {SKILLS.filter((s) => s.id !== 'grammar' && s.id !== 'vocabulary').map(({ id, to, label, desc, icon: Icon }) => (
-          <Link key={id} to={to} className={cx(panel, 'pressable group flex items-start gap-3 p-4 hover:border-brand-500/50')}>
-            <Icon size={18} className="mt-0.5 shrink-0 text-slate-400 transition group-hover:text-brand-600 dark:group-hover:text-brand-500" />
-            <div>
-              <div className="text-sm text-slate-900 dark:text-white"><span className="text-slate-500">Skill</span> <strong>{label}</strong></div>
-              <div className="mt-0.5 text-xs text-slate-500">{desc}</div>
-            </div>
-          </Link>
-        ))}
-      </div>
-
       <Week />
     </div>
   );
 }
 
-/** Horizontal carousel: the unit you are on plus the next ones, and pending reviews. */
-function Recommended({ currentId, mistakes, cards }: { currentId: string; mistakes: number; cards: number }) {
-  const p = useProgress();
-  const track = useRef<HTMLDivElement>(null);
-  const i = Math.max(0, PATH.indexOf(currentId));
-  const units = PATH.slice(i, i + 10);
-  const scroll = (dir: 1 | -1) => track.current?.scrollBy({ left: dir * 270, behavior: 'smooth' });
+const TOPICS = [
+  { to: '/courses', label: 'Grammar', tag: 'All 145 units', text: 'The full syllabus, step by step.', cta: 'Open', icon: GraduationCap, glow: 'bg-brand-500', tint: 'text-brand-600 dark:text-brand-500', sec: 'grammar' },
+  { to: '/vocabulary', label: 'Vocabulary', tag: 'Words that stick', text: 'Flashcards that come back just before you forget them.', cta: 'Learn', icon: Brain, glow: 'bg-violet-500', tint: 'text-violet-500', sec: 'vocabulary' },
+  { to: '/listening', label: 'Listening', tag: 'Train your ear', text: 'Dictations and listening comprehension.', cta: 'Listen', icon: Headphones, glow: 'bg-sky-500', tint: 'text-sky-500', sec: 'listening' },
+  { to: '/speaking', label: 'Speaking', tag: 'Talk with Jake', text: 'Pronunciation, shadowing and live conversation.', cta: 'Speak', icon: Mic, glow: 'bg-rose-500', tint: 'text-rose-500', sec: 'speaking' },
+  { to: '/readings', label: 'Reading', tag: 'Real stories', text: 'Texts with comprehension questions.', cta: 'Read', icon: BookOpen, glow: 'bg-amber-500', tint: 'text-amber-500', sec: 'reading' },
+  { to: '/writing', label: 'Writing', tag: 'Write with confidence', text: 'Letters, emails, essays and stories.', cta: 'Write', icon: PenLine, glow: 'bg-fuchsia-500', tint: 'text-fuchsia-500', sec: 'writing' },
+] as const;
 
-  const mine = Object.keys(p.myWords ?? {}).length;
-  const extra = [
-    { key: 'mine', to: '/my-words', badge: 'My words', title: mine ? 'Review my words' : 'Add my words', sub: mine ? `${mine} saved · add more` : 'word = sentence = meaning', icon: NotebookPen, glow: 'bg-brand-500' },
-    mistakes > 0 && { key: 'mist', to: '/practice?mode=mistakes', badge: 'Review', title: 'Fix my mistakes', sub: `${mistakes} to fix`, icon: Wrench, glow: 'bg-rose-500' },
-    cards > 0 && { key: 'cards', to: '/vocabulary?tab=review', badge: 'Words', title: 'Review vocabulary', sub: `${cards} for today`, icon: Brain, glow: 'bg-violet-500' },
-  ].filter(Boolean) as { key: string; to: string; badge: string; title: string; sub: string; icon: typeof Brain; glow: string }[];
-
+/** The six topics of the syllabus in one row of compact, wide cards; each one goes to its section. */
+function Topics() {
+  const { secs } = useStudyTime();
   return (
-    <section>
-      <SectionTitle info="Your current unit, the next ones on the path and the reviews that are due."
-        right={<div className="flex gap-1">
-          <button onClick={() => scroll(-1)} aria-label="Previous" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"><ChevronLeft size={18} /></button>
-          <button onClick={() => scroll(1)} aria-label="Next" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"><ChevronRight size={18} /></button>
-        </div>}>
-        Recommended for you
-      </SectionTitle>
-      <div ref={track} className="-mx-4 flex snap-x gap-3 overflow-x-auto scroll-smooth px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
-        {units.map((id) => {
-          const unit = UNIT_BY_ID[id];
-          const m = moduleOf(id);
-          const up = p.units[id];
-          const Icon = up?.completed ? CheckCircle2 : (up?.step ?? 0) > 0 ? CircleDashed : null;
-          return (
-            <Link key={id} to={`/learn/${id}`} className={cx(panel, 'pressable group w-60 shrink-0 snap-start p-3 transition hover:border-brand-500/50')}>
-              <div className="relative h-32 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-950">
-                <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(125,140,165,.18)_1px,transparent_1px),linear-gradient(90deg,rgba(125,140,165,.18)_1px,transparent_1px)] [background-size:16px_16px]" />
-                <div className={cx('absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-50 blur-2xl transition group-hover:opacity-80', COLOR[m?.color ?? 'indigo']?.bg)} />
-                <div className="absolute inset-0 flex items-center justify-center font-display text-5xl font-extrabold text-slate-900/80 dark:text-white/90">{unit.n}</div>
-                <span className="absolute left-2 top-2 rounded bg-white/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800/90 dark:text-slate-300">{id === currentId ? 'Current' : 'Unit'}</span>
-                {Icon && <Icon size={16} className="absolute right-2 top-2 text-brand-600 dark:text-brand-500" />}
-              </div>
-              <div className="mt-3 line-clamp-1 font-semibold text-slate-900 dark:text-white">{unit.title}</div>
-              <div className="mt-1 line-clamp-1 text-xs text-slate-500">{m?.title}</div>
-            </Link>
-          );
-        })}
-        {extra.map((e) => (
-          <Link key={e.key} to={e.to} className={cx(panel, 'pressable group w-60 shrink-0 snap-start p-3 transition hover:border-brand-500/50')}>
-            <div className="relative h-32 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-950">
-              <div className={cx('absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-50 blur-2xl', e.glow)} />
-              <div className="absolute inset-0 flex items-center justify-center text-slate-900/80 dark:text-white/90"><e.icon size={42} /></div>
-              <span className="absolute left-2 top-2 rounded bg-white/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:bg-slate-800/90 dark:text-slate-300">{e.badge}</span>
+    <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 min-[900px]:grid-cols-6">
+      {TOPICS.map(({ to, label, tag, cta, icon: Icon, glow, tint, sec }) => {
+        const v = secs[sec] ?? 0;
+        const min = Math.min(30, Math.floor(v / 60));
+        return (
+          <Link key={to} to={to} className={cx(panel, 'pressable group relative flex h-[118px] flex-col overflow-hidden p-3.5 transition hover:border-brand-500/50')}>
+            <div className={cx('pointer-events-none absolute -bottom-8 -right-8 h-28 w-28 rounded-full opacity-30 blur-2xl', glow)} />
+            <Icon size={48} strokeWidth={1.3} className={cx('pointer-events-none absolute -right-1 top-3 opacity-25', tint)} />
+            <div className="relative truncate pr-8 text-[11px] text-slate-500 dark:text-slate-400">{tag}</div>
+            <div className="relative font-display text-lg font-bold text-slate-900 dark:text-white">{label}</div>
+            <div className="relative mt-auto flex items-center justify-between gap-2">
+              <span className="truncate rounded-lg bg-brand-500 px-2.5 py-1 text-xs font-semibold text-slate-950 transition group-hover:bg-brand-400">{cta}</span>
+              <span className="flex shrink-0 items-center gap-1 text-[11px] tabular-nums text-slate-500" title="Minutes studied today in this section (goal: 30)">
+                {v >= SECTION_GOAL_SECS && <CheckCircle2 size={12} className="text-brand-600 dark:text-brand-500" />}
+                {min}/30
+              </span>
             </div>
-            <div className="mt-3 font-semibold text-slate-900 dark:text-white">{e.title}</div>
-            <div className="mt-1 text-xs text-slate-500">{e.sub}</div>
           </Link>
-        ))}
-      </div>
+        );
+      })}
     </section>
   );
 }

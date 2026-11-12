@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
-  BookOpen, Brain, CalendarCheck, ClipboardCheck, Flame, GraduationCap, Home, Layers, LayoutGrid, LibraryBig,
+  BookOpen, Brain, CalendarCheck, ClipboardCheck, Flame, GraduationCap, Home, Layers, LibraryBig,
   MessageCircle, Moon, MoreHorizontal, NotebookPen, Settings, Sun, Target, TrendingUp, X, BookText,
 } from 'lucide-react';
 import { cx } from './ui';
@@ -24,6 +24,16 @@ const MAIN = [
   { to: '/vocabulary', label: 'Words', icon: Brain },
   { to: '/my-words', label: 'My words', icon: NotebookPen },
   { to: '/progress', label: 'Progress', icon: TrendingUp },
+];
+
+/** Desktop top bar: the home page already has the topics, so no Home / Learn / Practise here. */
+const TOP = [
+  { to: '/vocabulary', label: 'Words', icon: Brain },
+  { to: '/my-words', label: 'My words', icon: NotebookPen },
+  { to: '/progress', label: 'Progress', icon: TrendingUp },
+  { to: '/assistant', label: 'Assistant', icon: MessageCircle },
+  { to: '/exams', label: 'Tests', icon: ClipboardCheck },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
 const MORE = [
@@ -109,42 +119,6 @@ function TopLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
   );
 }
 
-/** Desktop "apps" menu with the secondary pages. */
-function MoreMenu({ active }: { active: boolean }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const loc = useLocation();
-  useEffect(() => setOpen(false), [loc.pathname]);
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('mousedown', close);
-    document.addEventListener('keydown', esc);
-    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('keydown', esc); };
-  }, [open]);
-  return (
-    <div ref={ref} className="relative">
-      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label="More sections" title="More sections"
-        className={cx('pressable flex h-9 w-9 items-center justify-center rounded-xl transition', open || active ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800')}>
-        <LayoutGrid size={18} />
-      </button>
-      {open && (
-        <div className="absolute right-0 top-12 z-50 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl animate-fade-up dark:border-slate-700 dark:bg-slate-900">
-          <div className="grid grid-cols-2 gap-1">
-            {MORE.map(({ to, label, icon: Icon }) => (
-              <NavLink key={to} to={to} className={({ isActive }) => cx('pressable flex flex-col items-start gap-1.5 rounded-xl p-3 text-sm font-medium transition',
-                isActive ? 'bg-brand-50 text-brand-800 dark:bg-brand-500/10 dark:text-brand-300' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800')}>
-                <Icon size={18} className="text-brand-600 dark:text-brand-500" /> {label}
-              </NavLink>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function Layout() {
   const loc = useLocation();
   const inMore = MORE.some((m) => loc.pathname.startsWith(m.to));
@@ -160,20 +134,19 @@ export default function Layout() {
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/90">
         <div className="mx-auto flex h-16 max-w-5xl items-center gap-4 px-4 sm:px-6">
           <Brand />
-          <span className="hidden h-6 w-px bg-slate-200 lg:block dark:bg-slate-800" />
-          <nav className="hidden items-center lg:flex">
-            {MAIN.map((m) => <TopLink key={m.to} {...m} />)}
+          <span className="hidden h-6 w-px bg-slate-200 min-[900px]:block dark:bg-slate-800" />
+          <nav className="hidden items-center min-[900px]:flex">
+            {TOP.map((m) => <TopLink key={m.to} {...m} />)}
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <StreakPill />
             <AccountButton />
-            <div className="hidden lg:block"><MoreMenu active={inMore} /></div>
             <ThemeSwitch />
           </div>
         </div>
       </header>
 
-      <main className="pb-24 lg:pb-0">
+      <main className="pb-24 min-[900px]:pb-0">
         <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:py-10 animate-fade-up" key={loc.pathname}>
           {section && <SectionTimer section={section} />}
           <Outlet />
@@ -181,7 +154,7 @@ export default function Layout() {
       </main>
 
       {/* Mobile bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden dark:border-slate-800 dark:bg-slate-950/95">
+      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur min-[900px]:hidden dark:border-slate-800 dark:bg-slate-950/95">
         {MAIN.filter((m) => m.to !== '/progress').map(({ to, label, icon: Icon, end }) => (
           <NavLink key={to} to={to} end={end} className={({ isActive }) => cx('pressable flex flex-col items-center gap-0.5 py-2 text-center text-[11px] leading-tight font-medium', isActive ? 'text-brand-700 dark:text-brand-400' : 'text-slate-500')}>
             <Icon size={21} /> {label}
@@ -194,7 +167,7 @@ export default function Layout() {
 
       {/* Mobile "More" sheet */}
       {sheet && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div className="fixed inset-0 z-40 min-[900px]:hidden">
           <div className="absolute inset-0 bg-slate-950/50 animate-[fade-in_.2s_ease-out]" onClick={() => setSheet(false)} />
           <div className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white p-4 pb-8 shadow-2xl animate-[sheet-up_.3s_cubic-bezier(.2,.8,.2,1)] dark:bg-slate-900">
             <div className="mb-3 flex items-center justify-between px-1">
