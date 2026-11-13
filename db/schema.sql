@@ -29,3 +29,13 @@ CREATE TABLE IF NOT EXISTS login_fails (
   at    INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS login_fails_email ON login_fails(email, at);
+
+-- Physical-book prizes (7 days in a row reaching the daily goal), delivered in person by the owner.
+-- block_end = the 7th day of the run (in the learner's own calendar), so each run counts once.
+CREATE TABLE IF NOT EXISTS prizes (
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  block_end  TEXT NOT NULL,
+  earned_at  INTEGER NOT NULL,
+  delivered  INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, block_end)
+);

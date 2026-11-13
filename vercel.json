@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/api/account", "destination": "https://englishpath-1w0.pages.dev/api/account" },
-    { "source": "/api/progress", "destination": "https://englishpath-1w0.pages.dev/api/progress" }
+    { "source": "/api/progress", "destination": "https://englishpath-1w0.pages.dev/api/progress" },
+    { "source": "/api/prize", "destination": "https://englishpath-1w0.pages.dev/api/prize" }
   ]
 }

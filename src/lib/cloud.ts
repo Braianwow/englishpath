@@ -110,6 +110,13 @@ export async function signIn(email: string, password: string, register: boolean)
   await pull(r.user.email, register);
 }
 
+/** Records the physical-book prizes the learner has earned (the server checks the saved study history). */
+export async function claimPrizes(): Promise<void> {
+  if (!st.email) return;
+  if (dirty) await push();
+  await api('/api/prize', { method: 'POST' }).catch(() => {});
+}
+
 export async function signOut() {
   if (dirty) await push();
   await api('/api/account', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }).catch(() => {});

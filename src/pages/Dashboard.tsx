@@ -1,10 +1,13 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Brain, Check, CheckCircle2, Flame, GraduationCap, Headphones, Info, Mic, PenLine, Target } from 'lucide-react';
+import { BookOpen, Brain, Check, CheckCircle2, Flame, Gift, GraduationCap, Headphones, Info, Mic, PenLine, Target, X } from 'lucide-react';
 import { useProgress } from '../store/progress';
 import { useStudyTime } from '../store/timer';
 import { UNIT_BY_ID } from '../content';
 import { dueCards, estimatedLevel, nextUnit } from '../lib/adaptive';
 import { streak } from '../lib/gamification';
+import { PRIZE_STREAK, prizeBlocks } from '../lib/prize';
+import { claimPrizes } from '../lib/cloud';
 import { addDays, todayKey } from '../lib/dates';
 import { DAILY_GOAL_MIN, SECTION_GOAL_SECS, dayMinutes, fmtClock } from '../lib/studyTime';
 import { SKILLS } from '../components/SkillHeader';
@@ -168,16 +171,35 @@ function FeatureCard({ tag, title, text, to, cta, icon: Icon, glow, extra }: {
   );
 }
 
-/** Last 7 days: which ones reached the 2 hours. */
+const PRIZES_SEEN = 'ep.prizesSeen';
+
+/** Last 6 days, and the 7th square is the prize: a physical book for 7 days in a row reaching the daily goal. */
 function Week() {
   const p = useProgress();
   const { minutes } = useStudyTime();
   const today = todayKey();
-  const days = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6));
+  const days = Array.from({ length: PRIZE_STREAK - 1 }, (_, i) => addDays(today, i - (PRIZE_STREAK - 2)));
   const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const st = streak(p, minutes);
+  const won = st.current > 0 && st.current % PRIZE_STREAK === 0;
+  const towards = won ? PRIZE_STREAK : st.current % PRIZE_STREAK;
+
+  // prizes earned so far (today's minutes included); new ones are recorded for the owner
+  const earned = prizeBlocks(p.days, { date: today, minutes }).length;
+  const [seen, setSeen] = useState(() => { try { return Number(localStorage.getItem(PRIZES_SEEN) ?? earned); } catch { return earned; } });
+  useEffect(() => { if (earned > 0) claimPrizes(); }, [earned]);
+  const close = () => { setSeen(earned); try { localStorage.setItem(PRIZES_SEEN, String(earned)); } catch { /* ignore */ } };
+
   return (
     <section>
-      <SectionTitle info="A day with 2 hours or more counts towards your streak (orange flame).">Your week</SectionTitle>
+      <SectionTitle info="A day with 2 hours or more counts towards your streak (orange flame). 7 days in a row win a physical book.">Your week</SectionTitle>
+      {earned > seen && (
+        <div className="mb-3 flex items-center gap-3 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-slate-800 dark:text-slate-100">
+          <Gift size={20} className="shrink-0 text-amber-500" />
+          <span className="flex-1"><strong>You won a physical book!</strong> 7 days in a row. We'll contact you to deliver it.</span>
+          <button onClick={close} aria-label="Close" className="rounded-lg p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white"><X size={16} /></button>
+        </div>
+      )}
       <div className="grid grid-cols-7 gap-2">
         {days.map((k) => {
           const m = k === today ? minutes : dayMinutes(p.days[k]);
@@ -193,6 +215,14 @@ function Week() {
             </div>
           );
         })}
+        <div title="7 days in a row reaching the daily goal win a physical book, delivered in person"
+          className={cx(panel, 'flex flex-col items-center gap-1.5 px-1 py-3', won ? 'border-amber-400/70 bg-amber-400/10 dark:border-amber-400/70 dark:bg-amber-400/10' : 'border-amber-400/30 dark:border-amber-400/30')}>
+          <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">Prize</span>
+          <span className={cx('flex h-9 w-9 items-center justify-center rounded-full', won ? 'bg-amber-400 text-slate-950' : 'bg-amber-400/15 text-amber-500')}>
+            <Gift size={16} />
+          </span>
+          <span className="text-center text-[11px] leading-tight text-slate-500"><span className="font-semibold text-slate-700 dark:text-slate-200">Physical book</span><br />{towards}/{PRIZE_STREAK} days</span>
+        </div>
       </div>
     </section>
   );
