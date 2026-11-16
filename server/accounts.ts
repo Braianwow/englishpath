@@ -10,7 +10,7 @@ export interface D1Stmt {
   run(): Promise<unknown>;
 }
 export interface D1Database { prepare(sql: string): D1Stmt; batch(s: D1Stmt[]): Promise<unknown> }
-export interface Env { DB: D1Database }
+export interface Env { DB: D1Database; /** comma-separated emails that can open the admin page (Cloudflare variable) */ ADMIN_EMAILS?: string }
 export interface Ctx { request: Request; env: Env }
 
 export const SESSION_COOKIE = 'ep_session';
@@ -83,4 +83,10 @@ const OWN_SITES = [/^https:\/\/englishpath[\w-]*\.vercel\.app$/];
 export function sameOrigin(req: Request): boolean {
   const origin = req.headers.get('origin');
   return !origin || origin === new URL(req.url).origin || OWN_SITES.some((re) => re.test(origin));
+}
+
+/** True when this email is listed in the ADMIN_EMAILS variable. */
+export function isAdmin(env: Env, email: string | null | undefined): boolean {
+  if (!email) return false;
+  return (env.ADMIN_EMAILS ?? '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean).includes(email.toLowerCase());
 }

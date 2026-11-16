@@ -4,7 +4,7 @@ import {ClipboardCheck, Flame, GraduationCap, Home, LibraryBig, MessageCircle, M
 import { cx } from './ui';
 import { useProgress, useSettings } from '../store/progress';
 import { useCloud } from '../lib/cloud';
-import { CircleUserRound, LogIn } from 'lucide-react';
+import { CircleUserRound, LogIn, ShieldCheck } from 'lucide-react';
 import { streak } from '../lib/gamification';
 import { toggleThemeAnimated } from '../lib/theme';
 import Toasts from './Toasts';
@@ -12,6 +12,7 @@ import { SectionTimer } from './StudyTimer';
 import { SKILLS } from './SkillHeader';
 import { useStudyTime, useStudyTimer } from '../store/timer';
 import { sectionFor } from '../lib/studyTime';
+import { useHomeZoom } from '../lib/zoom';
 
 
 /** Top bar (and the phone bottom bar): Home · Learn · Assistant · Tests · Settings. */
@@ -100,7 +101,9 @@ function TopLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
 
 export default function Layout() {
   const loc = useLocation();
+  const cloud = useCloud();
   useEffect(() => { window.scrollTo(0, 0); }, [loc.pathname]);
+  useHomeZoom(loc.pathname === '/'); // only the home page is shown bigger
   const section = sectionFor(loc.pathname);
   useStudyTimer(section, SKILLS.find((s) => s.id === section)?.label ?? '');
 
@@ -114,6 +117,7 @@ export default function Layout() {
           <nav className="hidden items-center min-[900px]:flex">
             {TOP.map((m) => <TopLink key={m.to} {...m} />)}
             {TOP_BOX.map((m) => <TopLink key={m.to} {...m} />)}
+            {cloud.admin && <TopLink to="/admin" label="Admin" icon={ShieldCheck} />}
           </nav>
           <div className="ml-auto flex items-center gap-2">
             <StreakPill />

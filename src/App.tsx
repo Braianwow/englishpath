@@ -24,6 +24,7 @@ import Speaking from './pages/Speaking';
 import Conversation from './pages/Conversation';
 import Writing from './pages/Writing';
 import AccountPage from './pages/AccountPage';
+import AdminPage from './pages/AdminPage';
 import Landing from './pages/Landing';
 import { accountsRequired, initCloud, useCloud } from './lib/cloud';
 import { LibraryBig } from 'lucide-react';
@@ -93,6 +94,7 @@ export default function App() {
           <Route path="/reference" element={<Reference />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

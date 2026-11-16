@@ -1,10 +1,10 @@
 /**
- * GET  /api/account                                   → { user: { email } | null }
+ * GET  /api/account                                   → { user: { email, admin } | null }
  * POST /api/account { action: 'register', email, password } → { user } + session cookie
  * POST /api/account { action: 'login', email, password }    → { user } + session cookie
  * POST /api/account { action: 'logout' }                    → { user: null }
  */
-import { currentUser, hashPassword, json, readCookie, sameOrigin, sameText, sessionCookie, sha256, startSession, SESSION_COOKIE, type Ctx } from '../../server/accounts';
+import { currentUser, isAdmin, hashPassword, json, readCookie, sameOrigin, sameText, sessionCookie, sha256, startSession, SESSION_COOKIE, type Ctx } from '../../server/accounts';
 
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
 const MAX_FAILS = 8; // per email, per 15 minutes
@@ -12,7 +12,7 @@ const FAIL_WINDOW = 15 * 60000;
 
 export async function onRequestGet({ request, env }: Ctx) {
   const user = await currentUser(request, env.DB);
-  return json({ user: user ? { email: user.email } : null });
+  return json({ user: user ? { email: user.email, admin: isAdmin(env, user.email) } : null });
 }
 
 export async function onRequestPost({ request, env }: Ctx) {
@@ -38,7 +38,7 @@ export async function onRequestPost({ request, env }: Ctx) {
     const { hash, salt } = await hashPassword(password);
     await db.prepare('INSERT INTO users (email, pass_hash, pass_salt, created_at) VALUES (?, ?, ?, ?)').bind(email, hash, salt, Date.now()).run();
     const user = await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first<{ id: number }>();
-    return json({ user: { email } }, 201, { 'Set-Cookie': await startSession(db, user!.id) });
+    return json({ user: { email, admin: isAdmin(env, email) } }, 201, { 'Set-Cookie': await startSession(db, user!.id) });
   }
 
   if (body.action === 'login') {
@@ -56,7 +56,7 @@ export async function onRequestPost({ request, env }: Ctx) {
       return json({ error: 'Wrong email or password.' }, 401);
     }
     await db.prepare('DELETE FROM login_fails WHERE email = ?').bind(email).run();
-    return json({ user: { email } }, 200, { 'Set-Cookie': await startSession(db, user.id) });
+    return json({ user: { email, admin: isAdmin(env, email) } }, 200, { 'Set-Cookie': await startSession(db, user.id) });
   }
 
   return json({ error: 'Bad request.' }, 400);

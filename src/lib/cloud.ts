@@ -11,10 +11,12 @@ export type CloudState = {
   available: boolean;
   checked: boolean;
   email: string | null;
+  /** the signed-in account can open the admin page */
+  admin: boolean;
   sync: 'idle' | 'saving' | 'saved' | 'error';
 };
 
-let st: CloudState = { available: false, checked: false, email: null, sync: 'idle' };
+let st: CloudState = { available: false, checked: false, email: null, admin: false, sync: 'idle' };
 const listeners = new Set<() => void>();
 const set = (p: Partial<CloudState>) => { st = { ...st, ...p }; listeners.forEach((l) => l()); };
 export const getCloud = () => st;
@@ -92,9 +94,9 @@ async function pull(email: string, fresh: boolean) {
 export async function initCloud() {
   if (st.checked) return;
   try {
-    const r = await api<{ user?: { email: string } | null }>('/api/account');
+    const r = await api<{ user?: { email: string; admin?: boolean } | null }>('/api/account');
     if (r.user === undefined) throw new Error('no account server here');
-    set({ available: true, checked: true, email: r.user?.email ?? null });
+    set({ available: true, checked: true, email: r.user?.email ?? null, admin: !!r.user?.admin });
     if (r.user) await pull(r.user.email, false);
     else if (owner()) { setOwner(null); apply(null); } // the session ended: don't leave someone's progress here
   } catch {
@@ -103,10 +105,10 @@ export async function initCloud() {
 }
 
 export async function signIn(email: string, password: string, register: boolean) {
-  const r = await api<{ user: { email: string } }>('/api/account', {
+  const r = await api<{ user: { email: string; admin?: boolean } }>('/api/account', {
     method: 'POST', body: JSON.stringify({ action: register ? 'register' : 'login', email, password }),
   });
-  set({ email: r.user.email });
+  set({ email: r.user.email, admin: !!r.user.admin });
   await pull(r.user.email, register);
 }
 
@@ -121,7 +123,7 @@ export async function signOut() {
   if (dirty) await push();
   await api('/api/account', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }).catch(() => {});
   setOwner(null);
-  set({ email: null, sync: 'idle' });
+  set({ email: null, admin: false, sync: 'idle' });
   apply(null); // the next person on this computer starts clean
 }
 

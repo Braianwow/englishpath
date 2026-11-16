@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  /* --zoom is set in main.tsx: up to 140%, only as much as fits, so the layout never changes because of it. */
+  /* --zoom is set by useHomeZoom (src/lib/zoom.ts): only the home page, up to 140%, as much as fits. */
   html { -webkit-tap-highlight-color: transparent; zoom: var(--zoom, 1); }
   html .min-h-screen { min-height: calc(100vh / var(--zoom, 1)); }
   body { @apply bg-slate-50 text-slate-700 antialiased dark:bg-slate-950 dark:text-slate-300; font-feature-settings: 'cv11', 'ss01'; }
