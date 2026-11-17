@@ -5,8 +5,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+        // Body text: a neutral sans; titles: a grotesque with character (both outside Google Fonts' top 10)
+        sans: ['"Instrument Sans"', 'system-ui', 'sans-serif'],
+        display: ['"Bricolage Grotesque"', '"Instrument Sans"', 'sans-serif'],
       },
       colors: {
         // Lime accent (dark text on 400/500; 600+ are dark enough for text on white)

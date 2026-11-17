@@ -21,7 +21,7 @@
 
 /* ── Press animation: every button and tappable link shrinks a bit and springs back ── */
 button, .pressable, a.chip {
-  transition: transform .18s cubic-bezier(.34,1.56,.64,1), background-color .2s, color .2s, border-color .2s, box-shadow .2s, opacity .2s;
+  transition: transform .16s cubic-bezier(.22,1,.36,1), background-color .2s, color .2s, border-color .2s, box-shadow .2s, opacity .2s;
 }
 button:not(:disabled):active, .pressable:active { transform: scale(.95); }
 

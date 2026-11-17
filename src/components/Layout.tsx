@@ -47,7 +47,7 @@ export function ThemeSwitch() {
       className="relative h-8 w-14 shrink-0 rounded-full bg-slate-200 transition-colors duration-500 dark:bg-slate-800"
     >
       <span className={cx(
-        'absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow transition-all duration-500 [transition-timing-function:cubic-bezier(.34,1.56,.64,1)] dark:bg-slate-950',
+        'absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow transition-all duration-300 [transition-timing-function:cubic-bezier(.22,1,.36,1)] dark:bg-slate-950',
         dark ? 'translate-x-6 rotate-[360deg]' : 'translate-x-0 rotate-0',
       )}>
         {dark ? <Moon size={14} className="text-brand-400" /> : <Sun size={14} className="text-amber-500" />}

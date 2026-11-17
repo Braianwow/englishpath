@@ -60,7 +60,8 @@ export default function App() {
   }
 
   // Not signed in: only the landing page (what EnglishPath is + sign in / create account).
-  if (accountsRequired && !cloud.email) {
+  const devLanding = import.meta.env.DEV && new URLSearchParams(location.search).has('landing');
+  if ((accountsRequired || devLanding) && !cloud.email) {
     if (!cloud.checked) return <div className="flex min-h-screen items-center justify-center"><LibraryBig size={40} className="animate-pulse text-brand-500" /></div>;
     return <HashRouter><Landing /></HashRouter>;
   }
