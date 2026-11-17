@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 
 /**
- * The home page is shown bigger, up to 140%, but only as much as fits: it always keeps at least
+ * The home page is shown bigger, up to 130%, but only as much as fits: it always keeps at least
  * 1000 px of room, so the zoom never makes the layout switch to the phone version.
  * Every other page stays at the normal size.
  */
-const MAX_ZOOM = 1.4;
+const MAX_ZOOM = 1.3;
 const MIN_ROOM = 1000;
 
 export function useHomeZoom(active: boolean) {
